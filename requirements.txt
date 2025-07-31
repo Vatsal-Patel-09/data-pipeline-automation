@@ -1,0 +1,9 @@
+ psycopg2-binary
+ faker
+ fastapi
+ uvicorn
+ python-dotenv
+ click
+ pandas
+ sqlalchemy
+ pydantic
