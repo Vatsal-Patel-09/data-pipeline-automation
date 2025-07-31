@@ -1,0 +1,105 @@
+{
+  "database": {
+    "name": "ecommerce_platform",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "categories",
+      "description": "Product categories hierarchy",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "name", "type": "string", "max_length": 100, "unique": true},
+        {"name": "description", "type": "text", "nullable": true},
+        {"name": "parent_id", "type": "integer", "foreign_key": "categories.id", "nullable": true},
+        {"name": "is_active", "type": "boolean", "default": true},
+        {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "sample_size": 25,
+      "output_format": "postgres"
+    },
+    {
+      "name": "users",
+      "description": "Customer information",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "username", "type": "string", "max_length": 50, "unique": true},
+        {"name": "email", "type": "string", "max_length": 255, "unique": true},
+        {"name": "full_name", "type": "string", "max_length": 200},
+        {"name": "phone", "type": "string", "max_length": 20, "nullable": true},
+        {"name": "birth_date", "type": "date", "nullable": true},
+        {"name": "registration_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "status", "type": "enum", "values": ["active", "inactive", "suspended"], "default": "active"},
+        {"name": "total_spent", "type": "decimal", "precision": 12, "scale": 2, "default": 0}
+      ],
+      "sample_size": 150,
+      "output_format": "csv"
+    },
+    {
+      "name": "products",
+      "description": "Product catalog",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "sku", "type": "string", "max_length": 50, "unique": true},
+        {"name": "name", "type": "string", "max_length": 255},
+        {"name": "description", "type": "text", "nullable": true},
+        {"name": "category_id", "type": "integer", "foreign_key": "categories.id"},
+        {"name": "price", "type": "decimal", "precision": 10, "scale": 2},
+        {"name": "cost", "type": "decimal", "precision": 10, "scale": 2},
+        {"name": "stock_quantity", "type": "integer", "default": 0},
+        {"name": "weight", "type": "decimal", "precision": 8, "scale": 3, "nullable": true},
+        {"name": "is_active", "type": "boolean", "default": true},
+        {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "sample_size": 300,
+      "output_format": "json"
+    },
+    {
+      "name": "orders",
+      "description": "Customer orders",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "order_number", "type": "string", "max_length": 20, "unique": true},
+        {"name": "user_id", "type": "integer", "foreign_key": "users.id"},
+        {"name": "order_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "total_amount", "type": "decimal", "precision": 12, "scale": 2},
+        {"name": "tax_amount", "type": "decimal", "precision": 10, "scale": 2},
+        {"name": "shipping_cost", "type": "decimal", "precision": 8, "scale": 2},
+        {"name": "status", "type": "enum", "values": ["pending", "processing", "shipped", "delivered", "cancelled"], "default": "pending"},
+        {"name": "shipping_address", "type": "json"},
+        {"name": "payment_method", "type": "string", "max_length": 50}
+      ],
+      "sample_size": 200,
+      "output_format": "api"
+    },
+    {
+      "name": "order_items",
+      "description": "Individual items within orders",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "order_id", "type": "integer", "foreign_key": "orders.id"},
+        {"name": "product_id", "type": "integer", "foreign_key": "products.id"},
+        {"name": "quantity", "type": "integer"},
+        {"name": "unit_price", "type": "decimal", "precision": 10, "scale": 2},
+        {"name": "total_price", "type": "decimal", "precision": 12, "scale": 2},
+        {"name": "discount_amount", "type": "decimal", "precision": 8, "scale": 2, "default": 0}
+      ],
+      "sample_size": 500,
+      "output_format": "postgres"
+    },
+    {
+      "name": "reviews",
+      "description": "Product reviews by customers",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "product_id", "type": "integer", "foreign_key": "products.id"},
+        {"name": "user_id", "type": "integer", "foreign_key": "users.id"},
+        {"name": "rating", "type": "integer"},
+        {"name": "review_text", "type": "text", "nullable": true},
+        {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "sample_size": 400,
+      "output_format": "csv"
+    }
+  ]
+}
