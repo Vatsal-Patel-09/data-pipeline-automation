@@ -72,3 +72,5 @@ var/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+src/database_manager.py
