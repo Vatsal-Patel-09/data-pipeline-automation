@@ -89,6 +89,7 @@ source venv/bin/activate
 
 4. **Configure Environment**
 ```cp .env.example .env```
+
 Edit .env with your database credentials
 
 ### Database Setup (Supabase)
@@ -101,17 +102,18 @@ Edit .env with your database credentials
 ## 💻 Usage
 
 ### 1. Complete Pipeline Execution
-```
-python data_pipeline.py --model ecommerce_model.json --env .env
-```
+```python data_pipeline.py --model ecommerce_model.json --env .env```
+
 **Output**: Creates database schema, generates 1,575 records, exports to all formats
 
 ### 2. Database Export
 ```python data_pipeline.py export-db --env .env --output exports/database_dump.sql```
+
 **Output**: Complete SQL dump with schema and data
 
 ### 3. API Server
 ```python api_server.py --model ecommerce_model.json --env .env --port 8000```
+
 **Access**: http://localhost:8000/docs for interactive API documentation
 
 ## 📡 API Endpoints
