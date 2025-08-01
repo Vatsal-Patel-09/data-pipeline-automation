@@ -15,6 +15,7 @@ This system demonstrates advanced data pipeline capabilities by:
 
 ## 🏗️ System Architecture
 
+```
 ┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
 │ JSON Model │───▶│ Schema Manager │───▶│ PostgreSQL │
 │ Definition │ │ │ │ Database │
@@ -31,6 +32,7 @@ This system demonstrates advanced data pipeline capabilities by:
 │ CLI Interface │ │ FastAPI Server │ │ CSV/JSON/API │
 │ │ │ │ │ Files │
 └─────────────────┘ └──────────────────┘ └─────────────────┘
+```
 
 
 ### Core Components:
@@ -66,10 +68,13 @@ The system generates a complete e-commerce database with **6 interconnected tabl
 ### Installation
 
 1. **Clone Repository**
+```
 git clone https://github.com/your-username/ecommerce-data-pipeline.git
 cd ecommerce-data-pipeline
+```
 
 2. **Create Virtual Environment**
+```
 python -m venv venv
 
 Windows:
@@ -77,15 +82,14 @@ venv\Scripts\activate
 
 macOS/Linux:
 source venv/bin/activate
+```
 
 3. **Install Dependencies**
-pip install -r requirements.txt
+```pip install -r requirements.txt```
 
 4. **Configure Environment**
-cp .env.example .env
-
+```cp .env.example .env```
 Edit .env with your database credentials
-text
 
 ### Database Setup (Supabase)
 
@@ -97,15 +101,17 @@ text
 ## 💻 Usage
 
 ### 1. Complete Pipeline Execution
+```
 python data_pipeline.py --model ecommerce_model.json --env .env
+```
 **Output**: Creates database schema, generates 1,575 records, exports to all formats
 
 ### 2. Database Export
-python data_pipeline.py export-db --env .env --output exports/database_dump.sql
+```python data_pipeline.py export-db --env .env --output exports/database_dump.sql```
 **Output**: Complete SQL dump with schema and data
 
 ### 3. API Server
-python api_server.py --model ecommerce_model.json --env .env --port 8000
+```python api_server.py --model ecommerce_model.json --env .env --port 8000```
 **Access**: http://localhost:8000/docs for interactive API documentation
 
 ## 📡 API Endpoints
@@ -143,6 +149,7 @@ Maintaining foreign key relationships when data spans multiple formats:
 
 ## 📁 Project Structure
 
+```
 ecommerce-data-pipeline/
 ├── README.md # This file
 ├── requirements.txt # Python dependencies
@@ -159,16 +166,18 @@ ecommerce-data-pipeline/
 │ ├── json/ # JSON exports
 │ └── database_dump.sql # Database backup
 └── logs/ # Application logs
+```
 
 ## 🧪 Testing & Verification
 
 ### Verify Complete Pipeline
-1. Run complete pipeline
+```1. Run complete pipeline
 python data_pipeline.py --model ecommerce_model.json --env .env
 
 2. Check generated files
 ls -la exports/csv/ # Should contain users.csv, reviews.csv
 ls -la exports/json/ # Should contain products.json
+
 3. Verify database content (using your database client)
 SELECT COUNT() FROM categories; # Should return 25
 SELECT COUNT() FROM order_items; # Should return 500
@@ -176,12 +185,15 @@ SELECT COUNT() FROM order_items; # Should return 500
 4. Test API endpoints
 curl http://localhost:8000/orders?limit=5
 curl http://localhost:8000/orders/stats/summary
+```
 
 ### Verify Referential Integrity
+```
 Check cross-format relationships
 1. Get a product category_id from products.json
 2. Verify it exists in PostgreSQL categories table
 3. Confirm reviews.csv user_id values exist in PostgreSQL users table
+```
 
 ## 🔧 Technical Implementation
 
@@ -193,8 +205,10 @@ Check cross-format relationships
 
 ### Dependency Resolution
 Uses **topological sorting** algorithm to determine table creation/population order:
+```
 Example dependency chain
 categories → products → users → orders → order_items → reviews
+```
 
 ### Performance Optimizations
 - **Batch Processing**: Database insertions in configurable batches
