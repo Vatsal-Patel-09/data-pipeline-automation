@@ -10,7 +10,7 @@
     "stock_quantity": 6,
     "weight": 13.734,
     "is_active": false,
-    "created_at": "2025-01-03T17:58:08"
+    "created_at": "2025-01-03T20:27:48"
   },
   {
     "id": 2,
@@ -23,7 +23,7 @@
     "stock_quantity": 8,
     "weight": 44.742,
     "is_active": false,
-    "created_at": "2025-04-10T16:42:03"
+    "created_at": "2025-04-10T19:11:43"
   },
   {
     "id": 3,
@@ -36,7 +36,7 @@
     "stock_quantity": 8,
     "weight": 18.431,
     "is_active": false,
-    "created_at": "2025-02-28T19:48:02"
+    "created_at": "2025-02-28T22:17:42"
   },
   {
     "id": 4,
@@ -49,7 +49,7 @@
     "stock_quantity": 7,
     "weight": 4.038,
     "is_active": true,
-    "created_at": "2025-07-16T09:23:26"
+    "created_at": "2025-07-16T11:53:06"
   },
   {
     "id": 5,
@@ -62,7 +62,7 @@
     "stock_quantity": 2,
     "weight": 16.463,
     "is_active": true,
-    "created_at": "2025-07-30T10:56:43"
+    "created_at": "2025-07-30T13:26:23"
   },
   {
     "id": 6,
@@ -75,7 +75,7 @@
     "stock_quantity": 3,
     "weight": 34.519,
     "is_active": false,
-    "created_at": "2024-11-13T01:22:00"
+    "created_at": "2024-11-13T03:51:40"
   },
   {
     "id": 7,
@@ -88,7 +88,7 @@
     "stock_quantity": 6,
     "weight": 30.781,
     "is_active": false,
-    "created_at": "2024-09-18T10:29:16"
+    "created_at": "2024-09-18T12:58:56"
   },
   {
     "id": 8,
@@ -101,7 +101,7 @@
     "stock_quantity": 1,
     "weight": 3.845,
     "is_active": false,
-    "created_at": "2024-08-03T23:53:25"
+    "created_at": "2024-08-04T02:23:05"
   },
   {
     "id": 9,
@@ -114,7 +114,7 @@
     "stock_quantity": 3,
     "weight": 47.644,
     "is_active": false,
-    "created_at": "2025-04-14T14:28:05"
+    "created_at": "2025-04-14T16:57:45"
   },
   {
     "id": 10,
@@ -127,7 +127,7 @@
     "stock_quantity": 3,
     "weight": 3.455,
     "is_active": false,
-    "created_at": "2024-08-24T17:58:44"
+    "created_at": "2024-08-24T20:28:24"
   },
   {
     "id": 11,
@@ -140,7 +140,7 @@
     "stock_quantity": 10,
     "weight": 1.716,
     "is_active": true,
-    "created_at": "2025-05-10T05:03:49"
+    "created_at": "2025-05-10T07:33:29"
   },
   {
     "id": 12,
@@ -153,7 +153,7 @@
     "stock_quantity": 8,
     "weight": 38.178,
     "is_active": true,
-    "created_at": "2024-11-01T17:12:27"
+    "created_at": "2024-11-01T19:42:07"
   },
   {
     "id": 13,
@@ -166,7 +166,7 @@
     "stock_quantity": 5,
     "weight": 12.556,
     "is_active": false,
-    "created_at": "2025-04-04T08:56:33"
+    "created_at": "2025-04-04T11:26:13"
   },
   {
     "id": 14,
@@ -179,7 +179,7 @@
     "stock_quantity": 7,
     "weight": 45.686,
     "is_active": true,
-    "created_at": "2025-03-11T12:03:03"
+    "created_at": "2025-03-11T14:32:43"
   },
   {
     "id": 15,
@@ -192,7 +192,7 @@
     "stock_quantity": 4,
     "weight": 49.819,
     "is_active": false,
-    "created_at": "2025-05-28T10:05:26"
+    "created_at": "2025-05-28T12:35:06"
   },
   {
     "id": 16,
@@ -205,7 +205,7 @@
     "stock_quantity": 2,
     "weight": 6.873,
     "is_active": true,
-    "created_at": "2025-03-07T12:14:12"
+    "created_at": "2025-03-07T14:43:52"
   },
   {
     "id": 17,
@@ -218,7 +218,7 @@
     "stock_quantity": 2,
     "weight": 40.545,
     "is_active": false,
-    "created_at": "2025-05-26T13:15:35"
+    "created_at": "2025-05-26T15:45:15"
   },
   {
     "id": 18,
@@ -231,7 +231,7 @@
     "stock_quantity": 9,
     "weight": 27.154,
     "is_active": false,
-    "created_at": "2025-07-27T22:01:47"
+    "created_at": "2025-07-28T00:31:27"
   },
   {
     "id": 19,
@@ -244,7 +244,7 @@
     "stock_quantity": 3,
     "weight": 39.705,
     "is_active": true,
-    "created_at": "2025-02-17T00:27:06"
+    "created_at": "2025-02-17T02:56:46"
   },
   {
     "id": 20,
@@ -257,7 +257,7 @@
     "stock_quantity": 3,
     "weight": 11.913,
     "is_active": false,
-    "created_at": "2025-06-17T09:32:29"
+    "created_at": "2025-06-17T12:02:09"
   },
   {
     "id": 21,
@@ -270,7 +270,7 @@
     "stock_quantity": 8,
     "weight": 40.203,
     "is_active": true,
-    "created_at": "2024-12-28T00:05:34"
+    "created_at": "2024-12-28T02:35:14"
   },
   {
     "id": 22,
@@ -283,7 +283,7 @@
     "stock_quantity": 5,
     "weight": 19.968,
     "is_active": true,
-    "created_at": "2025-07-03T13:47:44"
+    "created_at": "2025-07-03T16:17:24"
   },
   {
     "id": 23,
@@ -296,7 +296,7 @@
     "stock_quantity": 7,
     "weight": 41.185,
     "is_active": true,
-    "created_at": "2025-06-06T15:29:53"
+    "created_at": "2025-06-06T17:59:33"
   },
   {
     "id": 24,
@@ -309,7 +309,7 @@
     "stock_quantity": 8,
     "weight": 23.345,
     "is_active": false,
-    "created_at": "2025-05-07T06:52:30"
+    "created_at": "2025-05-07T09:22:10"
   },
   {
     "id": 25,
@@ -322,7 +322,7 @@
     "stock_quantity": 9,
     "weight": 32.026,
     "is_active": false,
-    "created_at": "2024-12-17T00:18:29"
+    "created_at": "2024-12-17T02:48:09"
   },
   {
     "id": 26,
@@ -335,7 +335,7 @@
     "stock_quantity": 1,
     "weight": 41.586,
     "is_active": true,
-    "created_at": "2025-05-20T16:41:25"
+    "created_at": "2025-05-20T19:11:05"
   },
   {
     "id": 27,
@@ -348,7 +348,7 @@
     "stock_quantity": 4,
     "weight": 17.367,
     "is_active": true,
-    "created_at": "2024-11-16T08:56:44"
+    "created_at": "2024-11-16T11:26:24"
   },
   {
     "id": 28,
@@ -361,7 +361,7 @@
     "stock_quantity": 9,
     "weight": 13.795,
     "is_active": false,
-    "created_at": "2024-12-04T22:37:31"
+    "created_at": "2024-12-05T01:07:11"
   },
   {
     "id": 29,
@@ -374,7 +374,7 @@
     "stock_quantity": 3,
     "weight": 29.631,
     "is_active": false,
-    "created_at": "2025-06-17T02:06:50"
+    "created_at": "2025-06-17T04:36:30"
   },
   {
     "id": 30,
@@ -387,7 +387,7 @@
     "stock_quantity": 10,
     "weight": 16.947,
     "is_active": false,
-    "created_at": "2025-07-02T23:58:55"
+    "created_at": "2025-07-03T02:28:35"
   },
   {
     "id": 31,
@@ -400,7 +400,7 @@
     "stock_quantity": 2,
     "weight": 2.369,
     "is_active": false,
-    "created_at": "2025-01-09T16:04:00"
+    "created_at": "2025-01-09T18:33:40"
   },
   {
     "id": 32,
@@ -413,7 +413,7 @@
     "stock_quantity": 10,
     "weight": 20.888,
     "is_active": false,
-    "created_at": "2025-02-01T22:12:17"
+    "created_at": "2025-02-02T00:41:57"
   },
   {
     "id": 33,
@@ -426,7 +426,7 @@
     "stock_quantity": 5,
     "weight": 32.131,
     "is_active": true,
-    "created_at": "2024-10-13T17:25:41"
+    "created_at": "2024-10-13T19:55:21"
   },
   {
     "id": 34,
@@ -439,7 +439,7 @@
     "stock_quantity": 7,
     "weight": 14.942,
     "is_active": false,
-    "created_at": "2025-03-28T15:36:41"
+    "created_at": "2025-03-28T18:06:21"
   },
   {
     "id": 35,
@@ -452,7 +452,7 @@
     "stock_quantity": 8,
     "weight": 23.276,
     "is_active": false,
-    "created_at": "2025-04-14T17:46:09"
+    "created_at": "2025-04-14T20:15:49"
   },
   {
     "id": 36,
@@ -465,7 +465,7 @@
     "stock_quantity": 6,
     "weight": 36.737,
     "is_active": true,
-    "created_at": "2024-09-03T16:45:40"
+    "created_at": "2024-09-03T19:15:20"
   },
   {
     "id": 37,
@@ -478,7 +478,7 @@
     "stock_quantity": 6,
     "weight": 25.798,
     "is_active": true,
-    "created_at": "2025-05-03T17:39:32"
+    "created_at": "2025-05-03T20:09:12"
   },
   {
     "id": 38,
@@ -491,7 +491,7 @@
     "stock_quantity": 8,
     "weight": 12.471,
     "is_active": false,
-    "created_at": "2025-04-17T06:00:39"
+    "created_at": "2025-04-17T08:30:19"
   },
   {
     "id": 39,
@@ -504,7 +504,7 @@
     "stock_quantity": 10,
     "weight": 20.965,
     "is_active": true,
-    "created_at": "2025-01-29T05:57:21"
+    "created_at": "2025-01-29T08:27:01"
   },
   {
     "id": 40,
@@ -517,7 +517,7 @@
     "stock_quantity": 6,
     "weight": 9.573,
     "is_active": true,
-    "created_at": "2024-10-16T17:08:13"
+    "created_at": "2024-10-16T19:37:53"
   },
   {
     "id": 41,
@@ -530,7 +530,7 @@
     "stock_quantity": 5,
     "weight": 24.919,
     "is_active": false,
-    "created_at": "2025-03-06T18:08:42"
+    "created_at": "2025-03-06T20:38:22"
   },
   {
     "id": 42,
@@ -543,7 +543,7 @@
     "stock_quantity": 4,
     "weight": 29.209,
     "is_active": true,
-    "created_at": "2025-06-14T00:02:36"
+    "created_at": "2025-06-14T02:32:16"
   },
   {
     "id": 43,
@@ -556,7 +556,7 @@
     "stock_quantity": 8,
     "weight": 14.359,
     "is_active": true,
-    "created_at": "2025-01-11T06:16:11"
+    "created_at": "2025-01-11T08:45:51"
   },
   {
     "id": 44,
@@ -569,7 +569,7 @@
     "stock_quantity": 6,
     "weight": 38.216,
     "is_active": false,
-    "created_at": "2024-11-13T20:19:09"
+    "created_at": "2024-11-13T22:48:49"
   },
   {
     "id": 45,
@@ -582,7 +582,7 @@
     "stock_quantity": 4,
     "weight": 18.19,
     "is_active": true,
-    "created_at": "2024-10-19T13:49:08"
+    "created_at": "2024-10-19T16:18:48"
   },
   {
     "id": 46,
@@ -595,7 +595,7 @@
     "stock_quantity": 9,
     "weight": 14.058,
     "is_active": true,
-    "created_at": "2024-11-06T22:13:12"
+    "created_at": "2024-11-07T00:42:52"
   },
   {
     "id": 47,
@@ -608,7 +608,7 @@
     "stock_quantity": 2,
     "weight": 19.756,
     "is_active": false,
-    "created_at": "2025-06-04T16:37:34"
+    "created_at": "2025-06-04T19:07:14"
   },
   {
     "id": 48,
@@ -621,7 +621,7 @@
     "stock_quantity": 3,
     "weight": 10.033,
     "is_active": false,
-    "created_at": "2024-12-24T04:46:54"
+    "created_at": "2024-12-24T07:16:34"
   },
   {
     "id": 49,
@@ -634,7 +634,7 @@
     "stock_quantity": 3,
     "weight": 35.708,
     "is_active": true,
-    "created_at": "2025-03-28T16:40:35"
+    "created_at": "2025-03-28T19:10:15"
   },
   {
     "id": 50,
@@ -647,7 +647,7 @@
     "stock_quantity": 9,
     "weight": 7.075,
     "is_active": true,
-    "created_at": "2025-04-22T21:46:50"
+    "created_at": "2025-04-23T00:16:30"
   },
   {
     "id": 51,
@@ -660,7 +660,7 @@
     "stock_quantity": 10,
     "weight": 36.992,
     "is_active": false,
-    "created_at": "2025-02-25T07:09:48"
+    "created_at": "2025-02-25T09:39:28"
   },
   {
     "id": 52,
@@ -673,7 +673,7 @@
     "stock_quantity": 9,
     "weight": 24.543,
     "is_active": false,
-    "created_at": "2025-03-22T12:34:44"
+    "created_at": "2025-03-22T15:04:24"
   },
   {
     "id": 53,
@@ -686,7 +686,7 @@
     "stock_quantity": 6,
     "weight": 33.723,
     "is_active": false,
-    "created_at": "2025-01-01T23:27:05"
+    "created_at": "2025-01-02T01:56:45"
   },
   {
     "id": 54,
@@ -699,7 +699,7 @@
     "stock_quantity": 1,
     "weight": 29.886,
     "is_active": false,
-    "created_at": "2025-05-23T10:06:49"
+    "created_at": "2025-05-23T12:36:29"
   },
   {
     "id": 55,
@@ -712,7 +712,7 @@
     "stock_quantity": 10,
     "weight": 11.454,
     "is_active": false,
-    "created_at": "2024-10-29T17:14:13"
+    "created_at": "2024-10-29T19:43:53"
   },
   {
     "id": 56,
@@ -725,7 +725,7 @@
     "stock_quantity": 10,
     "weight": 38.753,
     "is_active": true,
-    "created_at": "2025-06-17T19:58:12"
+    "created_at": "2025-06-17T22:27:52"
   },
   {
     "id": 57,
@@ -738,7 +738,7 @@
     "stock_quantity": 10,
     "weight": 47.415,
     "is_active": true,
-    "created_at": "2025-05-28T12:18:40"
+    "created_at": "2025-05-28T14:48:20"
   },
   {
     "id": 58,
@@ -751,7 +751,7 @@
     "stock_quantity": 3,
     "weight": 20.707,
     "is_active": false,
-    "created_at": "2025-01-06T20:31:17"
+    "created_at": "2025-01-06T23:00:57"
   },
   {
     "id": 59,
@@ -764,7 +764,7 @@
     "stock_quantity": 8,
     "weight": 43.654,
     "is_active": false,
-    "created_at": "2025-05-26T09:54:04"
+    "created_at": "2025-05-26T12:23:44"
   },
   {
     "id": 60,
@@ -777,7 +777,7 @@
     "stock_quantity": 4,
     "weight": 28.088,
     "is_active": true,
-    "created_at": "2025-03-17T21:20:21"
+    "created_at": "2025-03-17T23:50:01"
   },
   {
     "id": 61,
@@ -790,7 +790,7 @@
     "stock_quantity": 3,
     "weight": 23.037,
     "is_active": true,
-    "created_at": "2024-12-25T16:48:13"
+    "created_at": "2024-12-25T19:17:53"
   },
   {
     "id": 62,
@@ -803,7 +803,7 @@
     "stock_quantity": 5,
     "weight": 30.543,
     "is_active": true,
-    "created_at": "2025-03-06T04:55:43"
+    "created_at": "2025-03-06T07:25:23"
   },
   {
     "id": 63,
@@ -816,7 +816,7 @@
     "stock_quantity": 5,
     "weight": 38.582,
     "is_active": true,
-    "created_at": "2025-04-24T03:19:33"
+    "created_at": "2025-04-24T05:49:13"
   },
   {
     "id": 64,
@@ -829,7 +829,7 @@
     "stock_quantity": 8,
     "weight": 17.505,
     "is_active": true,
-    "created_at": "2024-11-15T04:39:57"
+    "created_at": "2024-11-15T07:09:37"
   },
   {
     "id": 65,
@@ -842,7 +842,7 @@
     "stock_quantity": 9,
     "weight": 19.047,
     "is_active": true,
-    "created_at": "2025-05-03T11:23:49"
+    "created_at": "2025-05-03T13:53:29"
   },
   {
     "id": 66,
@@ -855,7 +855,7 @@
     "stock_quantity": 5,
     "weight": 2.199,
     "is_active": false,
-    "created_at": "2025-07-17T15:00:40"
+    "created_at": "2025-07-17T17:30:20"
   },
   {
     "id": 67,
@@ -868,7 +868,7 @@
     "stock_quantity": 5,
     "weight": 37.392,
     "is_active": false,
-    "created_at": "2025-05-18T16:50:07"
+    "created_at": "2025-05-18T19:19:47"
   },
   {
     "id": 68,
@@ -881,7 +881,7 @@
     "stock_quantity": 9,
     "weight": 34.839,
     "is_active": false,
-    "created_at": "2025-03-08T21:15:31"
+    "created_at": "2025-03-08T23:45:11"
   },
   {
     "id": 69,
@@ -894,7 +894,7 @@
     "stock_quantity": 4,
     "weight": 2.633,
     "is_active": true,
-    "created_at": "2025-04-30T08:00:22"
+    "created_at": "2025-04-30T10:30:02"
   },
   {
     "id": 70,
@@ -907,7 +907,7 @@
     "stock_quantity": 2,
     "weight": 20.724,
     "is_active": true,
-    "created_at": "2024-11-01T00:43:43"
+    "created_at": "2024-11-01T03:13:23"
   },
   {
     "id": 71,
@@ -920,7 +920,7 @@
     "stock_quantity": 1,
     "weight": 48.229,
     "is_active": false,
-    "created_at": "2024-08-06T04:40:04"
+    "created_at": "2024-08-06T07:09:44"
   },
   {
     "id": 72,
@@ -933,7 +933,7 @@
     "stock_quantity": 8,
     "weight": 23.925,
     "is_active": false,
-    "created_at": "2025-01-19T16:44:02"
+    "created_at": "2025-01-19T19:13:42"
   },
   {
     "id": 73,
@@ -946,7 +946,7 @@
     "stock_quantity": 1,
     "weight": 45.406,
     "is_active": false,
-    "created_at": "2025-01-14T23:21:04"
+    "created_at": "2025-01-15T01:50:44"
   },
   {
     "id": 74,
@@ -959,7 +959,7 @@
     "stock_quantity": 1,
     "weight": 45.67,
     "is_active": false,
-    "created_at": "2025-05-13T12:33:37"
+    "created_at": "2025-05-13T15:03:17"
   },
   {
     "id": 75,
@@ -972,7 +972,7 @@
     "stock_quantity": 1,
     "weight": 49.859,
     "is_active": false,
-    "created_at": "2025-02-27T13:44:13"
+    "created_at": "2025-02-27T16:13:53"
   },
   {
     "id": 76,
@@ -985,7 +985,7 @@
     "stock_quantity": 5,
     "weight": 43.849,
     "is_active": true,
-    "created_at": "2025-05-04T00:22:49"
+    "created_at": "2025-05-04T02:52:29"
   },
   {
     "id": 77,
@@ -998,7 +998,7 @@
     "stock_quantity": 6,
     "weight": 14.3,
     "is_active": true,
-    "created_at": "2024-12-03T13:19:57"
+    "created_at": "2024-12-03T15:49:37"
   },
   {
     "id": 78,
@@ -1011,7 +1011,7 @@
     "stock_quantity": 3,
     "weight": 42.568,
     "is_active": true,
-    "created_at": "2024-08-19T07:36:04"
+    "created_at": "2024-08-19T10:05:44"
   },
   {
     "id": 79,
@@ -1024,7 +1024,7 @@
     "stock_quantity": 3,
     "weight": 36.583,
     "is_active": true,
-    "created_at": "2025-06-02T12:31:01"
+    "created_at": "2025-06-02T15:00:41"
   },
   {
     "id": 80,
@@ -1037,7 +1037,7 @@
     "stock_quantity": 6,
     "weight": 39.559,
     "is_active": true,
-    "created_at": "2025-04-15T20:40:20"
+    "created_at": "2025-04-15T23:10:00"
   },
   {
     "id": 81,
@@ -1050,7 +1050,7 @@
     "stock_quantity": 7,
     "weight": 41.367,
     "is_active": false,
-    "created_at": "2025-06-02T19:26:24"
+    "created_at": "2025-06-02T21:56:04"
   },
   {
     "id": 82,
@@ -1063,7 +1063,7 @@
     "stock_quantity": 3,
     "weight": 49.086,
     "is_active": true,
-    "created_at": "2025-05-06T10:59:38"
+    "created_at": "2025-05-06T13:29:18"
   },
   {
     "id": 83,
@@ -1076,7 +1076,7 @@
     "stock_quantity": 7,
     "weight": 11.853,
     "is_active": true,
-    "created_at": "2025-01-27T16:36:47"
+    "created_at": "2025-01-27T19:06:27"
   },
   {
     "id": 84,
@@ -1089,7 +1089,7 @@
     "stock_quantity": 10,
     "weight": 0.671,
     "is_active": false,
-    "created_at": "2024-11-18T18:07:47"
+    "created_at": "2024-11-18T20:37:27"
   },
   {
     "id": 85,
@@ -1102,7 +1102,7 @@
     "stock_quantity": 2,
     "weight": 23.323,
     "is_active": true,
-    "created_at": "2025-06-01T07:51:25"
+    "created_at": "2025-06-01T10:21:05"
   },
   {
     "id": 86,
@@ -1115,7 +1115,7 @@
     "stock_quantity": 5,
     "weight": 34.545,
     "is_active": false,
-    "created_at": "2024-10-29T17:03:52"
+    "created_at": "2024-10-29T19:33:32"
   },
   {
     "id": 87,
@@ -1128,7 +1128,7 @@
     "stock_quantity": 3,
     "weight": 23.961,
     "is_active": false,
-    "created_at": "2024-12-15T06:18:15"
+    "created_at": "2024-12-15T08:47:55"
   },
   {
     "id": 88,
@@ -1141,7 +1141,7 @@
     "stock_quantity": 9,
     "weight": 45.649,
     "is_active": true,
-    "created_at": "2025-07-08T07:19:21"
+    "created_at": "2025-07-08T09:49:01"
   },
   {
     "id": 89,
@@ -1154,7 +1154,7 @@
     "stock_quantity": 4,
     "weight": 34.049,
     "is_active": false,
-    "created_at": "2024-09-23T09:31:06"
+    "created_at": "2024-09-23T12:00:46"
   },
   {
     "id": 90,
@@ -1167,7 +1167,7 @@
     "stock_quantity": 6,
     "weight": 3.997,
     "is_active": false,
-    "created_at": "2024-10-06T22:46:03"
+    "created_at": "2024-10-07T01:15:43"
   },
   {
     "id": 91,
@@ -1180,7 +1180,7 @@
     "stock_quantity": 9,
     "weight": 10.188,
     "is_active": false,
-    "created_at": "2025-07-11T16:11:23"
+    "created_at": "2025-07-11T18:41:03"
   },
   {
     "id": 92,
@@ -1193,7 +1193,7 @@
     "stock_quantity": 8,
     "weight": 5.9,
     "is_active": false,
-    "created_at": "2024-09-12T05:25:50"
+    "created_at": "2024-09-12T07:55:30"
   },
   {
     "id": 93,
@@ -1206,7 +1206,7 @@
     "stock_quantity": 9,
     "weight": 22.33,
     "is_active": false,
-    "created_at": "2025-05-18T01:29:02"
+    "created_at": "2025-05-18T03:58:42"
   },
   {
     "id": 94,
@@ -1219,7 +1219,7 @@
     "stock_quantity": 10,
     "weight": 2.981,
     "is_active": false,
-    "created_at": "2024-09-16T00:51:50"
+    "created_at": "2024-09-16T03:21:30"
   },
   {
     "id": 95,
@@ -1232,7 +1232,7 @@
     "stock_quantity": 7,
     "weight": 12.797,
     "is_active": false,
-    "created_at": "2024-10-26T16:22:18"
+    "created_at": "2024-10-26T18:51:58"
   },
   {
     "id": 96,
@@ -1245,7 +1245,7 @@
     "stock_quantity": 7,
     "weight": 17.292,
     "is_active": false,
-    "created_at": "2024-10-27T05:24:01"
+    "created_at": "2024-10-27T07:53:41"
   },
   {
     "id": 97,
@@ -1258,7 +1258,7 @@
     "stock_quantity": 2,
     "weight": 49.308,
     "is_active": false,
-    "created_at": "2025-02-02T05:45:25"
+    "created_at": "2025-02-02T08:15:05"
   },
   {
     "id": 98,
@@ -1271,7 +1271,7 @@
     "stock_quantity": 3,
     "weight": 38.315,
     "is_active": true,
-    "created_at": "2025-06-06T08:31:32"
+    "created_at": "2025-06-06T11:01:12"
   },
   {
     "id": 99,
@@ -1284,7 +1284,7 @@
     "stock_quantity": 7,
     "weight": 22.482,
     "is_active": true,
-    "created_at": "2025-06-16T07:11:38"
+    "created_at": "2025-06-16T09:41:18"
   },
   {
     "id": 100,
@@ -1297,7 +1297,7 @@
     "stock_quantity": 9,
     "weight": 6.736,
     "is_active": false,
-    "created_at": "2024-09-17T05:11:30"
+    "created_at": "2024-09-17T07:41:10"
   },
   {
     "id": 101,
@@ -1310,7 +1310,7 @@
     "stock_quantity": 7,
     "weight": 26.489,
     "is_active": true,
-    "created_at": "2025-01-07T15:04:48"
+    "created_at": "2025-01-07T17:34:28"
   },
   {
     "id": 102,
@@ -1323,7 +1323,7 @@
     "stock_quantity": 5,
     "weight": 23.204,
     "is_active": false,
-    "created_at": "2025-04-20T14:52:14"
+    "created_at": "2025-04-20T17:21:54"
   },
   {
     "id": 103,
@@ -1336,7 +1336,7 @@
     "stock_quantity": 4,
     "weight": 12.451,
     "is_active": false,
-    "created_at": "2025-01-13T20:05:31"
+    "created_at": "2025-01-13T22:35:11"
   },
   {
     "id": 104,
@@ -1349,7 +1349,7 @@
     "stock_quantity": 2,
     "weight": 1.708,
     "is_active": true,
-    "created_at": "2024-08-22T13:41:29"
+    "created_at": "2024-08-22T16:11:09"
   },
   {
     "id": 105,
@@ -1362,7 +1362,7 @@
     "stock_quantity": 1,
     "weight": 12.109,
     "is_active": true,
-    "created_at": "2024-11-29T00:04:36"
+    "created_at": "2024-11-29T02:34:16"
   },
   {
     "id": 106,
@@ -1375,7 +1375,7 @@
     "stock_quantity": 1,
     "weight": 12.312,
     "is_active": false,
-    "created_at": "2024-08-21T11:05:39"
+    "created_at": "2024-08-21T13:35:19"
   },
   {
     "id": 107,
@@ -1388,7 +1388,7 @@
     "stock_quantity": 1,
     "weight": 7.093,
     "is_active": false,
-    "created_at": "2024-09-23T20:54:19"
+    "created_at": "2024-09-23T23:23:59"
   },
   {
     "id": 108,
@@ -1401,7 +1401,7 @@
     "stock_quantity": 6,
     "weight": 28.916,
     "is_active": false,
-    "created_at": "2024-10-07T18:37:48"
+    "created_at": "2024-10-07T21:07:28"
   },
   {
     "id": 109,
@@ -1414,7 +1414,7 @@
     "stock_quantity": 3,
     "weight": 49.286,
     "is_active": false,
-    "created_at": "2024-12-24T03:13:15"
+    "created_at": "2024-12-24T05:42:55"
   },
   {
     "id": 110,
@@ -1427,7 +1427,7 @@
     "stock_quantity": 9,
     "weight": 47.431,
     "is_active": true,
-    "created_at": "2025-06-17T17:13:40"
+    "created_at": "2025-06-17T19:43:20"
   },
   {
     "id": 111,
@@ -1440,7 +1440,7 @@
     "stock_quantity": 7,
     "weight": 27.837,
     "is_active": false,
-    "created_at": "2025-01-04T14:32:59"
+    "created_at": "2025-01-04T17:02:39"
   },
   {
     "id": 112,
@@ -1453,7 +1453,7 @@
     "stock_quantity": 9,
     "weight": 16.005,
     "is_active": true,
-    "created_at": "2025-05-14T05:20:51"
+    "created_at": "2025-05-14T07:50:31"
   },
   {
     "id": 113,
@@ -1466,7 +1466,7 @@
     "stock_quantity": 9,
     "weight": 23.729,
     "is_active": true,
-    "created_at": "2025-02-01T18:25:16"
+    "created_at": "2025-02-01T20:54:56"
   },
   {
     "id": 114,
@@ -1479,7 +1479,7 @@
     "stock_quantity": 8,
     "weight": 45.746,
     "is_active": true,
-    "created_at": "2024-08-02T22:21:08"
+    "created_at": "2024-08-03T00:50:48"
   },
   {
     "id": 115,
@@ -1492,7 +1492,7 @@
     "stock_quantity": 3,
     "weight": 19.482,
     "is_active": true,
-    "created_at": "2024-11-28T00:13:42"
+    "created_at": "2024-11-28T02:43:22"
   },
   {
     "id": 116,
@@ -1505,7 +1505,7 @@
     "stock_quantity": 8,
     "weight": 42.372,
     "is_active": false,
-    "created_at": "2024-10-26T19:40:32"
+    "created_at": "2024-10-26T22:10:12"
   },
   {
     "id": 117,
@@ -1518,7 +1518,7 @@
     "stock_quantity": 5,
     "weight": 18.921,
     "is_active": true,
-    "created_at": "2025-01-07T01:34:51"
+    "created_at": "2025-01-07T04:04:31"
   },
   {
     "id": 118,
@@ -1531,7 +1531,7 @@
     "stock_quantity": 10,
     "weight": 36.243,
     "is_active": false,
-    "created_at": "2025-01-28T21:07:05"
+    "created_at": "2025-01-28T23:36:45"
   },
   {
     "id": 119,
@@ -1544,7 +1544,7 @@
     "stock_quantity": 6,
     "weight": 15.229,
     "is_active": false,
-    "created_at": "2025-04-15T04:29:23"
+    "created_at": "2025-04-15T06:59:03"
   },
   {
     "id": 120,
@@ -1557,7 +1557,7 @@
     "stock_quantity": 2,
     "weight": 37.369,
     "is_active": false,
-    "created_at": "2025-03-05T02:25:31"
+    "created_at": "2025-03-05T04:55:11"
   },
   {
     "id": 121,
@@ -1570,7 +1570,7 @@
     "stock_quantity": 4,
     "weight": 19.892,
     "is_active": false,
-    "created_at": "2024-10-10T12:16:54"
+    "created_at": "2024-10-10T14:46:34"
   },
   {
     "id": 122,
@@ -1583,7 +1583,7 @@
     "stock_quantity": 8,
     "weight": 26.729,
     "is_active": false,
-    "created_at": "2025-06-24T01:05:44"
+    "created_at": "2025-06-24T03:35:24"
   },
   {
     "id": 123,
@@ -1596,7 +1596,7 @@
     "stock_quantity": 8,
     "weight": 23.354,
     "is_active": true,
-    "created_at": "2025-07-05T00:07:54"
+    "created_at": "2025-07-05T02:37:34"
   },
   {
     "id": 124,
@@ -1609,7 +1609,7 @@
     "stock_quantity": 4,
     "weight": 18.598,
     "is_active": false,
-    "created_at": "2024-11-25T05:24:39"
+    "created_at": "2024-11-25T07:54:19"
   },
   {
     "id": 125,
@@ -1622,7 +1622,7 @@
     "stock_quantity": 3,
     "weight": 0.909,
     "is_active": false,
-    "created_at": "2025-05-06T09:55:23"
+    "created_at": "2025-05-06T12:25:03"
   },
   {
     "id": 126,
@@ -1635,7 +1635,7 @@
     "stock_quantity": 3,
     "weight": 9.89,
     "is_active": false,
-    "created_at": "2024-08-09T09:41:58"
+    "created_at": "2024-08-09T12:11:38"
   },
   {
     "id": 127,
@@ -1648,7 +1648,7 @@
     "stock_quantity": 9,
     "weight": 32.765,
     "is_active": true,
-    "created_at": "2025-04-13T13:37:16"
+    "created_at": "2025-04-13T16:06:56"
   },
   {
     "id": 128,
@@ -1661,7 +1661,7 @@
     "stock_quantity": 8,
     "weight": 23.095,
     "is_active": true,
-    "created_at": "2025-06-25T01:40:09"
+    "created_at": "2025-06-25T04:09:49"
   },
   {
     "id": 129,
@@ -1674,7 +1674,7 @@
     "stock_quantity": 8,
     "weight": 9.284,
     "is_active": false,
-    "created_at": "2025-07-08T08:15:39"
+    "created_at": "2025-07-08T10:45:19"
   },
   {
     "id": 130,
@@ -1687,7 +1687,7 @@
     "stock_quantity": 9,
     "weight": 1.788,
     "is_active": false,
-    "created_at": "2025-03-03T23:39:39"
+    "created_at": "2025-03-04T02:09:19"
   },
   {
     "id": 131,
@@ -1700,7 +1700,7 @@
     "stock_quantity": 1,
     "weight": 20.678,
     "is_active": true,
-    "created_at": "2024-11-25T15:50:39"
+    "created_at": "2024-11-25T18:20:19"
   },
   {
     "id": 132,
@@ -1713,7 +1713,7 @@
     "stock_quantity": 1,
     "weight": 11.014,
     "is_active": false,
-    "created_at": "2025-07-07T05:16:27"
+    "created_at": "2025-07-07T07:46:07"
   },
   {
     "id": 133,
@@ -1726,7 +1726,7 @@
     "stock_quantity": 10,
     "weight": 45.646,
     "is_active": false,
-    "created_at": "2024-08-25T05:02:23"
+    "created_at": "2024-08-25T07:32:03"
   },
   {
     "id": 134,
@@ -1739,7 +1739,7 @@
     "stock_quantity": 7,
     "weight": 0.691,
     "is_active": true,
-    "created_at": "2024-12-30T14:25:27"
+    "created_at": "2024-12-30T16:55:07"
   },
   {
     "id": 135,
@@ -1752,7 +1752,7 @@
     "stock_quantity": 1,
     "weight": 25.161,
     "is_active": false,
-    "created_at": "2024-09-08T00:45:35"
+    "created_at": "2024-09-08T03:15:15"
   },
   {
     "id": 136,
@@ -1765,7 +1765,7 @@
     "stock_quantity": 3,
     "weight": 5.44,
     "is_active": true,
-    "created_at": "2025-07-11T23:18:11"
+    "created_at": "2025-07-12T01:47:51"
   },
   {
     "id": 137,
@@ -1778,7 +1778,7 @@
     "stock_quantity": 9,
     "weight": 12.696,
     "is_active": true,
-    "created_at": "2025-07-21T02:31:58"
+    "created_at": "2025-07-21T05:01:38"
   },
   {
     "id": 138,
@@ -1791,7 +1791,7 @@
     "stock_quantity": 7,
     "weight": 23.004,
     "is_active": true,
-    "created_at": "2025-05-08T08:39:20"
+    "created_at": "2025-05-08T11:09:00"
   },
   {
     "id": 139,
@@ -1804,7 +1804,7 @@
     "stock_quantity": 2,
     "weight": 32.721,
     "is_active": false,
-    "created_at": "2024-12-12T08:16:13"
+    "created_at": "2024-12-12T10:45:53"
   },
   {
     "id": 140,
@@ -1817,7 +1817,7 @@
     "stock_quantity": 7,
     "weight": 18.921,
     "is_active": false,
-    "created_at": "2025-07-20T10:39:36"
+    "created_at": "2025-07-20T13:09:16"
   },
   {
     "id": 141,
@@ -1830,7 +1830,7 @@
     "stock_quantity": 2,
     "weight": 25.043,
     "is_active": false,
-    "created_at": "2025-07-30T18:28:28"
+    "created_at": "2025-07-30T20:58:08"
   },
   {
     "id": 142,
@@ -1843,7 +1843,7 @@
     "stock_quantity": 2,
     "weight": 44.75,
     "is_active": false,
-    "created_at": "2025-04-08T02:54:21"
+    "created_at": "2025-04-08T05:24:01"
   },
   {
     "id": 143,
@@ -1856,7 +1856,7 @@
     "stock_quantity": 10,
     "weight": 23.827,
     "is_active": false,
-    "created_at": "2025-03-07T05:37:15"
+    "created_at": "2025-03-07T08:06:55"
   },
   {
     "id": 144,
@@ -1869,7 +1869,7 @@
     "stock_quantity": 9,
     "weight": 28.219,
     "is_active": false,
-    "created_at": "2024-08-05T03:29:03"
+    "created_at": "2024-08-05T05:58:43"
   },
   {
     "id": 145,
@@ -1882,7 +1882,7 @@
     "stock_quantity": 4,
     "weight": 29.393,
     "is_active": false,
-    "created_at": "2024-10-26T08:46:50"
+    "created_at": "2024-10-26T11:16:30"
   },
   {
     "id": 146,
@@ -1895,7 +1895,7 @@
     "stock_quantity": 5,
     "weight": 8.206,
     "is_active": true,
-    "created_at": "2024-12-12T06:28:10"
+    "created_at": "2024-12-12T08:57:50"
   },
   {
     "id": 147,
@@ -1908,7 +1908,7 @@
     "stock_quantity": 9,
     "weight": 16.653,
     "is_active": true,
-    "created_at": "2024-11-10T11:42:08"
+    "created_at": "2024-11-10T14:11:48"
   },
   {
     "id": 148,
@@ -1921,7 +1921,7 @@
     "stock_quantity": 2,
     "weight": 25.09,
     "is_active": true,
-    "created_at": "2024-08-26T07:40:07"
+    "created_at": "2024-08-26T10:09:47"
   },
   {
     "id": 149,
@@ -1934,7 +1934,7 @@
     "stock_quantity": 2,
     "weight": 17.096,
     "is_active": false,
-    "created_at": "2025-01-20T08:50:51"
+    "created_at": "2025-01-20T11:20:31"
   },
   {
     "id": 150,
@@ -1947,7 +1947,7 @@
     "stock_quantity": 6,
     "weight": 1.578,
     "is_active": false,
-    "created_at": "2025-05-30T20:01:20"
+    "created_at": "2025-05-30T22:31:00"
   },
   {
     "id": 151,
@@ -1960,7 +1960,7 @@
     "stock_quantity": 7,
     "weight": 21.649,
     "is_active": false,
-    "created_at": "2025-05-19T14:23:42"
+    "created_at": "2025-05-19T16:53:22"
   },
   {
     "id": 152,
@@ -1973,7 +1973,7 @@
     "stock_quantity": 10,
     "weight": 14.839,
     "is_active": false,
-    "created_at": "2024-12-30T04:09:35"
+    "created_at": "2024-12-30T06:39:15"
   },
   {
     "id": 153,
@@ -1986,7 +1986,7 @@
     "stock_quantity": 7,
     "weight": 35.613,
     "is_active": true,
-    "created_at": "2025-05-17T22:52:39"
+    "created_at": "2025-05-18T01:22:19"
   },
   {
     "id": 154,
@@ -1999,7 +1999,7 @@
     "stock_quantity": 2,
     "weight": 4.667,
     "is_active": true,
-    "created_at": "2024-09-07T02:50:04"
+    "created_at": "2024-09-07T05:19:44"
   },
   {
     "id": 155,
@@ -2012,7 +2012,7 @@
     "stock_quantity": 3,
     "weight": 4.456,
     "is_active": true,
-    "created_at": "2025-03-30T20:31:08"
+    "created_at": "2025-03-30T23:00:48"
   },
   {
     "id": 156,
@@ -2025,7 +2025,7 @@
     "stock_quantity": 2,
     "weight": 1.41,
     "is_active": false,
-    "created_at": "2025-07-03T20:39:04"
+    "created_at": "2025-07-03T23:08:44"
   },
   {
     "id": 157,
@@ -2038,7 +2038,7 @@
     "stock_quantity": 6,
     "weight": 43.2,
     "is_active": true,
-    "created_at": "2025-07-07T07:45:00"
+    "created_at": "2025-07-07T10:14:40"
   },
   {
     "id": 158,
@@ -2051,7 +2051,7 @@
     "stock_quantity": 9,
     "weight": 45.27,
     "is_active": true,
-    "created_at": "2024-09-01T22:52:46"
+    "created_at": "2024-09-02T01:22:26"
   },
   {
     "id": 159,
@@ -2064,7 +2064,7 @@
     "stock_quantity": 3,
     "weight": 7.028,
     "is_active": true,
-    "created_at": "2025-06-29T20:59:21"
+    "created_at": "2025-06-29T23:29:01"
   },
   {
     "id": 160,
@@ -2077,7 +2077,7 @@
     "stock_quantity": 7,
     "weight": 13.87,
     "is_active": false,
-    "created_at": "2025-03-25T21:51:26"
+    "created_at": "2025-03-26T00:21:06"
   },
   {
     "id": 161,
@@ -2090,7 +2090,7 @@
     "stock_quantity": 4,
     "weight": 36.073,
     "is_active": true,
-    "created_at": "2024-09-24T17:23:57"
+    "created_at": "2024-09-24T19:53:37"
   },
   {
     "id": 162,
@@ -2103,7 +2103,7 @@
     "stock_quantity": 3,
     "weight": 15.302,
     "is_active": false,
-    "created_at": "2025-03-17T14:22:09"
+    "created_at": "2025-03-17T16:51:49"
   },
   {
     "id": 163,
@@ -2116,7 +2116,7 @@
     "stock_quantity": 6,
     "weight": 22.067,
     "is_active": true,
-    "created_at": "2024-10-27T16:25:16"
+    "created_at": "2024-10-27T18:54:56"
   },
   {
     "id": 164,
@@ -2129,7 +2129,7 @@
     "stock_quantity": 6,
     "weight": 30.2,
     "is_active": false,
-    "created_at": "2024-09-24T13:44:25"
+    "created_at": "2024-09-24T16:14:05"
   },
   {
     "id": 165,
@@ -2142,7 +2142,7 @@
     "stock_quantity": 7,
     "weight": 48.439,
     "is_active": false,
-    "created_at": "2024-12-10T11:17:48"
+    "created_at": "2024-12-10T13:47:28"
   },
   {
     "id": 166,
@@ -2155,7 +2155,7 @@
     "stock_quantity": 10,
     "weight": 39.121,
     "is_active": false,
-    "created_at": "2025-06-06T15:46:57"
+    "created_at": "2025-06-06T18:16:37"
   },
   {
     "id": 167,
@@ -2168,7 +2168,7 @@
     "stock_quantity": 6,
     "weight": 5.783,
     "is_active": false,
-    "created_at": "2024-11-26T13:04:25"
+    "created_at": "2024-11-26T15:34:05"
   },
   {
     "id": 168,
@@ -2181,7 +2181,7 @@
     "stock_quantity": 9,
     "weight": 1.443,
     "is_active": false,
-    "created_at": "2024-08-11T10:12:17"
+    "created_at": "2024-08-11T12:41:57"
   },
   {
     "id": 169,
@@ -2194,7 +2194,7 @@
     "stock_quantity": 5,
     "weight": 41.581,
     "is_active": true,
-    "created_at": "2025-03-17T12:22:03"
+    "created_at": "2025-03-17T14:51:43"
   },
   {
     "id": 170,
@@ -2207,7 +2207,7 @@
     "stock_quantity": 5,
     "weight": 12.177,
     "is_active": true,
-    "created_at": "2024-10-24T10:38:37"
+    "created_at": "2024-10-24T13:08:17"
   },
   {
     "id": 171,
@@ -2220,7 +2220,7 @@
     "stock_quantity": 2,
     "weight": 22.508,
     "is_active": false,
-    "created_at": "2024-08-04T22:09:31"
+    "created_at": "2024-08-05T00:39:11"
   },
   {
     "id": 172,
@@ -2233,7 +2233,7 @@
     "stock_quantity": 7,
     "weight": 27.228,
     "is_active": true,
-    "created_at": "2025-06-12T11:19:03"
+    "created_at": "2025-06-12T13:48:43"
   },
   {
     "id": 173,
@@ -2246,7 +2246,7 @@
     "stock_quantity": 10,
     "weight": 31.945,
     "is_active": false,
-    "created_at": "2024-08-24T11:02:21"
+    "created_at": "2024-08-24T13:32:01"
   },
   {
     "id": 174,
@@ -2259,7 +2259,7 @@
     "stock_quantity": 6,
     "weight": 8.4,
     "is_active": false,
-    "created_at": "2024-09-08T23:29:56"
+    "created_at": "2024-09-09T01:59:36"
   },
   {
     "id": 175,
@@ -2272,7 +2272,7 @@
     "stock_quantity": 7,
     "weight": 48.344,
     "is_active": true,
-    "created_at": "2024-11-21T23:35:20"
+    "created_at": "2024-11-22T02:05:00"
   },
   {
     "id": 176,
@@ -2285,7 +2285,7 @@
     "stock_quantity": 4,
     "weight": 25.583,
     "is_active": true,
-    "created_at": "2024-12-17T06:56:22"
+    "created_at": "2024-12-17T09:26:02"
   },
   {
     "id": 177,
@@ -2298,7 +2298,7 @@
     "stock_quantity": 8,
     "weight": 18.769,
     "is_active": true,
-    "created_at": "2024-12-24T06:18:35"
+    "created_at": "2024-12-24T08:48:15"
   },
   {
     "id": 178,
@@ -2311,7 +2311,7 @@
     "stock_quantity": 3,
     "weight": 17.314,
     "is_active": false,
-    "created_at": "2024-10-30T13:43:51"
+    "created_at": "2024-10-30T16:13:31"
   },
   {
     "id": 179,
@@ -2324,7 +2324,7 @@
     "stock_quantity": 2,
     "weight": 5.892,
     "is_active": true,
-    "created_at": "2025-01-21T04:11:42"
+    "created_at": "2025-01-21T06:41:22"
   },
   {
     "id": 180,
@@ -2337,7 +2337,7 @@
     "stock_quantity": 4,
     "weight": 26.104,
     "is_active": false,
-    "created_at": "2025-03-21T03:14:59"
+    "created_at": "2025-03-21T05:44:39"
   },
   {
     "id": 181,
@@ -2350,7 +2350,7 @@
     "stock_quantity": 8,
     "weight": 16.014,
     "is_active": false,
-    "created_at": "2025-03-25T15:11:19"
+    "created_at": "2025-03-25T17:40:59"
   },
   {
     "id": 182,
@@ -2363,7 +2363,7 @@
     "stock_quantity": 6,
     "weight": 32.434,
     "is_active": true,
-    "created_at": "2024-10-08T17:28:22"
+    "created_at": "2024-10-08T19:58:02"
   },
   {
     "id": 183,
@@ -2376,7 +2376,7 @@
     "stock_quantity": 9,
     "weight": 8.805,
     "is_active": false,
-    "created_at": "2024-09-15T06:38:16"
+    "created_at": "2024-09-15T09:07:56"
   },
   {
     "id": 184,
@@ -2389,7 +2389,7 @@
     "stock_quantity": 4,
     "weight": 39.908,
     "is_active": true,
-    "created_at": "2025-07-25T10:55:40"
+    "created_at": "2025-07-25T13:25:20"
   },
   {
     "id": 185,
@@ -2402,7 +2402,7 @@
     "stock_quantity": 7,
     "weight": 1.557,
     "is_active": false,
-    "created_at": "2025-05-30T09:11:36"
+    "created_at": "2025-05-30T11:41:16"
   },
   {
     "id": 186,
@@ -2415,7 +2415,7 @@
     "stock_quantity": 1,
     "weight": 35.266,
     "is_active": true,
-    "created_at": "2025-07-25T17:26:33"
+    "created_at": "2025-07-25T19:56:13"
   },
   {
     "id": 187,
@@ -2428,7 +2428,7 @@
     "stock_quantity": 2,
     "weight": 28.91,
     "is_active": false,
-    "created_at": "2024-09-27T22:58:18"
+    "created_at": "2024-09-28T01:27:58"
   },
   {
     "id": 188,
@@ -2441,7 +2441,7 @@
     "stock_quantity": 8,
     "weight": 5.786,
     "is_active": true,
-    "created_at": "2025-06-27T19:55:12"
+    "created_at": "2025-06-27T22:24:52"
   },
   {
     "id": 189,
@@ -2454,7 +2454,7 @@
     "stock_quantity": 10,
     "weight": 19.493,
     "is_active": false,
-    "created_at": "2025-06-23T15:31:41"
+    "created_at": "2025-06-23T18:01:21"
   },
   {
     "id": 190,
@@ -2467,7 +2467,7 @@
     "stock_quantity": 8,
     "weight": 30.906,
     "is_active": false,
-    "created_at": "2025-05-25T05:13:25"
+    "created_at": "2025-05-25T07:43:06"
   },
   {
     "id": 191,
@@ -2480,7 +2480,7 @@
     "stock_quantity": 10,
     "weight": 29.549,
     "is_active": false,
-    "created_at": "2025-04-16T01:11:48"
+    "created_at": "2025-04-16T03:41:29"
   },
   {
     "id": 192,
@@ -2493,7 +2493,7 @@
     "stock_quantity": 2,
     "weight": 9.234,
     "is_active": false,
-    "created_at": "2024-08-12T15:27:43"
+    "created_at": "2024-08-12T17:57:24"
   },
   {
     "id": 193,
@@ -2506,7 +2506,7 @@
     "stock_quantity": 3,
     "weight": 28.783,
     "is_active": false,
-    "created_at": "2025-07-28T15:40:12"
+    "created_at": "2025-07-28T18:09:53"
   },
   {
     "id": 194,
@@ -2519,7 +2519,7 @@
     "stock_quantity": 3,
     "weight": 27.79,
     "is_active": false,
-    "created_at": "2025-07-27T20:41:58"
+    "created_at": "2025-07-27T23:11:39"
   },
   {
     "id": 195,
@@ -2532,7 +2532,7 @@
     "stock_quantity": 8,
     "weight": 31.009,
     "is_active": true,
-    "created_at": "2025-01-24T15:53:33"
+    "created_at": "2025-01-24T18:23:14"
   },
   {
     "id": 196,
@@ -2545,7 +2545,7 @@
     "stock_quantity": 4,
     "weight": 40.779,
     "is_active": false,
-    "created_at": "2024-08-15T00:45:20"
+    "created_at": "2024-08-15T03:15:01"
   },
   {
     "id": 197,
@@ -2558,7 +2558,7 @@
     "stock_quantity": 8,
     "weight": 20.84,
     "is_active": false,
-    "created_at": "2024-11-05T22:14:33"
+    "created_at": "2024-11-06T00:44:14"
   },
   {
     "id": 198,
@@ -2571,7 +2571,7 @@
     "stock_quantity": 1,
     "weight": 39.814,
     "is_active": true,
-    "created_at": "2025-06-08T01:59:04"
+    "created_at": "2025-06-08T04:28:45"
   },
   {
     "id": 199,
@@ -2584,7 +2584,7 @@
     "stock_quantity": 5,
     "weight": 8.494,
     "is_active": false,
-    "created_at": "2024-11-07T12:04:30"
+    "created_at": "2024-11-07T14:34:11"
   },
   {
     "id": 200,
@@ -2597,7 +2597,7 @@
     "stock_quantity": 9,
     "weight": 25.589,
     "is_active": false,
-    "created_at": "2025-03-12T12:24:25"
+    "created_at": "2025-03-12T14:54:06"
   },
   {
     "id": 201,
@@ -2610,7 +2610,7 @@
     "stock_quantity": 6,
     "weight": 27.148,
     "is_active": false,
-    "created_at": "2024-08-25T06:49:48"
+    "created_at": "2024-08-25T09:19:29"
   },
   {
     "id": 202,
@@ -2623,7 +2623,7 @@
     "stock_quantity": 4,
     "weight": 49.49,
     "is_active": true,
-    "created_at": "2025-02-24T14:22:13"
+    "created_at": "2025-02-24T16:51:54"
   },
   {
     "id": 203,
@@ -2636,7 +2636,7 @@
     "stock_quantity": 5,
     "weight": 43.753,
     "is_active": false,
-    "created_at": "2025-03-15T13:48:55"
+    "created_at": "2025-03-15T16:18:36"
   },
   {
     "id": 204,
@@ -2649,7 +2649,7 @@
     "stock_quantity": 2,
     "weight": 22.01,
     "is_active": true,
-    "created_at": "2024-11-27T19:49:07"
+    "created_at": "2024-11-27T22:18:48"
   },
   {
     "id": 205,
@@ -2662,7 +2662,7 @@
     "stock_quantity": 10,
     "weight": 34.488,
     "is_active": false,
-    "created_at": "2025-03-12T19:37:37"
+    "created_at": "2025-03-12T22:07:18"
   },
   {
     "id": 206,
@@ -2675,7 +2675,7 @@
     "stock_quantity": 10,
     "weight": 7.048,
     "is_active": true,
-    "created_at": "2024-09-30T16:26:44"
+    "created_at": "2024-09-30T18:56:25"
   },
   {
     "id": 207,
@@ -2688,7 +2688,7 @@
     "stock_quantity": 9,
     "weight": 14.126,
     "is_active": false,
-    "created_at": "2024-12-08T18:45:32"
+    "created_at": "2024-12-08T21:15:13"
   },
   {
     "id": 208,
@@ -2701,7 +2701,7 @@
     "stock_quantity": 5,
     "weight": 28.68,
     "is_active": false,
-    "created_at": "2025-06-23T00:12:09"
+    "created_at": "2025-06-23T02:41:50"
   },
   {
     "id": 209,
@@ -2714,7 +2714,7 @@
     "stock_quantity": 2,
     "weight": 6.866,
     "is_active": false,
-    "created_at": "2024-08-11T11:40:51"
+    "created_at": "2024-08-11T14:10:32"
   },
   {
     "id": 210,
@@ -2727,7 +2727,7 @@
     "stock_quantity": 3,
     "weight": 35.101,
     "is_active": true,
-    "created_at": "2025-01-25T21:50:42"
+    "created_at": "2025-01-26T00:20:23"
   },
   {
     "id": 211,
@@ -2740,7 +2740,7 @@
     "stock_quantity": 4,
     "weight": 38.098,
     "is_active": true,
-    "created_at": "2025-07-27T04:42:26"
+    "created_at": "2025-07-27T07:12:07"
   },
   {
     "id": 212,
@@ -2753,7 +2753,7 @@
     "stock_quantity": 5,
     "weight": 31.428,
     "is_active": true,
-    "created_at": "2024-08-23T20:56:28"
+    "created_at": "2024-08-23T23:26:09"
   },
   {
     "id": 213,
@@ -2766,7 +2766,7 @@
     "stock_quantity": 2,
     "weight": 20.202,
     "is_active": false,
-    "created_at": "2024-10-24T12:51:11"
+    "created_at": "2024-10-24T15:20:52"
   },
   {
     "id": 214,
@@ -2779,7 +2779,7 @@
     "stock_quantity": 8,
     "weight": 47.518,
     "is_active": true,
-    "created_at": "2025-04-18T08:58:06"
+    "created_at": "2025-04-18T11:27:47"
   },
   {
     "id": 215,
@@ -2792,7 +2792,7 @@
     "stock_quantity": 2,
     "weight": 36.574,
     "is_active": true,
-    "created_at": "2024-09-30T16:35:26"
+    "created_at": "2024-09-30T19:05:07"
   },
   {
     "id": 216,
@@ -2805,7 +2805,7 @@
     "stock_quantity": 2,
     "weight": 39.804,
     "is_active": false,
-    "created_at": "2025-06-01T22:37:08"
+    "created_at": "2025-06-02T01:06:49"
   },
   {
     "id": 217,
@@ -2818,7 +2818,7 @@
     "stock_quantity": 8,
     "weight": 13.5,
     "is_active": true,
-    "created_at": "2024-12-25T13:17:23"
+    "created_at": "2024-12-25T15:47:04"
   },
   {
     "id": 218,
@@ -2831,7 +2831,7 @@
     "stock_quantity": 10,
     "weight": 42.636,
     "is_active": false,
-    "created_at": "2025-02-19T12:40:10"
+    "created_at": "2025-02-19T15:09:51"
   },
   {
     "id": 219,
@@ -2844,7 +2844,7 @@
     "stock_quantity": 1,
     "weight": 5.069,
     "is_active": true,
-    "created_at": "2025-04-21T03:07:38"
+    "created_at": "2025-04-21T05:37:19"
   },
   {
     "id": 220,
@@ -2857,7 +2857,7 @@
     "stock_quantity": 3,
     "weight": 22.12,
     "is_active": false,
-    "created_at": "2025-01-15T08:58:29"
+    "created_at": "2025-01-15T11:28:10"
   },
   {
     "id": 221,
@@ -2870,7 +2870,7 @@
     "stock_quantity": 3,
     "weight": 44.119,
     "is_active": true,
-    "created_at": "2024-12-05T02:55:34"
+    "created_at": "2024-12-05T05:25:15"
   },
   {
     "id": 222,
@@ -2883,7 +2883,7 @@
     "stock_quantity": 2,
     "weight": 32.764,
     "is_active": false,
-    "created_at": "2025-02-10T21:05:48"
+    "created_at": "2025-02-10T23:35:29"
   },
   {
     "id": 223,
@@ -2896,7 +2896,7 @@
     "stock_quantity": 3,
     "weight": 2.684,
     "is_active": false,
-    "created_at": "2025-01-30T00:56:01"
+    "created_at": "2025-01-30T03:25:42"
   },
   {
     "id": 224,
@@ -2909,7 +2909,7 @@
     "stock_quantity": 7,
     "weight": 32.809,
     "is_active": false,
-    "created_at": "2025-05-10T03:45:24"
+    "created_at": "2025-05-10T06:15:05"
   },
   {
     "id": 225,
@@ -2922,7 +2922,7 @@
     "stock_quantity": 3,
     "weight": 29.725,
     "is_active": true,
-    "created_at": "2025-05-04T01:13:10"
+    "created_at": "2025-05-04T03:42:51"
   },
   {
     "id": 226,
@@ -2935,7 +2935,7 @@
     "stock_quantity": 6,
     "weight": 40.874,
     "is_active": true,
-    "created_at": "2025-07-19T10:44:42"
+    "created_at": "2025-07-19T13:14:23"
   },
   {
     "id": 227,
@@ -2948,7 +2948,7 @@
     "stock_quantity": 4,
     "weight": 19.215,
     "is_active": true,
-    "created_at": "2024-11-22T01:14:49"
+    "created_at": "2024-11-22T03:44:30"
   },
   {
     "id": 228,
@@ -2961,7 +2961,7 @@
     "stock_quantity": 5,
     "weight": 6.943,
     "is_active": false,
-    "created_at": "2025-05-02T02:09:18"
+    "created_at": "2025-05-02T04:38:59"
   },
   {
     "id": 229,
@@ -2974,7 +2974,7 @@
     "stock_quantity": 3,
     "weight": 3.514,
     "is_active": false,
-    "created_at": "2025-04-05T01:30:39"
+    "created_at": "2025-04-05T04:00:20"
   },
   {
     "id": 230,
@@ -2987,7 +2987,7 @@
     "stock_quantity": 6,
     "weight": 36.149,
     "is_active": false,
-    "created_at": "2025-06-10T06:13:28"
+    "created_at": "2025-06-10T08:43:09"
   },
   {
     "id": 231,
@@ -3000,7 +3000,7 @@
     "stock_quantity": 8,
     "weight": 43.012,
     "is_active": true,
-    "created_at": "2024-11-03T17:45:25"
+    "created_at": "2024-11-03T20:15:06"
   },
   {
     "id": 232,
@@ -3013,7 +3013,7 @@
     "stock_quantity": 7,
     "weight": 17.642,
     "is_active": false,
-    "created_at": "2025-03-27T00:21:38"
+    "created_at": "2025-03-27T02:51:19"
   },
   {
     "id": 233,
@@ -3026,7 +3026,7 @@
     "stock_quantity": 2,
     "weight": 12.484,
     "is_active": true,
-    "created_at": "2025-03-23T21:15:36"
+    "created_at": "2025-03-23T23:45:17"
   },
   {
     "id": 234,
@@ -3039,7 +3039,7 @@
     "stock_quantity": 1,
     "weight": 42.41,
     "is_active": false,
-    "created_at": "2024-09-23T01:07:47"
+    "created_at": "2024-09-23T03:37:28"
   },
   {
     "id": 235,
@@ -3052,7 +3052,7 @@
     "stock_quantity": 4,
     "weight": 37.417,
     "is_active": false,
-    "created_at": "2025-07-03T02:53:53"
+    "created_at": "2025-07-03T05:23:34"
   },
   {
     "id": 236,
@@ -3065,7 +3065,7 @@
     "stock_quantity": 4,
     "weight": 24.795,
     "is_active": true,
-    "created_at": "2025-01-16T03:06:33"
+    "created_at": "2025-01-16T05:36:14"
   },
   {
     "id": 237,
@@ -3078,7 +3078,7 @@
     "stock_quantity": 9,
     "weight": 44.447,
     "is_active": false,
-    "created_at": "2024-08-13T20:57:07"
+    "created_at": "2024-08-13T23:26:48"
   },
   {
     "id": 238,
@@ -3091,7 +3091,7 @@
     "stock_quantity": 10,
     "weight": 21.101,
     "is_active": false,
-    "created_at": "2024-08-19T21:15:21"
+    "created_at": "2024-08-19T23:45:02"
   },
   {
     "id": 239,
@@ -3104,7 +3104,7 @@
     "stock_quantity": 2,
     "weight": 0.933,
     "is_active": true,
-    "created_at": "2025-04-27T14:58:45"
+    "created_at": "2025-04-27T17:28:26"
   },
   {
     "id": 240,
@@ -3117,7 +3117,7 @@
     "stock_quantity": 1,
     "weight": 47.439,
     "is_active": false,
-    "created_at": "2025-06-04T23:05:07"
+    "created_at": "2025-06-05T01:34:48"
   },
   {
     "id": 241,
@@ -3130,7 +3130,7 @@
     "stock_quantity": 7,
     "weight": 21.236,
     "is_active": true,
-    "created_at": "2025-01-28T15:30:00"
+    "created_at": "2025-01-28T17:59:41"
   },
   {
     "id": 242,
@@ -3143,7 +3143,7 @@
     "stock_quantity": 3,
     "weight": 13.946,
     "is_active": false,
-    "created_at": "2024-12-22T16:53:41"
+    "created_at": "2024-12-22T19:23:22"
   },
   {
     "id": 243,
@@ -3156,7 +3156,7 @@
     "stock_quantity": 3,
     "weight": 26.866,
     "is_active": false,
-    "created_at": "2025-07-25T16:18:56"
+    "created_at": "2025-07-25T18:48:37"
   },
   {
     "id": 244,
@@ -3169,7 +3169,7 @@
     "stock_quantity": 2,
     "weight": 15.577,
     "is_active": true,
-    "created_at": "2024-11-03T19:25:11"
+    "created_at": "2024-11-03T21:54:52"
   },
   {
     "id": 245,
@@ -3182,7 +3182,7 @@
     "stock_quantity": 4,
     "weight": 4.402,
     "is_active": false,
-    "created_at": "2025-07-26T03:27:24"
+    "created_at": "2025-07-26T05:57:05"
   },
   {
     "id": 246,
@@ -3195,7 +3195,7 @@
     "stock_quantity": 5,
     "weight": 33.337,
     "is_active": false,
-    "created_at": "2025-04-24T14:38:42"
+    "created_at": "2025-04-24T17:08:23"
   },
   {
     "id": 247,
@@ -3208,7 +3208,7 @@
     "stock_quantity": 3,
     "weight": 35.105,
     "is_active": true,
-    "created_at": "2024-09-16T00:02:38"
+    "created_at": "2024-09-16T02:32:19"
   },
   {
     "id": 248,
@@ -3221,7 +3221,7 @@
     "stock_quantity": 5,
     "weight": 8.431,
     "is_active": false,
-    "created_at": "2025-01-10T03:35:42"
+    "created_at": "2025-01-10T06:05:23"
   },
   {
     "id": 249,
@@ -3234,7 +3234,7 @@
     "stock_quantity": 2,
     "weight": 38.594,
     "is_active": true,
-    "created_at": "2024-12-12T02:45:26"
+    "created_at": "2024-12-12T05:15:07"
   },
   {
     "id": 250,
@@ -3247,7 +3247,7 @@
     "stock_quantity": 2,
     "weight": 13.221,
     "is_active": false,
-    "created_at": "2024-10-19T00:32:18"
+    "created_at": "2024-10-19T03:01:59"
   },
   {
     "id": 251,
@@ -3260,7 +3260,7 @@
     "stock_quantity": 6,
     "weight": 2.866,
     "is_active": false,
-    "created_at": "2024-10-20T00:47:41"
+    "created_at": "2024-10-20T03:17:22"
   },
   {
     "id": 252,
@@ -3273,7 +3273,7 @@
     "stock_quantity": 2,
     "weight": 44.724,
     "is_active": false,
-    "created_at": "2025-04-22T09:47:50"
+    "created_at": "2025-04-22T12:17:31"
   },
   {
     "id": 253,
@@ -3286,7 +3286,7 @@
     "stock_quantity": 1,
     "weight": 2.297,
     "is_active": false,
-    "created_at": "2024-10-17T15:44:06"
+    "created_at": "2024-10-17T18:13:47"
   },
   {
     "id": 254,
@@ -3299,7 +3299,7 @@
     "stock_quantity": 7,
     "weight": 46.019,
     "is_active": false,
-    "created_at": "2024-12-31T15:39:04"
+    "created_at": "2024-12-31T18:08:45"
   },
   {
     "id": 255,
@@ -3312,7 +3312,7 @@
     "stock_quantity": 7,
     "weight": 11.303,
     "is_active": true,
-    "created_at": "2024-10-14T08:38:55"
+    "created_at": "2024-10-14T11:08:36"
   },
   {
     "id": 256,
@@ -3325,7 +3325,7 @@
     "stock_quantity": 2,
     "weight": 28.62,
     "is_active": false,
-    "created_at": "2024-11-07T06:17:46"
+    "created_at": "2024-11-07T08:47:27"
   },
   {
     "id": 257,
@@ -3338,7 +3338,7 @@
     "stock_quantity": 4,
     "weight": 40.236,
     "is_active": true,
-    "created_at": "2025-07-15T18:16:23"
+    "created_at": "2025-07-15T20:46:04"
   },
   {
     "id": 258,
@@ -3351,7 +3351,7 @@
     "stock_quantity": 5,
     "weight": 38.699,
     "is_active": false,
-    "created_at": "2025-03-12T09:18:01"
+    "created_at": "2025-03-12T11:47:42"
   },
   {
     "id": 259,
@@ -3364,7 +3364,7 @@
     "stock_quantity": 6,
     "weight": 10.113,
     "is_active": true,
-    "created_at": "2025-06-07T00:33:41"
+    "created_at": "2025-06-07T03:03:22"
   },
   {
     "id": 260,
@@ -3377,7 +3377,7 @@
     "stock_quantity": 6,
     "weight": 29.625,
     "is_active": false,
-    "created_at": "2024-08-15T02:36:58"
+    "created_at": "2024-08-15T05:06:39"
   },
   {
     "id": 261,
@@ -3390,7 +3390,7 @@
     "stock_quantity": 9,
     "weight": 38.048,
     "is_active": false,
-    "created_at": "2025-07-17T09:21:50"
+    "created_at": "2025-07-17T11:51:31"
   },
   {
     "id": 262,
@@ -3403,7 +3403,7 @@
     "stock_quantity": 4,
     "weight": 27.123,
     "is_active": true,
-    "created_at": "2024-12-18T03:38:38"
+    "created_at": "2024-12-18T06:08:19"
   },
   {
     "id": 263,
@@ -3416,7 +3416,7 @@
     "stock_quantity": 1,
     "weight": 37.971,
     "is_active": true,
-    "created_at": "2025-03-12T23:27:36"
+    "created_at": "2025-03-13T01:57:17"
   },
   {
     "id": 264,
@@ -3429,7 +3429,7 @@
     "stock_quantity": 9,
     "weight": 49.157,
     "is_active": true,
-    "created_at": "2024-11-14T22:09:13"
+    "created_at": "2024-11-15T00:38:54"
   },
   {
     "id": 265,
@@ -3442,7 +3442,7 @@
     "stock_quantity": 3,
     "weight": 35.611,
     "is_active": false,
-    "created_at": "2025-01-06T19:48:22"
+    "created_at": "2025-01-06T22:18:03"
   },
   {
     "id": 266,
@@ -3455,7 +3455,7 @@
     "stock_quantity": 9,
     "weight": 20.712,
     "is_active": true,
-    "created_at": "2025-07-07T05:03:45"
+    "created_at": "2025-07-07T07:33:26"
   },
   {
     "id": 267,
@@ -3468,7 +3468,7 @@
     "stock_quantity": 10,
     "weight": 4.869,
     "is_active": true,
-    "created_at": "2025-04-07T20:17:47"
+    "created_at": "2025-04-07T22:47:28"
   },
   {
     "id": 268,
@@ -3481,7 +3481,7 @@
     "stock_quantity": 10,
     "weight": 3.208,
     "is_active": false,
-    "created_at": "2024-08-06T20:34:03"
+    "created_at": "2024-08-06T23:03:44"
   },
   {
     "id": 269,
@@ -3494,7 +3494,7 @@
     "stock_quantity": 6,
     "weight": 46.309,
     "is_active": false,
-    "created_at": "2025-07-06T12:32:02"
+    "created_at": "2025-07-06T15:01:43"
   },
   {
     "id": 270,
@@ -3507,7 +3507,7 @@
     "stock_quantity": 8,
     "weight": 13.671,
     "is_active": false,
-    "created_at": "2025-01-21T13:05:24"
+    "created_at": "2025-01-21T15:35:05"
   },
   {
     "id": 271,
@@ -3520,7 +3520,7 @@
     "stock_quantity": 2,
     "weight": 7.855,
     "is_active": true,
-    "created_at": "2024-09-15T07:58:34"
+    "created_at": "2024-09-15T10:28:15"
   },
   {
     "id": 272,
@@ -3533,7 +3533,7 @@
     "stock_quantity": 9,
     "weight": 17.979,
     "is_active": false,
-    "created_at": "2025-04-18T22:55:48"
+    "created_at": "2025-04-19T01:25:29"
   },
   {
     "id": 273,
@@ -3546,7 +3546,7 @@
     "stock_quantity": 2,
     "weight": 4.612,
     "is_active": true,
-    "created_at": "2024-08-26T04:46:01"
+    "created_at": "2024-08-26T07:15:42"
   },
   {
     "id": 274,
@@ -3559,7 +3559,7 @@
     "stock_quantity": 10,
     "weight": 2.112,
     "is_active": false,
-    "created_at": "2024-11-22T08:59:08"
+    "created_at": "2024-11-22T11:28:49"
   },
   {
     "id": 275,
@@ -3572,7 +3572,7 @@
     "stock_quantity": 6,
     "weight": 19.873,
     "is_active": false,
-    "created_at": "2024-12-10T06:20:26"
+    "created_at": "2024-12-10T08:50:07"
   },
   {
     "id": 276,
@@ -3585,7 +3585,7 @@
     "stock_quantity": 3,
     "weight": 1.651,
     "is_active": false,
-    "created_at": "2025-02-03T00:24:26"
+    "created_at": "2025-02-03T02:54:07"
   },
   {
     "id": 277,
@@ -3598,7 +3598,7 @@
     "stock_quantity": 2,
     "weight": 23.156,
     "is_active": false,
-    "created_at": "2025-07-31T07:32:08"
+    "created_at": "2025-07-31T10:01:49"
   },
   {
     "id": 278,
@@ -3611,7 +3611,7 @@
     "stock_quantity": 4,
     "weight": 6.623,
     "is_active": false,
-    "created_at": "2025-03-01T13:31:13"
+    "created_at": "2025-03-01T16:00:54"
   },
   {
     "id": 279,
@@ -3624,7 +3624,7 @@
     "stock_quantity": 2,
     "weight": 29.158,
     "is_active": true,
-    "created_at": "2024-12-06T02:45:06"
+    "created_at": "2024-12-06T05:14:47"
   },
   {
     "id": 280,
@@ -3637,7 +3637,7 @@
     "stock_quantity": 8,
     "weight": 40.484,
     "is_active": false,
-    "created_at": "2025-07-12T04:11:26"
+    "created_at": "2025-07-12T06:41:07"
   },
   {
     "id": 281,
@@ -3650,7 +3650,7 @@
     "stock_quantity": 1,
     "weight": 8.483,
     "is_active": false,
-    "created_at": "2024-08-08T15:09:20"
+    "created_at": "2024-08-08T17:39:01"
   },
   {
     "id": 282,
@@ -3663,7 +3663,7 @@
     "stock_quantity": 1,
     "weight": 19.198,
     "is_active": true,
-    "created_at": "2024-10-12T18:15:16"
+    "created_at": "2024-10-12T20:44:57"
   },
   {
     "id": 283,
@@ -3676,7 +3676,7 @@
     "stock_quantity": 5,
     "weight": 14.065,
     "is_active": true,
-    "created_at": "2025-07-12T02:19:06"
+    "created_at": "2025-07-12T04:48:47"
   },
   {
     "id": 284,
@@ -3689,7 +3689,7 @@
     "stock_quantity": 4,
     "weight": 32.399,
     "is_active": true,
-    "created_at": "2025-04-02T12:59:02"
+    "created_at": "2025-04-02T15:28:43"
   },
   {
     "id": 285,
@@ -3702,7 +3702,7 @@
     "stock_quantity": 2,
     "weight": 14.061,
     "is_active": false,
-    "created_at": "2025-07-31T23:58:56"
+    "created_at": "2025-08-01T02:28:37"
   },
   {
     "id": 286,
@@ -3715,7 +3715,7 @@
     "stock_quantity": 9,
     "weight": 12.532,
     "is_active": true,
-    "created_at": "2025-01-02T05:37:31"
+    "created_at": "2025-01-02T08:07:12"
   },
   {
     "id": 287,
@@ -3728,7 +3728,7 @@
     "stock_quantity": 6,
     "weight": 24.036,
     "is_active": true,
-    "created_at": "2024-08-07T17:00:54"
+    "created_at": "2024-08-07T19:30:35"
   },
   {
     "id": 288,
@@ -3741,7 +3741,7 @@
     "stock_quantity": 6,
     "weight": 19.48,
     "is_active": false,
-    "created_at": "2025-04-15T05:22:01"
+    "created_at": "2025-04-15T07:51:42"
   },
   {
     "id": 289,
@@ -3754,7 +3754,7 @@
     "stock_quantity": 5,
     "weight": 3.024,
     "is_active": true,
-    "created_at": "2025-03-31T17:42:15"
+    "created_at": "2025-03-31T20:11:56"
   },
   {
     "id": 290,
@@ -3767,7 +3767,7 @@
     "stock_quantity": 4,
     "weight": 48.702,
     "is_active": true,
-    "created_at": "2025-03-07T07:14:43"
+    "created_at": "2025-03-07T09:44:24"
   },
   {
     "id": 291,
@@ -3780,7 +3780,7 @@
     "stock_quantity": 1,
     "weight": 38.226,
     "is_active": false,
-    "created_at": "2025-02-01T12:48:28"
+    "created_at": "2025-02-01T15:18:09"
   },
   {
     "id": 292,
@@ -3793,7 +3793,7 @@
     "stock_quantity": 6,
     "weight": 46.767,
     "is_active": true,
-    "created_at": "2024-10-09T18:05:15"
+    "created_at": "2024-10-09T20:34:56"
   },
   {
     "id": 293,
@@ -3806,7 +3806,7 @@
     "stock_quantity": 6,
     "weight": 45.708,
     "is_active": true,
-    "created_at": "2025-07-01T21:54:54"
+    "created_at": "2025-07-02T00:24:35"
   },
   {
     "id": 294,
@@ -3819,7 +3819,7 @@
     "stock_quantity": 10,
     "weight": 7.191,
     "is_active": true,
-    "created_at": "2025-07-24T17:16:05"
+    "created_at": "2025-07-24T19:45:46"
   },
   {
     "id": 295,
@@ -3832,7 +3832,7 @@
     "stock_quantity": 1,
     "weight": 4.604,
     "is_active": true,
-    "created_at": "2025-05-26T01:44:40"
+    "created_at": "2025-05-26T04:14:21"
   },
   {
     "id": 296,
@@ -3845,7 +3845,7 @@
     "stock_quantity": 1,
     "weight": 16.654,
     "is_active": false,
-    "created_at": "2025-07-21T17:03:27"
+    "created_at": "2025-07-21T19:33:08"
   },
   {
     "id": 297,
@@ -3858,7 +3858,7 @@
     "stock_quantity": 3,
     "weight": 45.947,
     "is_active": false,
-    "created_at": "2024-10-30T13:34:06"
+    "created_at": "2024-10-30T16:03:47"
   },
   {
     "id": 298,
@@ -3871,7 +3871,7 @@
     "stock_quantity": 3,
     "weight": 38.741,
     "is_active": false,
-    "created_at": "2025-03-15T02:50:44"
+    "created_at": "2025-03-15T05:20:25"
   },
   {
     "id": 299,
@@ -3884,7 +3884,7 @@
     "stock_quantity": 6,
     "weight": 35.256,
     "is_active": false,
-    "created_at": "2024-08-24T03:55:23"
+    "created_at": "2024-08-24T06:25:04"
   },
   {
     "id": 300,
@@ -3897,6 +3897,6 @@
     "stock_quantity": 6,
     "weight": 6.909,
     "is_active": true,
-    "created_at": "2025-01-21T13:19:57"
+    "created_at": "2025-01-21T15:49:38"
   }
 ]
