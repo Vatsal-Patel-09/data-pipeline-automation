@@ -383,7 +383,7 @@
 #     cli()
 
 
-#no emoji file as the emogi package is not available in this environment
+#no emoji file as the emogi package is not available in this environment and the emojis were cause=ing issues in command prompt 
 #!/usr/bin/env python3
 """
 E-commerce Data Pipeline Automation System

@@ -2,6 +2,9 @@
 
 A comprehensive data engineering solution that automates the generation, transformation, and distribution of realistic e-commerce data across multiple platforms while maintaining referential integrity.
 
+## Demo video 
+https://www.loom.com/share/d52908593c834a7a878a1c5d30a54eb3?sid=e54bf7d4-832c-4975-871a-fb75a55a7893
+
 ## 🎯 Project Overview
 
 This system demonstrates advanced data pipeline capabilities by:
