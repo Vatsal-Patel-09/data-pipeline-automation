@@ -1,0 +1,278 @@
+{
+  "database": {
+    "name": "lending_management",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "loan_products",
+      "description": "Master catalog of loan products and pricing rules",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "code", "type": "string", "max_length": 50, "unique": true},
+        {"name": "name", "type": "string", "max_length": 200},
+        {"name": "product_type", "type": "enum", "values": ["personal", "business", "vehicle", "mortgage", "salaried", "overdraft"]},
+        {"name": "interest_rate_annual", "type": "decimal", "precision": 5, "scale": 3},
+        {"name": "processing_fee_percent", "type": "decimal", "precision": 5, "scale": 2},
+        {"name": "prepayment_fee_percent", "type": "decimal", "precision": 5, "scale": 2, "nullable": true},
+        {"name": "late_fee_fixed", "type": "decimal", "precision": 10, "scale": 2, "nullable": true},
+        {"name": "min_tenure_months", "type": "integer"},
+        {"name": "max_tenure_months", "type": "integer"},
+        {"name": "is_active", "type": "boolean", "default": true},
+        {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "sample_size": 20,
+      "output_format": "json"
+    },
+
+    {
+      "name": "customers",
+      "description": "Customer demographic & identity information",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "external_customer_id", "type": "string", "max_length": 50, "unique": true},
+        {"name": "full_name", "type": "string", "max_length": 200},
+        {"name": "email", "type": "string", "max_length": 255, "nullable": true},
+        {"name": "phone", "type": "string", "max_length": 20},
+        {"name": "gender", "type": "enum", "values": ["male", "female", "other"], "nullable": true},
+        {"name": "date_of_birth", "type": "date", "nullable": true},
+        {"name": "pan_number", "type": "string", "max_length": 10, "nullable": true},
+        {"name": "aadhaar_masked", "type": "string", "max_length": 12, "nullable": true},
+        {"name": "residence_city", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "residence_state", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "employment_type", "type": "enum", "values": ["salaried", "self_employed", "business", "unemployed", "other"], "nullable": true},
+        {"name": "annual_income", "type": "decimal", "precision": 12, "scale": 2, "nullable": true},
+        {"name": "registration_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "status", "type": "enum", "values": ["active", "inactive", "blacklisted"], "default": "active"}
+      ],
+      "sample_size": 20000,
+      "output_format": "csv"
+    },
+
+    {
+      "name": "cibil_reports",
+      "description": "CIBIL / credit bureau snapshots (one or more per customer over time)",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "customer_id", "type": "integer", "foreign_key": "customers.id"},
+        {"name": "bureau_name", "type": "string", "max_length": 50, "default": "CIBIL"},
+        {"name": "report_date", "type": "date"},
+        {"name": "cibil_score", "type": "integer"},
+        {"name": "credit_accounts_count", "type": "integer"},
+        {"name": "total_sanctioned_amount", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "total_outstanding_amount", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "nem_flag", "type": "boolean", "default": false},
+        {"name": "raw_report_json", "type": "json", "nullable": true}
+      ],
+      "sample_size": 20000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "loan_applications",
+      "description": "Applications submitted by customers for loan products",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "application_reference", "type": "string", "max_length": 50, "unique": true},
+        {"name": "customer_id", "type": "integer", "foreign_key": "customers.id"},
+        {"name": "loan_product_id", "type": "integer", "foreign_key": "loan_products.id"},
+        {"name": "application_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "loan_amount_requested", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "tenure_months_requested", "type": "integer"},
+        {"name": "status", "type": "enum", "values": ["submitted", "in_review", "approved", "rejected", "withdrawn"], "default": "submitted"},
+        {"name": "decision_date", "type": "timestamp", "nullable": true},
+        {"name": "approved_amount", "type": "decimal", "precision": 14, "scale": 2, "nullable": true},
+        {"name": "approved_tenure_months", "type": "integer", "nullable": true},
+        {"name": "rejection_reason", "type": "string", "max_length": 500, "nullable": true},
+        {"name": "underwriting_score", "type": "decimal", "precision": 6, "scale": 3, "nullable": true},
+        {"name": "processing_fee_charged", "type": "decimal", "precision": 12, "scale": 2, "nullable": true}
+      ],
+      "sample_size": 25000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "loan_accounts",
+      "description": "Active or historical loan accounts created after approvals",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "loan_application_id", "type": "integer", "foreign_key": "loan_applications.id", "unique": true},
+        {"name": "account_number", "type": "string", "max_length": 30, "unique": true},
+        {"name": "customer_id", "type": "integer", "foreign_key": "customers.id"},
+        {"name": "loan_product_id", "type": "integer", "foreign_key": "loan_products.id"},
+        {"name": "loan_amount_sanctioned", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "disbursal_date", "type": "date"},
+        {"name": "start_date", "type": "date"},
+        {"name": "maturity_date", "type": "date"},
+        {"name": "outstanding_principal", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "outstanding_interest", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "status", "type": "enum", "values": ["active", "closed", "written_off", "defaulted"], "default": "active"},
+        {"name": "installment_cycle", "type": "enum", "values": ["monthly", "weekly", "fortnightly"], "default": "monthly"},
+        {"name": "last_statement_date", "type": "date", "nullable": true},
+        {"name": "amortization_type", "type": "enum", "values": ["annuity", "bullet", "reducing_balance"], "default": "annuity"}
+      ],
+      "sample_size": 30000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "payment_schedules",
+      "description": "Amortization / EMI schedule rows for each loan account",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "loan_account_id", "type": "integer", "foreign_key": "loan_accounts.id"},
+        {"name": "installment_number", "type": "integer"},
+        {"name": "due_date", "type": "date"},
+        {"name": "principal_due", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "interest_due", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "fee_due", "type": "decimal", "precision": 12, "scale": 2, "default": 0},
+        {"name": "late_fee_due", "type": "decimal", "precision": 12, "scale": 2, "default": 0},
+        {"name": "total_due", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "status", "type": "enum", "values": ["pending", "paid", "overdue", "waived"], "default": "pending"},
+        {"name": "paid_date", "type": "date", "nullable": true},
+        {"name": "paid_principal", "type": "decimal", "precision": 14, "scale": 2, "default": 0},
+        {"name": "paid_interest", "type": "decimal", "precision": 14, "scale": 2, "default": 0},
+        {"name": "paid_fee", "type": "decimal", "precision": 12, "scale": 2, "default": 0},
+        {"name": "paid_late_fee", "type": "decimal", "precision": 12, "scale": 2, "default": 0}
+      ],
+      "sample_size": 100000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "transactions",
+      "description": "Payment/settlement attempts tied to schedule rows or ad-hoc payments",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "payment_schedule_id", "type": "bigint", "foreign_key": "payment_schedules.id", "nullable": true},
+        {"name": "loan_account_id", "type": "integer", "foreign_key": "loan_accounts.id"},
+        {"name": "transaction_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "amount", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "amount_principal", "type": "decimal", "precision": 14, "scale": 2, "nullable": true},
+        {"name": "amount_interest", "type": "decimal", "precision": 14, "scale": 2, "nullable": true},
+        {"name": "amount_fee", "type": "decimal", "precision": 12, "scale": 2, "nullable": true},
+        {"name": "amount_late_fee", "type": "decimal", "precision": 12, "scale": 2, "nullable": true},
+        {"name": "payment_mode", "type": "enum", "values": ["UPI", "NEFT", "RTGS", "IMPS", "CARD", "AUTO_DEBIT", "CHEQUE", "CASH"]},
+        {"name": "transaction_status", "type": "enum", "values": ["success", "failed", "pending"], "default": "success"},
+        {"name": "bank_reference", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "gateway", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "notes", "type": "string", "max_length": 500, "nullable": true}
+      ],
+      "sample_size": 100000,
+      "output_format": "api"
+    },
+
+    {
+      "name": "collection_agents",
+      "description": "Agents / partners responsible for collections and recovery",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "agent_code", "type": "string", "max_length": 50, "unique": true},
+        {"name": "name", "type": "string", "max_length": 200},
+        {"name": "phone", "type": "string", "max_length": 20, "nullable": true},
+        {"name": "email", "type": "string", "max_length": 255, "nullable": true},
+        {"name": "region", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "is_active", "type": "boolean", "default": true}
+      ],
+      "sample_size": 500,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "collections",
+      "description": "Collection / recovery events (agent / agency-driven payments or adjustments)",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "loan_account_id", "type": "integer", "foreign_key": "loan_accounts.id"},
+        {"name": "collection_agent_id", "type": "integer", "foreign_key": "collection_agents.id", "nullable": true},
+        {"name": "collection_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "amount_collected", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "collection_mode", "type": "enum", "values": ["bank_transfer", "card", "cheque", "cash"]},
+        {"name": "remarks", "type": "string", "max_length": 500, "nullable": true},
+        {"name": "is_reconciled", "type": "boolean", "default": false}
+      ],
+      "sample_size": 20000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "charges",
+      "description": "Charges, fees, adjustments posted to loan accounts (late fees, processing, reversals)",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "loan_account_id", "type": "integer", "foreign_key": "loan_accounts.id"},
+        {"name": "charge_type", "type": "enum", "values": ["processing_fee", "late_fee", "prepayment_fee", "service_fee", "reversal", "tax"]},
+        {"name": "amount", "type": "decimal", "precision": 12, "scale": 2},
+        {"name": "tax_amount", "type": "decimal", "precision": 12, "scale": 2, "default": 0},
+        {"name": "charge_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "posted_by", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "notes", "type": "string", "max_length": 500, "nullable": true}
+      ],
+      "sample_size": 15000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "write_offs",
+      "description": "Records of amounts written off against accounts",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "loan_account_id", "type": "integer", "foreign_key": "loan_accounts.id"},
+        {"name": "write_off_date", "type": "date"},
+        {"name": "principal_written_off", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "interest_written_off", "type": "decimal", "precision": 14, "scale": 2, "default": 0},
+        {"name": "remarks", "type": "string", "max_length": 500, "nullable": true}
+      ],
+      "sample_size": 2000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "customer_notes",
+      "description": "Operational notes for customers (calls, promises to pay, escalations)",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "customer_id", "type": "integer", "foreign_key": "customers.id"},
+        {"name": "note_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "author", "type": "string", "max_length": 100},
+        {"name": "note_type", "type": "enum", "values": ["call", "email", "visit", "promise_to_pay", "escalation"]},
+        {"name": "note_text", "type": "text"}
+      ],
+      "sample_size": 40000,
+      "output_format": "csv"
+    },
+
+    {
+      "name": "agent_performance",
+      "description": "Aggregated performance metrics per collection agent (materialized-like table)",
+      "fields": [
+        {"name": "id", "type": "integer", "primary_key": true, "auto_increment": true},
+        {"name": "collection_agent_id", "type": "integer", "foreign_key": "collection_agents.id"},
+        {"name": "period_start", "type": "date"},
+        {"name": "period_end", "type": "date"},
+        {"name": "amount_collected", "type": "decimal", "precision": 14, "scale": 2},
+        {"name": "calls_made", "type": "integer"},
+        {"name": "promises_to_pay", "type": "integer"},
+        {"name": "recovery_rate_percent", "type": "decimal", "precision": 5, "scale": 2}
+      ],
+      "sample_size": 5000,
+      "output_format": "postgres"
+    },
+
+    {
+      "name": "system_audit_log",
+      "description": "Generic audit logs for key actions (payments, charge posts, status changes)",
+      "fields": [
+        {"name": "id", "type": "bigint", "primary_key": true, "auto_increment": true},
+        {"name": "entity_name", "type": "string", "max_length": 100},
+        {"name": "entity_id", "type": "string", "max_length": 100},
+        {"name": "action", "type": "string", "max_length": 100},
+        {"name": "performed_by", "type": "string", "max_length": 100, "nullable": true},
+        {"name": "performed_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
+        {"name": "metadata", "type": "json", "nullable": true}
+      ],
+      "sample_size": 50000,
+      "output_format": "postgres"
+    }
+  ]
+}
