@@ -1,0 +1,317 @@
+PS C:\vatsal\Internship\data-pipeline-automation> venv\Scripts\Activate.ps1                                                      
+(venv) PS C:\vatsal\Internship\data-pipeline-automation> python data_pipeline.py --model ecommerce_model.json --env .env
+2025-08-11 09:31:40,426 - INFO - Data Pipeline initialized with model: ecommerce_model.json
+2025-08-11 09:31:40,427 - INFO - ================================================================================
+2025-08-11 09:31:40,427 - INFO - STARTING COMPLETE DATA PIPELINE EXECUTION
+2025-08-11 09:31:40,427 - INFO - ================================================================================
+2025-08-11 09:31:40,428 - INFO - 
+STEP 1: Creating Database Schema...
+2025-08-11 09:31:40,428 - INFO - --------------------------------------------------
+2025-08-11 09:31:41,960 - INFO - Database connection established successfully
+2025-08-11 09:31:41,962 - INFO - Loaded data model from ecommerce_model.json
+2025-08-11 09:31:42,124 - INFO - Started database transaction
+2025-08-11 09:31:42,483 - INFO - Dropped table: reviews
+2025-08-11 09:31:42,665 - INFO - Dropped table: order_items
+2025-08-11 09:31:42,960 - INFO - Dropped table: orders
+2025-08-11 09:31:43,098 - INFO - Dropped table: products
+2025-08-11 09:31:43,266 - INFO - Dropped table: users
+2025-08-11 09:31:43,358 - INFO - Dropped table: categories
+2025-08-11 09:31:43,359 - INFO - Creating table: categories
+2025-08-11 09:31:43,670 - INFO - ✅ Created table: categories
+2025-08-11 09:31:43,671 - INFO - Creating table: users
+2025-08-11 09:31:43,828 - INFO - ✅ Created table: users
+2025-08-11 09:31:43,829 - INFO - Creating table: products
+2025-08-11 09:31:43,938 - INFO - ✅ Created table: products
+2025-08-11 09:31:43,939 - INFO - Creating table: orders
+2025-08-11 09:31:44,096 - INFO - ✅ Created table: orders
+2025-08-11 09:31:44,110 - INFO - Creating table: order_items
+2025-08-11 09:31:44,236 - INFO - ✅ Created table: order_items
+2025-08-11 09:31:44,237 - INFO - Creating table: reviews
+2025-08-11 09:31:44,345 - INFO - ✅ Created table: reviews
+2025-08-11 09:31:44,346 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,415 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:44,416 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,493 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:44,494 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,603 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:44,604 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,657 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:44,658 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,708 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:44,710 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,783 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:44,784 - INFO - Adding foreign key constraint
+2025-08-11 09:31:44,840 - INFO - ✅ Added foreign key constraint
+2025-08-11 09:31:45,029 - INFO - ✅ Database schema created successfully!
+2025-08-11 09:31:45,031 - INFO - Database connection closed
+2025-08-11 09:31:45,032 - INFO - SUCCESS: Database schema created successfully
+2025-08-11 09:31:45,033 - INFO -
+STEP 2: Generating Realistic Data...
+2025-08-11 09:31:45,034 - INFO - --------------------------------------------------
+2025-08-11 09:31:45,035 - INFO - Starting data generation for all tables...
+2025-08-11 09:31:45,036 - INFO - Generating 400 records for table: categories
+2025-08-11 09:31:45,346 - INFO - ✅ Generated 400 records for categories
+2025-08-11 09:31:45,347 - INFO - Generating 10000 records for table: users
+2025-08-11 09:31:52,557 - INFO - ✅ Generated 10000 records for users
+2025-08-11 09:31:52,557 - INFO - Generating 15000 records for table: orders
+2025-08-11 09:32:28,093 - INFO - ✅ Generated 15000 records for orders
+2025-08-11 09:32:28,093 - INFO - Generating 20000 records for table: products
+2025-08-11 09:32:36,690 - INFO - ✅ Generated 20000 records for products
+2025-08-11 09:32:36,691 - INFO - Generating 40000 records for table: order_items
+2025-08-11 09:36:49,257 - INFO - ✅ Generated 40000 records for order_items
+2025-08-11 09:36:49,258 - INFO - Generating 15000 records for table: reviews
+2025-08-11 09:38:22,634 - INFO - ✅ Generated 15000 records for reviews
+2025-08-11 09:38:22,634 - INFO - ✅ Data generation completed for all tables!
+2025-08-11 09:38:22,634 - INFO - SUCCESS: Data generation completed successfully     
+2025-08-11 09:38:22,635 - INFO -
+STEP 3: Processing Multi-Format Outputs...
+2025-08-11 09:38:22,635 - INFO - --------------------------------------------------  
+2025-08-11 09:38:22,635 - INFO - Processing all data outputs...
+2025-08-11 09:38:22,635 - INFO - 🔗 Foreign Key Dependency Analysis:
+2025-08-11 09:32:36,691 - INFO - Generating 40000 records for table: order_items
+2025-08-11 09:36:49,257 - INFO - ✅ Generated 40000 records for order_items
+2025-08-11 09:36:49,258 - INFO - Generating 15000 records for table: reviews
+2025-08-11 09:38:22,634 - INFO - ✅ Generated 15000 records for reviews
+2025-08-11 09:38:22,634 - INFO - ✅ Data generation completed for all tables!
+2025-08-11 09:38:22,634 - INFO - SUCCESS: Data generation completed successfully
+2025-08-11 09:38:22,635 - INFO -
+STEP 3: Processing Multi-Format Outputs...
+2025-08-11 09:38:22,635 - INFO - --------------------------------------------------
+2025-08-11 09:38:22,635 - INFO - Processing all data outputs...
+2025-08-11 09:38:22,635 - INFO - 🔗 Foreign Key Dependency Analysis:
+2025-08-11 09:38:22,634 - INFO - ✅ Generated 15000 records for reviews
+2025-08-11 09:38:22,634 - INFO - ✅ Data generation completed for all tables!
+2025-08-11 09:38:22,634 - INFO - SUCCESS: Data generation completed successfully
+2025-08-11 09:38:22,635 - INFO -
+STEP 3: Processing Multi-Format Outputs...
+2025-08-11 09:38:22,635 - INFO - --------------------------------------------------
+2025-08-11 09:38:22,635 - INFO - Processing all data outputs...
+2025-08-11 09:38:22,635 - INFO - 🔗 Foreign Key Dependency Analysis:
+2025-08-11 09:38:22,634 - INFO - ✅ Data generation completed for all tables!
+2025-08-11 09:38:22,634 - INFO - SUCCESS: Data generation completed successfully
+2025-08-11 09:38:22,635 - INFO -
+STEP 3: Processing Multi-Format Outputs...
+2025-08-11 09:38:22,635 - INFO - --------------------------------------------------
+2025-08-11 09:38:22,635 - INFO - Processing all data outputs...
+2025-08-11 09:38:22,635 - INFO - 🔗 Foreign Key Dependency Analysis:
+STEP 3: Processing Multi-Format Outputs...
+2025-08-11 09:38:22,635 - INFO - --------------------------------------------------
+2025-08-11 09:38:22,635 - INFO - Processing all data outputs...
+2025-08-11 09:38:22,635 - INFO - 🔗 Foreign Key Dependency Analysis:
+2025-08-11 09:38:22,636 - INFO -    📋 products: json + PostgreSQL (for FK integrity)
+2025-08-11 09:38:22,635 - INFO - 🔗 Foreign Key Dependency Analysis:
+2025-08-11 09:38:22,636 - INFO -    📋 products: json + PostgreSQL (for FK integrity)
+2025-08-11 09:38:22,636 - INFO -    📋 products: json + PostgreSQL (for FK integrity)
+2025-08-11 09:38:22,636 - INFO -    📋 orders: api
+2025-08-11 09:38:22,636 - INFO -    📋 categories: postgresql
+2025-08-11 09:38:22,636 - INFO -    📋 order_items: postgresql
+2025-08-11 09:38:22,637 - INFO -    📋 users: csv + PostgreSQL (for FK integrity)
+2025-08-11 09:38:22,637 - INFO -
+🐘 PHASE 1: PostgreSQL Tables (Dependencies First)
+2025-08-11 09:38:22,638 - INFO - 🔄 Processing categories for PostgreSQL...
+2025-08-11 09:38:22,638 - INFO - Inserting 400 records into PostgreSQL table: categories
+2025-08-11 09:38:23,445 - INFO - Cleared existing data from categories
+2025-08-11 09:38:49,074 - INFO - ✅ Successfully inserted 400 records into categories
+2025-08-11 09:38:49,076 - INFO - 🔄 Processing users for PostgreSQL...
+2025-08-11 09:38:49,077 - INFO - Inserting 10000 records into PostgreSQL table: users
+2025-08-11 09:38:49,714 - INFO - Cleared existing data from users
+2025-08-11 09:53:13,383 - INFO - ✅ Successfully inserted 10000 records into users
+2025-08-11 09:53:13,392 - INFO - 🔄 Processing orders for PostgreSQL...
+2025-08-11 09:53:13,393 - INFO - Inserting 15000 records into PostgreSQL table: orders
+2025-08-11 09:53:14,194 - INFO - Cleared existing data from orders
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 09:38:23,445 - INFO - Cleared existing data from categories
+2025-08-11 09:38:49,074 - INFO - ✅ Successfully inserted 400 records into categories
+2025-08-11 09:38:49,076 - INFO - 🔄 Processing users for PostgreSQL...
+2025-08-11 09:38:49,077 - INFO - Inserting 10000 records into PostgreSQL table: users
+2025-08-11 09:38:49,714 - INFO - Cleared existing data from users
+2025-08-11 09:53:13,383 - INFO - ✅ Successfully inserted 10000 records into users
+2025-08-11 09:53:13,392 - INFO - 🔄 Processing orders for PostgreSQL...
+2025-08-11 09:53:13,393 - INFO - Inserting 15000 records into PostgreSQL table: orders
+2025-08-11 09:53:14,194 - INFO - Cleared existing data from orders
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 10:11:00,280 - INFO - Inserting 20000 records into PostgreSQL table: products
+2025-08-11 10:11:01,203 - INFO - Cleared existing data from products
+2025-08-11 10:35:32,732 - INFO - ✅ Successfully inserted 20000 records into products
+2025-08-11 10:35:32,974 - INFO - 🔄 Processing order_items for PostgreSQL...
+2025-08-11 10:35:32,975 - INFO - Inserting 40000 records into PostgreSQL table: order_items
+2025-08-11 10:35:33,828 - INFO - Cleared existing data from order_items
+2025-08-11 09:38:23,445 - INFO - Cleared existing data from categories
+2025-08-11 09:38:49,074 - INFO - ✅ Successfully inserted 400 records into categories
+2025-08-11 09:38:49,076 - INFO - 🔄 Processing users for PostgreSQL...
+2025-08-11 09:38:49,077 - INFO - Inserting 10000 records into PostgreSQL table: users
+2025-08-11 09:38:49,714 - INFO - Cleared existing data from users
+2025-08-11 09:53:13,383 - INFO - ✅ Successfully inserted 10000 records into users
+2025-08-11 09:53:13,392 - INFO - 🔄 Processing orders for PostgreSQL...
+2025-08-11 09:53:13,393 - INFO - Inserting 15000 records into PostgreSQL table: orders
+2025-08-11 09:53:14,194 - INFO - Cleared existing data from orders
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 10:11:00,280 - INFO - Inserting 20000 records into PostgreSQL table: products
+2025-08-11 10:11:01,203 - INFO - Cleared existing data from products
+2025-08-11 10:35:32,732 - INFO - ✅ Successfully inserted 20000 records into products
+2025-08-11 10:35:32,974 - INFO - 🔄 Processing order_items for PostgreSQL...
+2025-08-11 10:35:32,975 - INFO - Inserting 40000 records into PostgreSQL table: order_items
+2025-08-11 10:35:33,828 - INFO - Cleared existing data from order_items
+2025-08-11 09:38:23,445 - INFO - Cleared existing data from categories
+2025-08-11 09:38:49,074 - INFO - ✅ Successfully inserted 400 records into categories
+2025-08-11 09:38:49,076 - INFO - 🔄 Processing users for PostgreSQL...
+2025-08-11 09:38:49,077 - INFO - Inserting 10000 records into PostgreSQL table: users
+2025-08-11 09:38:49,714 - INFO - Cleared existing data from users
+2025-08-11 09:53:13,383 - INFO - ✅ Successfully inserted 10000 records into users
+2025-08-11 09:53:13,392 - INFO - 🔄 Processing orders for PostgreSQL...
+2025-08-11 09:53:13,393 - INFO - Inserting 15000 records into PostgreSQL table: orders
+2025-08-11 09:53:14,194 - INFO - Cleared existing data from orders
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 10:11:00,280 - INFO - Inserting 20000 records into PostgreSQL table: products
+2025-08-11 10:11:01,203 - INFO - Cleared existing data from products
+2025-08-11 10:35:32,732 - INFO - ✅ Successfully inserted 20000 records into products
+2025-08-11 10:35:32,974 - INFO - 🔄 Processing order_items for PostgreSQL...
+2025-08-11 10:35:32,975 - INFO - Inserting 40000 records into PostgreSQL table: order_items
+2025-08-11 10:35:33,828 - INFO - Cleared existing data from order_items
+2025-08-11 09:38:23,445 - INFO - Cleared existing data from categories
+2025-08-11 09:38:49,074 - INFO - ✅ Successfully inserted 400 records into categories
+2025-08-11 09:38:49,076 - INFO - 🔄 Processing users for PostgreSQL...
+2025-08-11 09:38:49,077 - INFO - Inserting 10000 records into PostgreSQL table: users
+2025-08-11 09:38:49,714 - INFO - Cleared existing data from users
+2025-08-11 09:53:13,383 - INFO - ✅ Successfully inserted 10000 records into users
+2025-08-11 09:53:13,392 - INFO - 🔄 Processing orders for PostgreSQL...
+2025-08-11 09:53:13,393 - INFO - Inserting 15000 records into PostgreSQL table: orders
+2025-08-11 09:53:14,194 - INFO - Cleared existing data from orders
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 09:53:13,383 - INFO - ✅ Successfully inserted 10000 records into users
+2025-08-11 09:53:13,392 - INFO - 🔄 Processing orders for PostgreSQL...
+2025-08-11 09:53:13,393 - INFO - Inserting 15000 records into PostgreSQL table: orders
+2025-08-11 09:53:14,194 - INFO - Cleared existing data from orders
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 10:11:00,263 - INFO - ✅ Successfully inserted 15000 records into orders
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 10:11:00,279 - INFO - 🔄 Processing products for PostgreSQL...
+2025-08-11 10:11:00,280 - INFO - Inserting 20000 records into PostgreSQL table: products
+2025-08-11 10:11:01,203 - INFO - Cleared existing data from products
+2025-08-11 10:35:32,732 - INFO - ✅ Successfully inserted 20000 records into products
+2025-08-11 10:35:32,974 - INFO - 🔄 Processing order_items for PostgreSQL...
+2025-08-11 10:35:32,975 - INFO - Inserting 40000 records into PostgreSQL table: order_items
+2025-08-11 10:35:33,828 - INFO - Cleared existing data from order_items
+2025-08-11 11:17:10,587 - INFO - ✅ Successfully inserted 40000 records into order_items
+2025-08-11 11:17:10,609 - INFO -
+📁 PHASE 2: Primary Destinations (Files & Others)
+2025-08-11 11:17:10,610 - INFO - 🔄 Processing categories -> postgresql format        
+2025-08-11 11:17:10,611 - INFO - 🔄 Processing users -> csv format
+2025-08-11 11:17:10,612 - INFO - Exporting 10000 records to CSV: exports/csv/users.csv
+2025-08-11 11:17:10,984 - INFO - ✅ Successfully exported 10000 records to exports/csv/users.csv
+2025-08-11 11:17:10,993 - INFO - 🔄 Processing orders -> api format
+2025-08-11 11:17:10,994 - INFO - 🔄 Processing products -> json format
+2025-08-11 11:17:10,994 - INFO - Exporting 20000 records to JSON: exports/json/products.json
+2025-08-11 11:17:12,440 - INFO - ✅ Successfully exported 20000 records to exports/json/products.json
+2025-08-11 11:17:12,447 - INFO - 🔄 Processing order_items -> postgresql format
+2025-08-11 11:17:12,447 - INFO - 🔄 Processing reviews -> csv format
+2025-08-11 11:17:12,447 - INFO - Exporting 15000 records to CSV: exports/csv/reviews.csv
+2025-08-11 11:17:13,076 - INFO - ✅ Successfully exported 15000 records to exports/csv/reviews.csv
+2025-08-11 11:17:13,084 - INFO - 
+✅ All data outputs processed successfully!
+2025-08-11 11:17:13,085 - INFO - SUCCESS: All outputs processed successfully
+2025-08-11 11:17:13,085 - INFO -
+STEP 4: Pipeline Execution Summary
+2025-08-11 11:17:13,086 - INFO - --------------------------------------------------
+2025-08-11 11:17:13,086 - INFO -
+PIPELINE EXECUTION SUMMARY:
+2025-08-11 11:17:13,087 - INFO - +--------------------------------------------------+
+2025-08-11 11:17:13,087 - INFO - |               DATA GENERATION REPORT             |
+2025-08-11 11:17:13,087 - INFO - +--------------------------------------------------+
+2025-08-11 11:17:13,089 - INFO - | categories         400 records -> PostgreSQL DB
+2025-08-11 11:17:13,090 - INFO - | users            10000 records -> CSV File
+2025-08-11 11:17:13,090 - INFO - | orders           15000 records -> API Endpoint
+2025-08-11 11:17:13,091 - INFO - | products         20000 records -> JSON File
+2025-08-11 11:17:13,091 - INFO - | order_items      40000 records -> PostgreSQL DB
+2025-08-11 11:17:13,092 - INFO - | reviews          15000 records -> CSV File
+2025-08-11 11:17:13,092 - INFO - +--------------------------------------------------+
+2025-08-11 11:17:13,092 - INFO - | TOTAL           100400 records generated       |
+2025-08-11 11:17:13,093 - INFO - +--------------------------------------------------+
+2025-08-11 11:17:13,094 - INFO -
+OUTPUT LOCATIONS:
+2025-08-11 11:17:13,094 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,095 - INFO - |                    FILE SYSTEM OUTPUTS                     |
+2025-08-11 11:17:13,095 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,096 - INFO - | CSV Files:   exports/csv/users.csv (150 records)      |
+2025-08-11 11:17:13,098 - INFO - |              exports/csv/reviews.csv (400 records)    |
+2025-08-11 11:17:13,099 - INFO - | JSON Files:  exports/json/products.json (300 records) |
+2025-08-11 11:17:13,100 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,101 - INFO - |                  DATABASE OUTPUTS                        |
+2025-08-11 11:17:13,101 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,102 - INFO - | PostgreSQL:  categories (25 records)                  |
+2025-08-11 11:17:13,102 - INFO - |              users (150 records) - for FK integrity   |
+2025-08-11 11:17:13,103 - INFO - |              products (300 records) - for FK integrity|
+2025-08-11 11:17:13,103 - INFO - |              orders (200 records) - for API           |
+2025-08-11 11:17:13,103 - INFO - |              order_items (500 records)                |
+2025-08-11 11:17:13,104 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,104 - INFO -
+API SERVER INFORMATION:
+2025-08-11 11:17:13,105 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,105 - INFO - | Endpoint:     http://localhost:8000/orders            |
+2025-08-11 11:17:13,106 - INFO - | Documentation: http://localhost:8000/docs             |
+2025-08-11 11:17:13,107 - INFO - | Health Check: http://localhost:8000/health            |
+2025-08-11 11:17:13,111 - INFO - | Data Ready:   200 orders available for API serving    |
+2025-08-11 11:17:13,112 - INFO - +------------------------------------------------------------+
+2025-08-11 11:17:13,114 - INFO -
+================================================================================
+2025-08-11 11:17:13,114 - INFO - SUCCESS: COMPLETE DATA PIPELINE EXECUTION FINISHED!
+2025-08-11 11:17:13,114 - INFO - ================================================================================
+
+SUCCESS: Complete data pipeline execution finished successfully!
+Ready to start API server: python api_server.py --model ecommerce_model.json --env .env
+
+
+ python data_pipeline.py export-db --env .env --output exports/database_dump.sql                                         
+2025-08-11 12:10:05,459 - INFO - Data Pipeline initialized with model: ecommerce_model.json
+2025-08-11 12:10:05,460 - INFO - ================================================================================
+2025-08-11 12:10:05,460 - INFO - STARTING DATABASE EXPORT
+2025-08-11 12:10:05,460 - INFO - ================================================================================
+2025-08-11 12:10:05,461 - INFO - Generating SQL dump using Python database connection...
+2025-08-11 12:10:06,436 - INFO - Found 6 tables to export: categories, order_items, orders, products, reviews, users
+2025-08-11 12:10:06,436 - INFO - Exporting table: categories
+2025-08-11 12:10:07,237 - INFO - Exporting table: order_items
+2025-08-11 12:10:11,883 - INFO - Exporting table: orders
+2025-08-11 12:10:16,994 - INFO - Exporting table: products
+2025-08-11 12:10:47,374 - INFO - Exporting table: reviews
+2025-08-11 12:10:47,551 - INFO - Exporting table: users
+2025-08-11 12:10:57,297 - INFO - SUCCESS: Database export completed successfully
+2025-08-11 12:10:57,297 - INFO - Export file: exports/database_dump.sql
+2025-08-11 12:10:57,297 - INFO - File size: 34,425,588 bytes
+2025-08-11 12:10:57,298 - INFO - ================================================================================
+2025-08-11 12:10:57,298 - INFO - SUCCESS: DATABASE EXPORT COMPLETED!
+2025-08-11 12:10:57,298 - INFO - ================================================================================
+
+SUCCESS: Database export completed successfully!
+Export saved to: exports/database_dump.sql
+
+(venv) PS C:\vatsal\Internship\data-pipeline-automation> python api_server.py --model ecommerce_model.json --env .env --port 8000
+C:\vatsal\Internship\data-pipeline-automation\api_server.py:101: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+
+  @app.on_event("startup")
+INFO:__main__:Loaded API configuration from ecommerce_model.json
+INFO:__main__:✅ Configuration loaded from ecommerce_model.json
+INFO:__main__:============================================================
+INFO:__main__:🚀 STARTING E-COMMERCE DATA PIPELINE API SERVER
+INFO:__main__:============================================================
+INFO:__main__:📁 Model file: ecommerce_model.json
+INFO:__main__:🔐 Environment file: .env
+INFO:__main__:🌐 Server: http://0.0.0.0:8000
+INFO:__main__:📖 API Documentation: http://0.0.0.0:8000/docs
+INFO:__main__:🔄 Reload mode: Disabled
+INFO:__main__:============================================================
+INFO:__main__:📊 Database connected - 15000 orders available
+INFO:     Started server process [10104]
+INFO:     Waiting for application startup.
+INFO:api_server:🚀 Starting E-commerce Data Pipeline API...
+INFO:api_server:✅ API server ready to serve orders data
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
