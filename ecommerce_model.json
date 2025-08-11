@@ -15,7 +15,7 @@
         {"name": "is_active", "type": "boolean", "default": true},
         {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
       ],
-      "sample_size": 25,
+      "sample_size": 400,
       "output_format": "postgres"
     },
     {
@@ -32,7 +32,7 @@
         {"name": "status", "type": "enum", "values": ["active", "inactive", "suspended"], "default": "active"},
         {"name": "total_spent", "type": "decimal", "precision": 12, "scale": 2, "default": 0}
       ],
-      "sample_size": 150,
+      "sample_size": 10000,
       "output_format": "csv"
     },
     {
@@ -51,7 +51,7 @@
         {"name": "is_active", "type": "boolean", "default": true},
         {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
       ],
-      "sample_size": 300,
+      "sample_size": 20000,
       "output_format": "json"
     },
     {
@@ -69,7 +69,7 @@
         {"name": "shipping_address", "type": "json"},
         {"name": "payment_method", "type": "string", "max_length": 50}
       ],
-      "sample_size": 200,
+      "sample_size": 15000,
       "output_format": "api"
     },
     {
@@ -84,7 +84,7 @@
         {"name": "total_price", "type": "decimal", "precision": 12, "scale": 2},
         {"name": "discount_amount", "type": "decimal", "precision": 8, "scale": 2, "default": 0}
       ],
-      "sample_size": 500,
+      "sample_size": 40000,
       "output_format": "postgres"
     },
     {
@@ -98,7 +98,7 @@
         {"name": "review_text", "type": "text", "nullable": true},
         {"name": "created_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"}
       ],
-      "sample_size": 400,
+      "sample_size": 15000,
       "output_format": "csv"
     }
   ]
