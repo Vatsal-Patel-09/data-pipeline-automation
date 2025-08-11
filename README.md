@@ -82,6 +82,8 @@ python -m venv venv
 
 Windows:
 venv\Scripts\activate
+Powershell:
+venv\Scripts\Activate.ps1
 
 macOS/Linux:
 source venv/bin/activate
