@@ -45,7 +45,7 @@
         {"name": "registration_date", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
         {"name": "status", "type": "enum", "values": ["active", "inactive", "blacklisted"], "default": "active"}
       ],
-      "sample_size": 20000,
+      "sample_size": 200,
       "output_format": "csv"
     },
 
@@ -64,7 +64,7 @@
         {"name": "nem_flag", "type": "boolean", "default": false},
         {"name": "raw_report_json", "type": "json", "nullable": true}
       ],
-      "sample_size": 20000,
+      "sample_size": 200,
       "output_format": "postgres"
     },
 
@@ -87,7 +87,7 @@
         {"name": "underwriting_score", "type": "decimal", "precision": 6, "scale": 3, "nullable": true},
         {"name": "processing_fee_charged", "type": "decimal", "precision": 12, "scale": 2, "nullable": true}
       ],
-      "sample_size": 25000,
+      "sample_size": 250,
       "output_format": "postgres"
     },
 
@@ -111,7 +111,7 @@
         {"name": "last_statement_date", "type": "date", "nullable": true},
         {"name": "amortization_type", "type": "enum", "values": ["annuity", "bullet", "reducing_balance"], "default": "annuity"}
       ],
-      "sample_size": 30000,
+      "sample_size": 300,
       "output_format": "postgres"
     },
 
@@ -135,7 +135,7 @@
         {"name": "paid_fee", "type": "decimal", "precision": 12, "scale": 2, "default": 0},
         {"name": "paid_late_fee", "type": "decimal", "precision": 12, "scale": 2, "default": 0}
       ],
-      "sample_size": 100000,
+      "sample_size": 1000, 
       "output_format": "postgres"
     },
 
@@ -158,7 +158,7 @@
         {"name": "gateway", "type": "string", "max_length": 100, "nullable": true},
         {"name": "notes", "type": "string", "max_length": 500, "nullable": true}
       ],
-      "sample_size": 100000,
+      "sample_size": 1000,
       "output_format": "api"
     },
 
@@ -174,7 +174,7 @@
         {"name": "region", "type": "string", "max_length": 100, "nullable": true},
         {"name": "is_active", "type": "boolean", "default": true}
       ],
-      "sample_size": 500,
+      "sample_size": 50,
       "output_format": "postgres"
     },
 
@@ -191,7 +191,7 @@
         {"name": "remarks", "type": "string", "max_length": 500, "nullable": true},
         {"name": "is_reconciled", "type": "boolean", "default": false}
       ],
-      "sample_size": 20000,
+      "sample_size": 200,
       "output_format": "postgres"
     },
 
@@ -208,7 +208,7 @@
         {"name": "posted_by", "type": "string", "max_length": 100, "nullable": true},
         {"name": "notes", "type": "string", "max_length": 500, "nullable": true}
       ],
-      "sample_size": 15000,
+      "sample_size": 150,
       "output_format": "postgres"
     },
 
@@ -223,7 +223,7 @@
         {"name": "interest_written_off", "type": "decimal", "precision": 14, "scale": 2, "default": 0},
         {"name": "remarks", "type": "string", "max_length": 500, "nullable": true}
       ],
-      "sample_size": 2000,
+      "sample_size": 200,
       "output_format": "postgres"
     },
 
@@ -238,7 +238,7 @@
         {"name": "note_type", "type": "enum", "values": ["call", "email", "visit", "promise_to_pay", "escalation"]},
         {"name": "note_text", "type": "text"}
       ],
-      "sample_size": 40000,
+      "sample_size": 400,
       "output_format": "csv"
     },
 
@@ -255,7 +255,7 @@
         {"name": "promises_to_pay", "type": "integer"},
         {"name": "recovery_rate_percent", "type": "decimal", "precision": 5, "scale": 2}
       ],
-      "sample_size": 5000,
+      "sample_size": 50,
       "output_format": "postgres"
     },
 
@@ -271,7 +271,7 @@
         {"name": "performed_at", "type": "timestamp", "default": "CURRENT_TIMESTAMP"},
         {"name": "metadata", "type": "json", "nullable": true}
       ],
-      "sample_size": 50000,
+      "sample_size": 500,
       "output_format": "postgres"
     }
   ]

@@ -50,24 +50,35 @@ class DatabaseConnection:
                 conn.close()
 
 # Pydantic models for API responses
-class OrderResponse(BaseModel):
+class TransactionResponse(BaseModel):
     id: int
-    order_number: str
-    user_id: int
-    order_date: str
-    total_amount: float
-    tax_amount: float
-    shipping_cost: float
-    status: str
-    shipping_address: Dict[str, Any]
-    payment_method: str
+    loan_account_id: int
+    transaction_date: str
+    amount: float
+    amount_principal: float
+    amount_interest: float
+    payment_mode: str
+    transaction_status: str
+    bank_reference: str
 
-class OrderListResponse(BaseModel):
-    orders: List[OrderResponse]
+class LoanAccountResponse(BaseModel):
+    id: int
+    account_number: str
+    customer_id: int
+    loan_amount_sanctioned: float
+    outstanding_principal: float
+    outstanding_interest: float
+    status: str
+    disbursal_date: str
+    maturity_date: str
+
+class TransactionListResponse(BaseModel):
+    transactions: List[TransactionResponse]
     total_count: int
     skip: int
     limit: int
     has_more: bool
+
 
 class APIConfig:
     def __init__(self, model_file: str):
@@ -93,29 +104,32 @@ api_config = None
 
 # Create FastAPI app
 app = FastAPI(
-    title="E-commerce Data Pipeline API",
-    description="REST API serving generated e-commerce data",
+    title="Loan Management Data Pipeline API",
+    description="REST API serving generated loan management data",
     version="1.0.0"
 )
+
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize API on startup"""
-    logger.info("🚀 Starting E-commerce Data Pipeline API...")
-    logger.info("✅ API server ready to serve orders data")
+    logger.info("Starting Loan Management Data Pipeline API...")
+    logger.info("API server ready to serve transactions data")
 
 @app.get("/")
 async def root():
     """Root endpoint with API information"""
     return {
-        "message": "E-commerce Data Pipeline API",
+        "message": "Loan Management Data Pipeline API",
         "version": "1.0.0",
         "endpoints": {
-            "orders": "/orders",
+            "transactions": "/transactions",
+            "loan_accounts": "/loan-accounts",
             "health": "/health"
         },
         "documentation": "/docs"
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -135,190 +149,182 @@ async def health_check():
         logger.error(f"Health check failed: {e}")
         raise HTTPException(status_code=503, detail="Service unavailable")
 
-@app.get("/orders", response_model=OrderListResponse)
-async def get_orders(
+@app.get("/transactions", response_model=TransactionListResponse)
+async def get_transactions(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(50, ge=1, le=500, description="Maximum number of records to return"),
-    status: Optional[str] = Query(None, description="Filter by order status"),
-    user_id: Optional[int] = Query(None, description="Filter by user ID")
+    loan_account_id: Optional[int] = Query(None, description="Filter by loan account ID"),
+    payment_mode: Optional[str] = Query(None, description="Filter by payment mode"),
+    transaction_status: Optional[str] = Query(None, description="Filter by transaction status")
 ):
     """
-    Get paginated list of orders with optional filtering
+    Get paginated list of transactions with optional filtering
     """
     try:
         with db_connection.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Build base query
             base_query = """
-                SELECT id, order_number, user_id, order_date, total_amount, 
-                       tax_amount, shipping_cost, status, shipping_address, payment_method
-                FROM orders
+            SELECT id, loan_account_id, transaction_date, amount, 
+                   amount_principal, amount_interest, payment_mode, 
+                   transaction_status, bank_reference
+            FROM transactions
             """
-            
-            count_query = "SELECT COUNT(*) FROM orders"
-            
+            count_query = "SELECT COUNT(*) FROM transactions"
+
             # Add filtering conditions
             conditions = []
             params = []
-            
-            if status:
-                conditions.append("status = %s")
-                params.append(status)
-            
-            if user_id:
-                conditions.append("user_id = %s")
-                params.append(user_id)
-            
+            if loan_account_id:
+                conditions.append("loan_account_id = %s")
+                params.append(loan_account_id)
+            if payment_mode:
+                conditions.append("payment_mode = %s")
+                params.append(payment_mode)
+            if transaction_status:
+                conditions.append("transaction_status = %s")
+                params.append(transaction_status)
+
             if conditions:
                 where_clause = " WHERE " + " AND ".join(conditions)
                 base_query += where_clause
                 count_query += where_clause
-            
+
             # Get total count
             cursor.execute(count_query, params)
             total_count = cursor.fetchone()[0]
-            
+
             # Add pagination
-            base_query += " ORDER BY id LIMIT %s OFFSET %s"
+            base_query += " ORDER BY transaction_date DESC LIMIT %s OFFSET %s"
             params.extend([limit, skip])
-            
+
             # Execute main query
             cursor.execute(base_query, params)
             rows = cursor.fetchall()
-            
+
             # Convert to response format
-            orders = []
+            transactions = []
             for row in rows:
-                # Parse shipping_address JSON if it's a string
-                shipping_address = row[8]
-                if isinstance(shipping_address, str):
-                    try:
-                        shipping_address = json.loads(shipping_address)
-                    except:
-                        shipping_address = {}
-                
-                order = OrderResponse(
+                transaction = TransactionResponse(
                     id=row[0],
-                    order_number=row[1],
-                    user_id=row[2],
-                    order_date=row[3].isoformat() if row[3] else None,
-                    total_amount=float(row[4]) if row[4] else 0.0,
-                    tax_amount=float(row[5]) if row[5] else 0.0,
-                    shipping_cost=float(row[6]) if row[6] else 0.0,
-                    status=row[7] or "unknown",
-                    shipping_address=shipping_address or {},
-                    payment_method=row[9] or "unknown"
+                    loan_account_id=row[1],
+                    transaction_date=row[2].isoformat() if row[2] else None,
+                    amount=float(row[3]) if row[3] else 0.0,
+                    amount_principal=float(row[4]) if row[4] else 0.0,
+                    amount_interest=float(row[5]) if row[5] else 0.0,
+                    payment_mode=row[6] or "unknown",
+                    transaction_status=row[7] or "unknown",
+                    bank_reference=row[8] or ""
                 )
-                orders.append(order)
-            
+                transactions.append(transaction)
+
             # Calculate if there are more records
             has_more = (skip + limit) < total_count
-            
-            return OrderListResponse(
-                orders=orders,
+
+            return TransactionListResponse(
+                transactions=transactions,
                 total_count=total_count,
                 skip=skip,
                 limit=limit,
                 has_more=has_more
             )
-            
+
     except Exception as e:
-        logger.error(f"Error fetching orders: {e}")
+        logger.error(f"Error fetching transactions: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.get("/orders/{order_id}", response_model=OrderResponse)
-async def get_order_by_id(order_id: int):
-    """Get a specific order by ID"""
+@app.get("/loan-accounts/{account_id}", response_model=LoanAccountResponse)
+async def get_loan_account(account_id: int):
+    """Get a specific loan account by ID"""
     try:
         with db_connection.get_connection() as conn:
             cursor = conn.cursor()
-            
             query = """
-                SELECT id, order_number, user_id, order_date, total_amount, 
-                       tax_amount, shipping_cost, status, shipping_address, payment_method
-                FROM orders 
-                WHERE id = %s
+            SELECT id, account_number, customer_id, loan_amount_sanctioned,
+                   outstanding_principal, outstanding_interest, status,
+                   disbursal_date, maturity_date
+            FROM loan_accounts
+            WHERE id = %s
             """
-            
-            cursor.execute(query, (order_id,))
+            cursor.execute(query, (account_id,))
             row = cursor.fetchone()
-            
+
             if not row:
-                raise HTTPException(status_code=404, detail="Order not found")
-            
-            # Parse shipping_address JSON if it's a string
-            shipping_address = row[8]
-            if isinstance(shipping_address, str):
-                try:
-                    shipping_address = json.loads(shipping_address)
-                except:
-                    shipping_address = {}
-            
-            return OrderResponse(
+                raise HTTPException(status_code=404, detail="Loan account not found")
+
+            return LoanAccountResponse(
                 id=row[0],
-                order_number=row[1],
-                user_id=row[2],
-                order_date=row[3].isoformat() if row[3] else None,
-                total_amount=float(row[4]) if row[4] else 0.0,
-                tax_amount=float(row[5]) if row[5] else 0.0,
-                shipping_cost=float(row[6]) if row[6] else 0.0,
-                status=row[7] or "unknown",
-                shipping_address=shipping_address or {},
-                payment_method=row[9] or "unknown"
+                account_number=row[1],
+                customer_id=row[2],
+                loan_amount_sanctioned=float(row[3]) if row[3] else 0.0,
+                outstanding_principal=float(row[4]) if row[4] else 0.0,
+                outstanding_interest=float(row[5]) if row[5] else 0.0,
+                status=row[6] or "unknown",
+                disbursal_date=row[7].isoformat() if row[7] else None,
+                maturity_date=row[8].isoformat() if row[8] else None
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error fetching order {order_id}: {e}")
+        logger.error(f"Error fetching loan account {account_id}: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-@app.get("/orders/stats/summary")
-async def get_orders_summary():
-    """Get summary statistics for orders"""
+@app.get("/transactions/stats/summary")
+async def get_transactions_summary():
+    """Get summary statistics for transactions"""
     try:
         with db_connection.get_connection() as conn:
             cursor = conn.cursor()
             
             # Get various statistics
             stats_query = """
-                SELECT 
-                    COUNT(*) as total_orders,
-                    COUNT(DISTINCT user_id) as unique_customers,
-                    AVG(total_amount) as avg_order_value,
-                    SUM(total_amount) as total_revenue,
-                    MIN(total_amount) as min_order_value,
-                    MAX(total_amount) as max_order_value
-                FROM orders
+            SELECT
+                COUNT(*) as total_transactions,
+                COUNT(DISTINCT loan_account_id) as unique_loan_accounts,
+                AVG(amount) as avg_transaction_amount,
+                SUM(amount) as total_transaction_amount,
+                MIN(amount) as min_transaction_amount,
+                MAX(amount) as max_transaction_amount
+            FROM transactions
             """
-            
             cursor.execute(stats_query)
             stats = cursor.fetchone()
-            
+
+            # Get payment mode breakdown
+            mode_query = """
+            SELECT payment_mode, COUNT(*)
+            FROM transactions
+            GROUP BY payment_mode
+            ORDER BY COUNT(*) DESC
+            """
+            cursor.execute(mode_query)
+            payment_mode_breakdown = dict(cursor.fetchall())
+
             # Get status breakdown
             status_query = """
-                SELECT status, COUNT(*) 
-                FROM orders 
-                GROUP BY status
-                ORDER BY COUNT(*) DESC
+            SELECT transaction_status, COUNT(*)
+            FROM transactions
+            GROUP BY transaction_status
+            ORDER BY COUNT(*) DESC
             """
-            
             cursor.execute(status_query)
             status_breakdown = dict(cursor.fetchall())
-            
+
             return {
-                "total_orders": stats[0],
-                "unique_customers": stats[1],
-                "average_order_value": round(float(stats[2]), 2) if stats[2] else 0,
-                "total_revenue": round(float(stats[3]), 2) if stats[3] else 0,
-                "min_order_value": round(float(stats[4]), 2) if stats[4] else 0,
-                "max_order_value": round(float(stats[5]), 2) if stats[5] else 0,
+                "total_transactions": stats[0],
+                "unique_loan_accounts": stats[1],
+                "average_transaction_amount": round(float(stats[2]), 2) if stats[2] else 0,
+                "total_transaction_amount": round(float(stats[3]), 2) if stats[3] else 0,
+                "min_transaction_amount": round(float(stats[4]), 2) if stats[4] else 0,
+                "max_transaction_amount": round(float(stats[5]), 2) if stats[5] else 0,
+                "payment_mode_breakdown": payment_mode_breakdown,
                 "status_breakdown": status_breakdown
             }
-            
+
     except Exception as e:
-        logger.error(f"Error generating order summary: {e}")
+        logger.error(f"Error generating transaction summary: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 # CLI Interface
@@ -363,12 +369,13 @@ def main(model: str, env: str, port: int, host: str, reload: bool):
     try:
         with db_connection.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM orders;")
-            order_count = cursor.fetchone()[0]
-            logger.info(f"📊 Database connected - {order_count} orders available")
+            cursor.execute("SELECT COUNT(*) FROM transactions;")
+            transaction_count = cursor.fetchone()[0]
+            logger.info(f"Database connected - {transaction_count} transactions available")
     except Exception as e:
-        logger.error(f"❌ Database connection failed: {e}")
+        logger.error(f"Database connection failed: {e}")
         return
+
     
     # Start the server
     try:

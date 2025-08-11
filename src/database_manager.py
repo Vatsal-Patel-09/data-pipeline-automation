@@ -75,6 +75,7 @@ class DatabaseManager:
         type_mapping = {
             'string': 'VARCHAR',
             'integer': 'INTEGER',
+            'bigint': 'BIGINT', #Added for load_managment_model
             'decimal': 'DECIMAL',
             'timestamp': 'TIMESTAMP',
             'date': 'DATE',

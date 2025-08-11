@@ -63,9 +63,13 @@ class DatabaseManager: #class defination to manage database operations
         type_mapping = {
             'string': 'VARCHAR',
             'integer': 'INTEGER',
+            'bigint': 'BIGINT', #Added for load_managment_model
             'decimal': 'DECIMAL',
             'timestamp': 'TIMESTAMP',
+            'date': 'DATE',
+            'boolean': 'BOOLEAN',
             'json': 'JSONB',
+            'text': 'TEXT',
             'enum': 'VARCHAR'
         }
         

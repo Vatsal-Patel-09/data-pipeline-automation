@@ -84,7 +84,8 @@ class DataGenerator:
                 field_config['foreign_key'], 
                 field_config.get('nullable', False),
                 table_name,
-                existing_records
+                existing_records,
+                field_config
             )
         
         # Handle unique fields
@@ -125,23 +126,37 @@ class DataGenerator:
         
         # Generate context-appropriate strings based on field name
         if 'name' in field_name.lower():
-            if 'full' in field_name.lower():
-                value = self.fake.name()
-            elif 'user' in field_name.lower():
-                value = self.fake.user_name()
-            elif 'company' in field_name.lower():
-                value = self.fake.company()
-            elif 'category' in field_name.lower() or field_name.lower() == 'name':
-                # Generate category names for categories table
-                categories = [
-                    'Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports',
-                    'Toys', 'Beauty', 'Automotive', 'Health', 'Food & Beverage',
-                    'Smartphones', 'Laptops', 'Tablets', 'Gaming', 'Audio',
-                    'Men\'s Clothing', 'Women\'s Clothing', 'Kids\' Clothing', 'Shoes', 'Accessories',
-                    'Fiction', 'Non-Fiction', 'Educational', 'Comics', 'Magazines',
-                    'Furniture', 'Kitchen', 'Bathroom', 'Garden Tools', 'Decor'
-                ]
-                value = random.choice(categories)
+            # if 'full' in field_name.lower():
+            #     value = self.fake.name()
+            # elif 'user' in field_name.lower():
+            #     value = self.fake.user_name()
+            # elif 'company' in field_name.lower():
+            #     value = self.fake.company()
+            if 'product_type' in field_name.lower():
+                loan_types = ['personal', 'business', 'vehicle', 'mortgage', 'salaried', 'overdraft']
+                value = random.choice(loan_types)
+            elif 'employment_type' in field_name.lower():
+                employment_types = ['salaried', 'self_employed', 'business', 'unemployed', 'other']
+                value = random.choice(employment_types)
+            elif 'payment_mode' in field_name.lower():
+                payment_modes = ['UPI', 'NEFT', 'RTGS', 'IMPS', 'CARD', 'AUTO_DEBIT', 'CHEQUE', 'CASH']
+                value = random.choice(payment_modes)
+            elif 'account_number' in field_name.lower():
+                value = f"LA-{self.fake.random_number(digits=12)}"
+            elif 'pan_number' in field_name.lower():
+                value = f"{self.fake.random_letters(5).upper()}{self.fake.random_number(digits=4)}{self.fake.random_letter().upper()}"
+#For E-commerce model
+            # elif 'category' in field_name.lower() or field_name.lower() == 'name':
+            #     # Generate category names for categories table
+            #     categories = [
+            #         'Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports',
+            #         'Toys', 'Beauty', 'Automotive', 'Health', 'Food & Beverage',
+            #         'Smartphones', 'Laptops', 'Tablets', 'Gaming', 'Audio',
+            #         'Men\'s Clothing', 'Women\'s Clothing', 'Kids\' Clothing', 'Shoes', 'Accessories',
+            #         'Fiction', 'Non-Fiction', 'Educational', 'Comics', 'Magazines',
+            #         'Furniture', 'Kitchen', 'Bathroom', 'Garden Tools', 'Decor'
+            #     ]
+            #     value = random.choice(categories)
             else:
                 value = self.fake.word().title()
         elif 'email' in field_name.lower():
@@ -184,24 +199,33 @@ class DataGenerator:
         precision = field_config.get('precision', 10)
         scale = field_config.get('scale', 2)
         
-        if 'price' in field_name or 'cost' in field_name:
-            # Generate prices between $1.00 and $999.99
-            value = random.uniform(1.0, 999.99)
-        elif 'total' in field_name or 'amount' in field_name:
-            # Generate amounts between $10.00 and $5000.00
-            value = random.uniform(10.0, 5000.0)
-        elif 'tax' in field_name:
-            # Generate tax amounts between $0.50 and $500.00
-            value = random.uniform(0.5, 500.0)
-        elif 'shipping' in field_name:
-            # Generate shipping costs between $0.00 and $50.00
-            value = random.uniform(0.0, 50.0)
-        elif 'discount' in field_name:
-            # Generate discount amounts between $0.00 and $100.00
-            value = random.uniform(0.0, 100.0)
-        elif 'weight' in field_name:
-            # Generate weights between 0.1 and 50.0 kg
-            value = random.uniform(0.1, 50.0)
+        if 'loan_amount' in field_name:
+            value = random.uniform(50000.0, 10000000.0)  # ₹50K to ₹1Cr
+        elif 'annual_income' in field_name:
+            value = random.uniform(300000.0, 5000000.0)   # ₹3L to ₹50L
+        elif 'interest_rate' in field_name:
+            value = random.uniform(8.5, 24.0)             # 8.5% to 24%
+        elif 'cibil_score' in field_name:
+            value = random.randint(300, 900)              # CIBIL range
+        elif 'processing_fee' in field_name:
+            value = random.uniform(0.5, 3.0)              # 0.5% to 3%
+
+# for ecommers
+        # elif 'total' in field_name or 'amount' in field_name:
+        #     # Generate amounts between $10.00 and $5000.00
+        #     value = random.uniform(10.0, 5000.0)
+        # elif 'tax' in field_name:
+        #     # Generate tax amounts between $0.50 and $500.00
+        #     value = random.uniform(0.5, 500.0)
+        # elif 'shipping' in field_name:
+        #     # Generate shipping costs between $0.00 and $50.00
+        #     value = random.uniform(0.0, 50.0)
+        # elif 'discount' in field_name:
+        #     # Generate discount amounts between $0.00 and $100.00
+        #     value = random.uniform(0.0, 100.0)
+        # elif 'weight' in field_name:
+        #     # Generate weights between 0.1 and 50.0 kg
+        #     value = random.uniform(0.1, 50.0)
         else:
             value = random.uniform(1.0, 1000.0)
         
@@ -228,20 +252,16 @@ class DataGenerator:
             return {'table': table, 'field': field}
         return {'table': fk_string, 'field': 'id'}
     
-    def generate_foreign_key_value(self, foreign_key: str, nullable: bool = False, current_table: str = None, existing_records: List[Dict] = None) -> Union[int, None]:
-        """Generate foreign key value that references existing record"""
+    def generate_foreign_key_value(self, foreign_key: str, nullable: bool = False, current_table: str = None, existing_records: List[Dict] = None, field_config: Dict = None) -> Union[int, None]:
         fk_info = self.parse_foreign_key(foreign_key)
         ref_table = fk_info['table']
         ref_field = fk_info['field']
         
-        # Handle self-referencing foreign keys (like categories.parent_id)
+        # Handle self-referencing foreign keys
         if ref_table == current_table and existing_records:
-            # For self-referencing tables, 30% chance of NULL (root categories)
-            # 70% chance of referencing an existing record in the same table
             if random.random() < 0.3 or len(existing_records) == 0:
                 return None
             else:
-                # Reference an existing record from the current generation batch
                 existing_ids = [record[ref_field] for record in existing_records if ref_field in record]
                 if existing_ids:
                     return random.choice(existing_ids)
@@ -249,21 +269,46 @@ class DataGenerator:
                     return None
         
         # Handle nullable foreign keys
-        if nullable and random.random() < 0.1:  # 10% chance of NULL
+        if nullable and random.random() < 0.1:
             return None
         
         # Get available IDs from referenced table
         if ref_table in self.generated_data and self.generated_data[ref_table]:
             available_ids = [record[ref_field] for record in self.generated_data[ref_table] if ref_field in record]
+            
+            # ← ADD THIS SECTION FOR UNIQUE CONSTRAINT HANDLING
+            if field_config and field_config.get('unique'):
+                # For unique foreign keys, track already used values
+                field_name = field_config['name']
+                used_key = f"{current_table}.{field_name}"
+                
+                if used_key not in self.used_unique_values:
+                    self.used_unique_values[used_key] = set()
+                
+                # Get unused IDs
+                unused_ids = [id_val for id_val in available_ids if id_val not in self.used_unique_values[used_key]]
+                
+                if unused_ids:
+                    selected_id = random.choice(unused_ids)
+                    self.used_unique_values[used_key].add(selected_id)
+                    return selected_id
+                elif nullable:
+                    return None
+                else:
+                    self.logger.warning(f"No unused unique foreign key values available for {current_table}.{field_name}")
+                    return None
+            # ← END OF NEW SECTION
+            
             if available_ids:
                 return random.choice(available_ids)
         
-        # Fallback: return None for nullable fields, 1 for non-nullable
+        # Fallback
         if nullable:
             return None
         else:
             self.logger.warning(f"No data available for foreign key reference to {ref_table}.{ref_field}, using fallback value 1")
             return 1
+
     
     def get_table_generation_order(self) -> List[Dict]:
         """Determine correct order to generate data based on dependencies"""
