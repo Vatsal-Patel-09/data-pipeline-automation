@@ -89,12 +89,15 @@ naive merge produces a server that queries tables the ecommerce model does not d
 
 ## Recovering deleted files
 
-`src/initial_db_manager.py` was deleted on the `ai-dev-ready` work. It exists in
-history on all three branches:
+`src/initial_db_manager.py` was deleted from `master` on 2026-11-01. It still exists
+in history, and on both other branches:
 
 ```bash
-git show origin/master:src/initial_db_manager.py
+git show 537677a:src/initial_db_manager.py        # last commit that had it on master
+git show origin/vatsal:src/initial_db_manager.py  # or either other branch
 ```
+
+Note `git show origin/master:...` no longer works — the file is gone from master's tip.
 
 It is a superseded draft built against an incompatible model shape. Recover it for
 reference only — do not reintroduce its conventions. See `CLAUDE.md`.

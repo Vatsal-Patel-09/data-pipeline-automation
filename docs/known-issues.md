@@ -142,8 +142,11 @@ exposes `get_orders_table_config`, but no endpoint uses it. Change `orders` in t
 model and the API will drift silently until something 500s.
 
 ### Repo history carries ~57 MB of generated data
-`exports/` and `log.txt` are untracked as of the `ai-dev-ready` branch, but the old
-blobs remain in history: `exports/database_dump.sql` at 34 MB,
-`exports/json/products.json` at 14 MB, `exports/csv/reviews.csv` at 7 MB. Clearing
-them requires rewriting history (`git filter-repo`), which was explicitly left alone.
-`.git` is ~15 MB compressed.
+`exports/` and `log.txt` are gitignored and no longer tracked, but their old blobs
+remain in pre-2026-11-01 commits: `exports/database_dump.sql` at 34 MB,
+`exports/json/products.json` at 14 MB, `exports/csv/reviews.csv` at 7 MB. That is
+essentially all of the ~15 MB packed `.git`.
+
+Clearing it means rewriting history again with `git filter-repo` plus a force-push,
+which was not done — unlike the archive removal, nobody asked for it and the data is
+the project's own output.
