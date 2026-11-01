@@ -1,0 +1,68 @@
+{
+  "label": "ORIGINAL pre-overhaul code (git 381a9a2)",
+  "scale": 0.1,
+  "note": "Measured against the unmodified generator from the branch point, so no later fix contaminates these figures.",
+  "measurements": {
+    "age_years": {
+      "min": 0.0,
+      "max": 2.0,
+      "mean": 1.0,
+      "under_18": 1000,
+      "sampled": 1000
+    },
+    "orders_before_registration": {
+      "count": 749,
+      "checked": 1500,
+      "pct": 49.9
+    },
+    "reviews_before_product": {
+      "count": 753,
+      "checked": 1500,
+      "pct": 50.2
+    },
+    "order_total_mismatch": {
+      "count": 1397,
+      "checked": 1397,
+      "pct": 100.0
+    },
+    "line_total_mismatch": {
+      "count": 4000,
+      "checked": 4000,
+      "pct": 100.0
+    },
+    "product_names": {
+      "rows": 2000,
+      "distinct": 30,
+      "distinct_ratio": 0.015,
+      "most_common": [
+        [
+          "Food & Beverage",
+          82
+        ],
+        [
+          "Toys",
+          81
+        ],
+        [
+          "Garden Tools",
+          80
+        ]
+      ]
+    },
+    "unit_price_unrelated_to_product": {
+      "count": 2396,
+      "checked": 4000,
+      "pct": 59.9
+    },
+    "negative_margin_products": {
+      "count": 1012,
+      "checked": 2000,
+      "pct": 50.6
+    },
+    "total_spent_mismatch": {
+      "count": 1000,
+      "checked": 1000,
+      "pct": 100.0
+    }
+  }
+}

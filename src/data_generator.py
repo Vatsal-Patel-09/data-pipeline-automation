@@ -14,6 +14,7 @@ try:
         normalize_output_format,
         parse_foreign_key as _parse_foreign_key,
     )
+    from src.realism import SemanticPass
 except ImportError:  # pragma: no cover - supports direct module execution
     from metrics import NullMetrics
     from model_graph import (
@@ -21,6 +22,7 @@ except ImportError:  # pragma: no cover - supports direct module execution
         normalize_output_format,
         parse_foreign_key as _parse_foreign_key,
     )
+    from realism import SemanticPass
 
 class DataGenerator:
     DEFAULT_SEED = 42
@@ -41,7 +43,8 @@ class DataGenerator:
 
     def __init__(self, model_file: str, seed: int = DEFAULT_SEED,
                  scale: float = 1.0, metrics=None,
-                 reference_date: Optional[str] = None):
+                 reference_date: Optional[str] = None,
+                 realism: bool = True):
         """
         Initialize data generator with JSON model.
 
@@ -53,8 +56,10 @@ class DataGenerator:
         """
         self.seed = seed
         self.scale = scale
+        self.realism = realism
         self.reference_datetime = self._resolve_reference(reference_date)
         self.reference_date = self.reference_datetime.date()
+        self.realism_stats = None
         self.metrics = metrics if metrics is not None else NullMetrics()
         self.engine_name = 'legacy'
 
@@ -208,6 +213,37 @@ class DataGenerator:
         else:
             return f"sample_{field_type}"
     
+    # A two-part vocabulary for taxonomy names.
+    #
+    # The previous flat 30-item list could not supply 400 unique category names,
+    # so get_unique_value's fallback appended a counter and roughly 370 of 400
+    # categories ended up named like 'Electronics_7'. Composing a qualifier with
+    # a base department yields 31 x 24 = 744 natural combinations, which covers
+    # 400 unique draws without ever reaching the counter fallback.
+    CATEGORY_BASES = (
+        'Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports',
+        'Toys', 'Beauty', 'Automotive', 'Health', 'Food & Beverage',
+        'Smartphones', 'Laptops', 'Tablets', 'Gaming', 'Audio',
+        "Men's Clothing", "Women's Clothing", "Kids' Clothing", 'Shoes',
+        'Accessories', 'Fiction', 'Non-Fiction', 'Educational', 'Comics',
+        'Magazines', 'Furniture', 'Kitchen', 'Bathroom', 'Garden Tools',
+        'Decor', 'Pet Supplies',
+    )
+
+    CATEGORY_QUALIFIERS = (
+        '', '', '', 'Premium', 'Budget', 'Outdoor', 'Indoor', 'Travel',
+        'Professional', 'Vintage', 'Modern', 'Seasonal', 'Imported',
+        'Handmade', 'Refurbished', 'Clearance', 'Luxury', 'Compact',
+        'Commercial', 'Wholesale', 'Specialty', 'Everyday', 'Limited Edition',
+        'Essentials',
+    )
+
+    def generate_category_name(self) -> str:
+        """Compose a taxonomy name from a qualifier and a base department."""
+        qualifier = random.choice(self.CATEGORY_QUALIFIERS)
+        base = random.choice(self.CATEGORY_BASES)
+        return f"{qualifier} {base}".strip()
+
     def generate_string_value(self, field_config: Dict, field_name: str) -> str:
         """Generate realistic string values based on field name"""
         max_length = field_config.get('max_length', 255)
@@ -221,16 +257,7 @@ class DataGenerator:
             elif 'company' in field_name.lower():
                 value = self.fake.company()
             elif 'category' in field_name.lower() or field_name.lower() == 'name':
-                # Generate category names for categories table
-                categories = [
-                    'Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports',
-                    'Toys', 'Beauty', 'Automotive', 'Health', 'Food & Beverage',
-                    'Smartphones', 'Laptops', 'Tablets', 'Gaming', 'Audio',
-                    'Men\'s Clothing', 'Women\'s Clothing', 'Kids\' Clothing', 'Shoes', 'Accessories',
-                    'Fiction', 'Non-Fiction', 'Educational', 'Comics', 'Magazines',
-                    'Furniture', 'Kitchen', 'Bathroom', 'Garden Tools', 'Decor'
-                ]
-                value = random.choice(categories)
+                value = self.generate_category_name()
             else:
                 value = self.fake.word().title()
         elif 'email' in field_name.lower():
@@ -487,5 +514,38 @@ class DataGenerator:
         self.metrics.set_graph(
             generation_order=[t['name'] for t in ordered_tables]
         )
+
+        # Semantic repair runs after every table exists, because almost all of
+        # its rules are cross-table: a child cannot be checked against its
+        # parent while the parent is still being built.
+        if self.realism:
+            started = time.perf_counter()
+            semantic = SemanticPass(
+                graph=self.graph,
+                reference_datetime=self.reference_datetime,
+                # Its own RNG stream, so the semantic pass cannot perturb the
+                # draws the field generators consumed.
+                rng=random.Random(self.seed + 1),
+            )
+            self.realism_stats = semantic.apply(all_data)
+            elapsed = time.perf_counter() - started
+            self.metrics.set_verification(
+                realism=self.realism_stats.as_dict(),
+                realism_s=round(elapsed, 6),
+            )
+            self.logger.info(
+                "Semantic pass applied in %.2fs: %s birth dates corrected, "
+                "%s dates reordered, %s unit prices linked, %s line totals and "
+                "%s parent totals reconciled, %s costs adjusted, %s names composed",
+                elapsed,
+                self.realism_stats.birth_dates_corrected,
+                self.realism_stats.dates_reordered,
+                self.realism_stats.unit_prices_linked,
+                self.realism_stats.line_totals_reconciled,
+                self.realism_stats.parent_totals_reconciled,
+                self.realism_stats.costs_adjusted,
+                self.realism_stats.names_composed,
+            )
+
         self.logger.info("Data generation completed for all tables")
         return all_data

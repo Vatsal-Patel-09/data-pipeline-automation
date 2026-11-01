@@ -1,0 +1,69 @@
+{
+  "label": "WITH realism pass",
+  "realism": true,
+  "scale": 1.0,
+  "reference_date": "2026-01-01 00:00:00",
+  "measurements": {
+    "age_years": {
+      "min": 18.01,
+      "max": 79.99,
+      "mean": 49.31,
+      "under_18": 0,
+      "sampled": 10000
+    },
+    "orders_before_registration": {
+      "count": 0,
+      "checked": 15000,
+      "pct": 0.0
+    },
+    "reviews_before_product": {
+      "count": 0,
+      "checked": 15000,
+      "pct": 0.0
+    },
+    "order_total_mismatch": {
+      "count": 0,
+      "checked": 13969,
+      "pct": 0.0
+    },
+    "line_total_mismatch": {
+      "count": 0,
+      "checked": 40000,
+      "pct": 0.0
+    },
+    "product_names": {
+      "rows": 20000,
+      "distinct": 19999,
+      "distinct_ratio": 1.0,
+      "most_common": [
+        [
+          "Redwood Essential Accessory Pro 2710",
+          2
+        ],
+        [
+          "Redwood Heavy-Duty Smartphone III 5585",
+          1
+        ],
+        [
+          "Zenith Travel Laptop X 6643",
+          1
+        ]
+      ]
+    },
+    "unit_price_unrelated_to_product": {
+      "count": 0,
+      "checked": 40000,
+      "pct": 0.0
+    },
+    "negative_margin_products": {
+      "count": 0,
+      "checked": 20000,
+      "pct": 0.0
+    },
+    "total_spent_mismatch": {
+      "count": 0,
+      "checked": 10000,
+      "pct": 0.0
+    }
+  }
+}
