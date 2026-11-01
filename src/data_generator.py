@@ -60,6 +60,10 @@ class DataGenerator:
         self.primary_key_counters = {}
         self.used_unique_values = {}  # Track unique values to avoid duplicates
 
+        # Memoized parent-id lists for foreign-key resolution, keyed by
+        # (ref_table, ref_field). See _parent_ids for why this is safe.
+        self._parent_id_cache = {}
+
         self.logger = logging.getLogger(__name__)
 
     @classmethod
@@ -300,6 +304,42 @@ class DataGenerator:
             return {'table': table, 'field': field}
         return {'table': fk_string, 'field': 'id'}
     
+    def _parent_ids(self, ref_table: str, ref_field: str) -> List[Any]:
+        """
+        The list of candidate parent ids for a foreign key, built once.
+
+        This replaces a list comprehension that previously ran on every single
+        field call, rebuilding the entire parent-id list each time. For
+        ecommerce_model.json that was roughly 2.0 billion dict probes per run
+        (order_items alone contributed 40,000 x 35,000), to produce a result
+        that is invariant for a given (ref_table, ref_field).
+
+        Memoizing is behaviour-preserving rather than merely equivalent: tables
+        are generated in topological order, so generated_data[ref_table] is
+        complete and never mutated again before any child table reads it. The
+        cached list is therefore the identical list in the identical order, and
+        random.choice consumes the identical RNG draw. The cache is still
+        invalidated whenever a table's data is (re)assigned, so the invariant
+        does not depend on callers preserving the order.
+        """
+        key = (ref_table, ref_field)
+        cached = self._parent_id_cache.get(key)
+        if cached is not None:
+            return cached
+
+        records = self.generated_data.get(ref_table)
+        if not records:
+            return []
+        ids = [record[ref_field] for record in records if ref_field in record]
+        self._parent_id_cache[key] = ids
+        return ids
+
+    def _invalidate_parent_ids(self, table_name: str) -> None:
+        """Drop cached parent-id lists for a table whose data just changed."""
+        stale = [key for key in self._parent_id_cache if key[0] == table_name]
+        for key in stale:
+            del self._parent_id_cache[key]
+
     def generate_foreign_key_value(self, foreign_key: str, nullable: bool = False, current_table: str = None, existing_records: List[Dict] = None) -> Union[int, None]:
         """Generate foreign key value that references existing record"""
         fk_info = self.parse_foreign_key(foreign_key)
@@ -325,11 +365,10 @@ class DataGenerator:
             return None
         
         # Get available IDs from referenced table
-        if ref_table in self.generated_data and self.generated_data[ref_table]:
-            available_ids = [record[ref_field] for record in self.generated_data[ref_table] if ref_field in record]
-            if available_ids:
-                return random.choice(available_ids)
-        
+        available_ids = self._parent_ids(ref_table, ref_field)
+        if available_ids:
+            return random.choice(available_ids)
+
         # Fallback: return None for nullable fields, 1 for non-nullable
         if nullable:
             return None
@@ -409,6 +448,7 @@ class DataGenerator:
 
         # Store generated data for foreign key references
         self.generated_data[table_name] = records
+        self._invalidate_parent_ids(table_name)
         elapsed = time.perf_counter() - started
 
         table_metric = self.metrics.table(table_name)
