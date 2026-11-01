@@ -12,11 +12,8 @@ Only `master` exists locally; the others are remote-only on
 The ecommerce pipeline: 6 tables, 100,400 records, `ecommerce_model.json`,
 `api_server.py` serving `/orders`.
 
-Its last three commits each added a single file belonging to an unrelated product
-(a backend zip, a Salesforce design PDF and a status note about them). Those files
-have been removed — see "Removed material" below.
-
-This is the branch to work on.
+This is the branch to work on. Its history was rewritten on 2026-11-01 — see
+"Removed material" below.
 
 ## `origin/vatsal` — stale, superseded
 
@@ -104,21 +101,27 @@ reference only — do not reintroduce its conventions. See `CLAUDE.md`.
 
 ## Removed material
 
-`master`'s final three commits each added exactly one file, none of them related to
-this project:
+**`master`'s history was rewritten on 2026-11-01.** Three commits were dropped, each
+of which had added exactly one file belonging to an unrelated data-integration
+product: a zipped Flask/Airflow backend, a Salesforce connector design PDF, and a
+status note about them. They were committed on 2025-08-22 and 2025-08-23, twelve days
+after the pipeline work itself finished on 2025-08-11, and the status note referenced
+frontend files that never existed in this repository.
 
-| Commit | Date | File |
-|---|---|---|
-| `be86123 test file` | 2025-08-22 | a Salesforce connector design PDF |
-| `69907c0 New file` | 2025-08-22 | a status note about that connector |
-| `4597f86 added final backend` | 2025-08-23 | a zipped Flask/Airflow backend |
+Nothing of the pipeline was lost. Each of those three commits changed one file and
+nothing else, so `master` now reads:
 
-They belonged to a separate data-integration product and arrived twelve days after
-the pipeline work finished on 2025-08-11. The status note even referenced frontend
-files (`dbconnection.tsx`, `route.ts`) that never existed in this repository.
-
-All three were **removed at the user's request** (2026-11-01). Nothing of the
-pipeline was touched: each of those commits changed one file and nothing else, so
-their removal costs this project nothing.
+```
+537677a  Merge pull request #6 ...     <- last real pipeline commit
+   |
+   +-- AI development context layer
+   +-- archive removal + verified doc corrections
+```
 
 If you are looking for that other product, it is not here and was never meant to be.
+Do not restore it: the removal was deliberate and requested.
+
+### If you find a stale reference
+`origin/vatsal` and `origin/loan_mgmt` never contained these files, so they are
+unaffected. Old clones made before the rewrite will still have the three commits;
+re-clone rather than merging from one, or you will reintroduce the files.
