@@ -16,9 +16,8 @@ inserting. Confirm with the user before starting unless they clearly just asked 
 python -c "import psycopg2, faker, fastapi, uvicorn, click, pandas, dotenv; print('deps ok')"
 ```
 
-If this fails, dependencies are missing: `pip install -r requirements.txt`. Note that
-`psycopg2-binary`, `faker`, `fastapi` and `uvicorn` are unpinned — see
-`docs/known-issues.md`.
+If this fails, dependencies are missing: `pip install -r requirements.txt`. All ten
+are pinned to versions verified working.
 
 Then confirm config exists:
 

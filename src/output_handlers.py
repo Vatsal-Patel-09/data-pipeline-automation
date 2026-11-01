@@ -158,6 +158,7 @@ class OutputHandler:
     def handle_csv_output(self, table_name: str, data: List[Dict], config: Dict):
         """Export data to CSV file"""
         filename = f"exports/csv/{table_name}.csv"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         self.logger.info(f"Exporting {len(data)} records to CSV: {filename}")
         
         if not data:
@@ -192,6 +193,7 @@ class OutputHandler:
     def handle_json_output(self, table_name: str, data: List[Dict], config: Dict):
         """Export data to JSON file"""
         filename = f"exports/json/{table_name}.json"
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         self.logger.info(f"Exporting {len(data)} records to JSON: {filename}")
         
         if not data:

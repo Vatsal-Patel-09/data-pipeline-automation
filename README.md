@@ -176,7 +176,6 @@ data-pipeline-automation/
 │   ├── architecture.md       # Call path and two-phase output strategy
 │   ├── data-model.md         # Model-JSON contract in full
 │   ├── branches.md           # What lives on each branch
-│   ├── archive.md            # Out-of-scope files explained
 │   └── known-issues.md       # Known bugs and rough edges
 ├── .claude/skills/           # Repo-specific workflows
 │   ├── run-pipeline/         # Run and verify the pipeline
@@ -199,7 +198,6 @@ guessing. Start here:
   *names* drive generated data realism.
 - **`docs/branches.md`** - what lives on `master`, `vatsal` and `loan_mgmt`.
   `master` is not the whole project.
-- **`docs/archive.md`** - why `backend.zip`, `report.txt` and the PDF are out of scope.
 - **`docs/known-issues.md`** - known bugs and rough edges, recorded rather than hidden.
 
 Note on the `test_*.py` files: despite the names they are manual print-based
@@ -237,15 +235,19 @@ Check cross-format relationships
 
 ### Data Generation Strategy
 - **Context-Aware Generation**: Products have realistic names for their categories
-- **Business Logic**: Order totals mathematically consistent with line items  
 - **Self-Referencing Relationships**: Categories can have parent-child hierarchies
-- **Realistic Constraints**: Unique emails, valid phone formats, proper date sequences
+- **Realistic Constraints**: Unique emails, valid phone formats
+
+Two caveats, both verified by running the generator and recorded in
+`docs/known-issues.md`: order totals are **not** reconciled against their line items
+(every field is generated independently), and dates have **no causal ordering**, so an
+order can predate the registration of the user who placed it.
 
 ### Dependency Resolution
 Uses **topological sorting** algorithm to determine table creation/population order:
 ```
-Example dependency chain
-categories → products → users → orders → order_items → reviews
+Actual order, verified by running the generator:
+categories → users → orders → products → order_items → reviews
 ```
 
 ### Performance Optimizations

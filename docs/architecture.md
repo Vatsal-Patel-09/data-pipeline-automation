@@ -82,9 +82,24 @@ graph and handled during generation instead.
 
 This is real duplication and a sensible thing to consolidate. It is **documented, not
 refactored**, because the three copies have already diverged: `data_generator` and
-`output_handlers` both sort `ready_tables` for deterministic ordering and log a warning
-when they break a cycle, while `database_manager` does neither. Unifying them would
-change CREATE TABLE ordering, so it is a behaviour change rather than a tidy-up.
+`output_handlers` both sort `ready_tables` and log a warning when they break a cycle,
+while `database_manager` does neither.
+
+That difference has a visible consequence. All three iterate a Python `set`, so without
+the sort the result depends on string hash order, which is randomised per process.
+Running `get_table_dependency_order` under five different `PYTHONHASHSEED` values gives
+**five different CREATE TABLE orders**:
+
+```
+seed=0: users -> categories -> products -> orders -> order_items -> reviews
+seed=1: categories -> users -> orders -> products -> reviews -> order_items
+seed=3: categories -> users -> products -> orders -> order_items -> reviews
+```
+
+Every one of them is a *valid* topological order, so this is harmless in practice — the
+algorithm only ever picks tables whose dependencies are already satisfied. But schema
+creation is not reproducible run to run, while data generation (which does sort, and
+seeds Faker) is. Adding `ready_tables.sort()` to `database_manager` would fix it.
 
 ## Database access
 

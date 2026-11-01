@@ -115,6 +115,11 @@ class DataPipeline:
         file_outputs = []
         db_outputs = []
         api_tables = []
+        # Which tables actually reach PostgreSQL: the ones that declare it, plus
+        # every table they reference through a foreign key (the dual-destination
+        # closure). Computed with the same function the writer uses, so the report
+        # cannot disagree with what was actually written.
+        in_postgres = self.output_handler.find_postgresql_dependencies(generated_data)
 
         for table_name, table_info in generated_data.items():
             count = len(table_info['data'])
@@ -126,9 +131,15 @@ class DataPipeline:
                 file_outputs.append(f"exports/json/{table_name}.json ({count:,} records)")
             elif output_format == 'api':
                 api_tables.append((table_name, count))
-                db_outputs.append(f"{table_name} ({count:,} records) - served via API")
-            else:
-                db_outputs.append(f"{table_name} ({count:,} records)")
+
+            if table_name in in_postgres:
+                if output_format == 'api':
+                    note = " - served via API"
+                elif output_format not in ('postgresql', 'api'):
+                    note = f" - dual destination, also {output_format.upper()}, for FK integrity"
+                else:
+                    note = ""
+                db_outputs.append(f"{table_name} ({count:,} records){note}")
 
         logger.info("\nOUTPUT LOCATIONS:")
         logger.info("  File system:")
@@ -137,9 +148,6 @@ class DataPipeline:
         logger.info("  PostgreSQL:")
         for line in db_outputs or ["(none)"]:
             logger.info(f"    - {line}")
-        logger.info("  Note: a table referenced by a foreign key is also written to")
-        logger.info("        PostgreSQL, whatever its primary destination.")
-
         # API information
         logger.info("\nAPI SERVER INFORMATION:")
         logger.info("  Documentation: http://localhost:8000/docs")

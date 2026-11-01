@@ -10,10 +10,11 @@ preserving foreign-key integrity *across* those destinations.
 It is a coursework demonstrator, **not** a production ELT tool. Scope decisions
 should be read in that light: correctness and clarity matter, horizontal scale does not.
 
-## Live code vs. archive
+## The files
 
-Check this table before reading or editing anything. The repo contains a sizeable
-amount of material that has nothing to do with the pipeline.
+Every tracked file is part of the pipeline. Material belonging to an unrelated
+product was removed from this repo entirely, so there is no longer anything here to
+steer around.
 
 | Path | Status |
 |---|---|
@@ -25,12 +26,6 @@ amount of material that has nothing to do with the pipeline.
 | `ecommerce_model.json` | **Live** — the data model that drives everything |
 | `test_*.py`, `final_integration_test.py` | Manual print-scripts, **not** a pytest suite |
 | `exports/`, `log.txt` | Generated output. Untracked. Never hand-edit |
-| `backend.zip` | **Archive — out of scope.** A different product entirely |
-| `report.txt` | **Archive — out of scope.** Status note about that other product |
-| `Salesforce_Connector_Architecture_Overview.pdf` | **Archive — out of scope** |
-
-Do not read, extract, search or modify the three archive entries when working on the
-pipeline. See `docs/archive.md` for what they actually are and why they are here.
 
 `src/initial_db_manager.py` was deleted on this branch. It was a superseded draft of
 `src/database_manager.py` built against an **incompatible** model shape, and it misled
@@ -101,7 +96,13 @@ instance. There is no offline or dry-run mode.
   field name: a field containing `email` gets an email, `price` gets a currency-shaped
   decimal, `rating` gets 1–5. Naming a field badly produces junk data. See
   `docs/data-model.md`.
-- Generation is seeded (`Faker.seed(42)`, `random.seed(42)`) so runs are reproducible.
+- Generation is seeded (`Faker.seed(42)`, `random.seed(42)`) so record generation is
+  reproducible. Schema creation order is **not** — see `docs/known-issues.md`.
+- **The generated data is structurally sound but not semantically realistic.** Foreign
+  keys are always valid (verified), but dates have no causal ordering, order totals do
+  not reconcile with their line items, and `users.birth_date` yields infants. Know this
+  before presenting the output as realistic. Details and measurements in
+  `docs/known-issues.md`.
 - Generated artefacts belong in `exports/`, which is gitignored. Do not commit them.
 
 ## Going deeper
@@ -111,5 +112,4 @@ instance. There is no offline or dry-run mode.
 | `docs/architecture.md` | Changing the pipeline flow or output routing |
 | `docs/data-model.md` | Adding or editing tables and fields |
 | `docs/branches.md` | Before assuming `master` is the whole project |
-| `docs/archive.md` | If `backend.zip` / `report.txt` / the PDF come up |
 | `docs/known-issues.md` | Before reporting a bug as new |

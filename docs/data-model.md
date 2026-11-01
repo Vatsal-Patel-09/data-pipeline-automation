@@ -123,8 +123,16 @@ the already-generated parent table, which is why generation order matters. Three
 | `order_items` | 40,000 | `postgres` | — | `orders.id`, `products.id` |
 | `reviews` | 15,000 | `csv` | — | `products.id`, `users.id` |
 
-Generation/insert order follows the FK graph: `categories` → `users` → `products` →
-`orders` → `order_items` → `reviews`.
+Generation order, **verified by running it**, is:
+
+```
+categories -> users -> orders -> products -> order_items -> reviews
+```
+
+Note `orders` comes *before* `products`. Both become eligible in the same round once
+`categories` and `users` are done, and the tie is broken alphabetically by
+`ready_tables.sort()`. This is correct — `orders` only depends on `users` — but it is
+not the intuitive "parents before everything" order, so do not assume it.
 
 Note that `reviews` goes to CSV only and is referenced by nothing, so it never lands in
 PostgreSQL — its `product_id` and `user_id` columns are plain integers in a CSV file

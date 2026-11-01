@@ -1,11 +1,75 @@
 # Known issues
 
-Found while mapping the repo (2025-11-01) and deliberately **not fixed** — the cleanup
+Found while mapping the repo (2026-11-01) and deliberately **not fixed** — the cleanup
 pass was scoped to removing misleading material, not changing behaviour. Recorded here
 so they are visible rather than rediscovered. None of these is a regression; all predate
 the context work.
 
+All findings below the first heading were **confirmed by executing the pipeline**
+(generation and file output run without a database; the API was exercised through
+FastAPI's `TestClient` against a stubbed connection), not by reading the code.
+
+## Data realism — the generated data is less correct than the README claims
+
+### `date` and `timestamp` ignore the field name
+Every other type (`string`, `integer`, `decimal`, `json`) pattern-matches the field
+name to pick a realistic value. `date` and `timestamp` do not
+(`src/data_generator.py:109-112`): they always return
+`date_between('-2y', 'today')` and `date_time_between('-1y', 'now')`.
+
+Measured consequence: `users.birth_date` produces implied ages of **0.1 to 2.0 years**.
+Every user in the dataset is an infant.
+
+Affected fields: `users.birth_date`, `users.registration_date`, `categories.created_at`,
+`products.created_at`, `orders.order_date`, `reviews.created_at`.
+
+### No causal ordering between dates
+Because each date is drawn independently, nothing enforces that related events happen
+in a sensible sequence. Measured on a 150-order sample: **57% of orders were placed
+before the user who placed them registered.** The same applies to reviews predating the
+orders they review.
+
+The README's "proper date sequences" claim has been corrected.
+
+### Order totals are not reconciled with their line items
+`orders.total_amount`, `tax_amount` and `shipping_cost` are generated independently of
+the `order_items` rows that reference the order. Measured: **138 of 138 orders** whose
+line-item `total_price` values do not sum to the order's `total_amount`. Not most —
+all of them.
+
+The README claimed "Order totals mathematically consistent with line items". That claim
+was false and has been removed. Fixing it means a post-generation reconciliation pass
+over `order_items` grouped by `order_id`.
+
+### `products.name` draws from the category list
+`generate_string_value` treats a field named exactly `name` as a category name
+(`src/data_generator.py:134-144`). `products.name` is exactly that, so all 20,000
+products are named from a hardcoded 30-item category list. Measured on a 200-product
+sample: **30 distinct names**, every one a category ("Fiction", "Tablets",
+"Home & Garden"). Renaming the column to `product_name` would not help either — it
+would fall through to a single random word. Realistic product names need a new branch
+in `generate_string_value`.
+
 ## Bugs
+
+### Schema creation order is not reproducible
+`DatabaseManager.get_table_dependency_order` (`src/database_manager.py:187`) iterates a
+`set` without sorting, so CREATE TABLE order follows randomised string hash order.
+Verified: five `PYTHONHASHSEED` values produce five different orders. All are valid
+topological orders, so nothing breaks — but it undercuts the project's reproducibility
+story, which `Faker.seed(42)` otherwise delivers. One `ready_tables.sort()` fixes it.
+See `docs/architecture.md`.
+
+### `/health` reports a frozen timestamp
+`api_server.py:132` returns the string literal `"2025-08-02T00:00:00Z"` as the health
+check's timestamp. It never changes, so the endpoint cannot be used to tell a live
+server from a stale cached response. Should be `datetime.now(timezone.utc).isoformat()`.
+
+### The `status` filter is not validated
+`/orders?status=` takes an unconstrained `Optional[str]` (`api_server.py:142`) rather
+than the model's enum (`pending`, `processing`, `shipped`, `delivered`, `cancelled`).
+A typo returns an empty result set with HTTP 200 instead of a 422. The `orders` table
+does carry a `CHECK` constraint on the column, so only the API surface is loose.
 
 ### `export-db` rejects a `DATABASE_URL`-only config
 `data_pipeline.py:168` — `export_database` guards on
@@ -70,11 +134,6 @@ require a live database and (for the API ones) a server already running on
 `localhost:8000`, and `pytest` would collect them and then fail on connection errors.
 There is no CI. Treat "the tests pass" as meaningless in this repo until a real suite
 exists.
-
-### Four dependencies are unpinned
-`psycopg2-binary`, `faker`, `fastapi` and `uvicorn` are not installed in the
-development environment, so they were left unpinned rather than pinned to a guess.
-Pin them from `pip freeze` once a working venv exists. The other six are pinned.
 
 ### `api_server.py` response models are hand-written
 `OrderResponse` and `OrderListResponse` are maintained by hand against the `orders`
