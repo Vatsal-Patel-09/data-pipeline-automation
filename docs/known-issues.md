@@ -147,6 +147,23 @@ remain in pre-2026-11-01 commits: `exports/database_dump.sql` at 34 MB,
 `exports/json/products.json` at 14 MB, `exports/csv/reviews.csv` at 7 MB. That is
 essentially all of the ~15 MB packed `.git`.
 
-Clearing it means rewriting history again with `git filter-repo` plus a force-push,
-which was not done — unlike the archive removal, nobody asked for it and the data is
-the project's own output.
+Clearing it was considered on 2026-11-01 and **deliberately declined**. The reason is
+measurable: `master`, `origin/vatsal` and `origin/loan_mgmt` each carry the same
+~57 MB of export blobs, so a `git filter-repo` purge of `master` alone shrinks nothing
+— the blobs stay reachable through the other two. An effective purge means rewriting
+all three branches and force-pushing all three, which would renumber every commit on
+the unmerged `loan_mgmt` work. Not worth 14 MB on a college project.
+
+Verify the claim yourself rather than trusting this paragraph:
+
+```bash
+for ref in master origin/vatsal origin/loan_mgmt; do
+  echo "=== $ref ==="
+  git rev-list --objects "$ref" \
+    | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' \
+    | awk '$1=="blob" && $3>100000 {s+=$3} END {printf "  %.1f MB in blobs >100KB\n", s/1048576}'
+done
+```
+
+Do not propose the purge again as a new idea. If it is ever wanted, it is a
+three-branch rewrite, not a `master` cleanup.
