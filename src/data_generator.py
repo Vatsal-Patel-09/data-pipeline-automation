@@ -1,34 +1,60 @@
 import json
 import random
 import logging
-from datetime import datetime, timedelta
+import time
 from decimal import Decimal
 from typing import Dict, List, Any, Union
 from faker import Faker
-import os
+
+try:
+    from src.metrics import NullMetrics
+except ImportError:  # pragma: no cover - supports direct module execution
+    from metrics import NullMetrics
 
 class DataGenerator:
-    def __init__(self, model_file: str):
-        """Initialize data generator with JSON model"""
+    DEFAULT_SEED = 42
+
+    def __init__(self, model_file: str, seed: int = DEFAULT_SEED,
+                 scale: float = 1.0, metrics=None):
+        """
+        Initialize data generator with JSON model.
+
+        seed and scale default to the historical values (42 and 1.0), so the
+        default construction is byte-identical to the pre-overhaul generator.
+        scale multiplies every table's sample_size, which turns a 90-minute
+        feedback loop into a seconds-long one during development.
+        """
+        self.seed = seed
+        self.scale = scale
+        self.metrics = metrics if metrics is not None else NullMetrics()
+        self.engine_name = 'legacy'
+
         self.fake = Faker()
-        Faker.seed(42)  # For reproducible data
-        random.seed(42)
-        
-        with open(model_file, 'r') as f:
+        Faker.seed(seed)  # For reproducible data
+        random.seed(seed)
+
+        with open(model_file, 'r', encoding='utf-8') as f:
             self.model = json.load(f)
-        
+
         # Storage for generated data to maintain relationships
         self.generated_data = {}
         self.primary_key_counters = {}
         self.used_unique_values = {}  # Track unique values to avoid duplicates
-        
-        # Set up logging
-        logging.basicConfig(level=logging.INFO)
+
         self.logger = logging.getLogger(__name__)
-    
+
     def get_sample_size(self, table_config: Dict) -> int:
-        """Get number of records to generate for a table"""
-        return table_config.get('sample_size', 100)
+        """
+        Get number of records to generate for a table.
+
+        The declared sample_size is multiplied by self.scale and floored at 1,
+        so --scale 0.01 still produces at least one row per table and the
+        dependency structure stays exercised.
+        """
+        declared = table_config.get('sample_size', 100)
+        if self.scale == 1.0:
+            return declared
+        return max(1, int(round(declared * self.scale)))
     
     def get_output_format(self, table_config: Dict) -> str:
         """Get output format for a table"""
@@ -315,33 +341,51 @@ class DataGenerator:
         sample_size = self.get_sample_size(table_config)
         
         self.logger.info(f"Generating {sample_size} records for table: {table_name}")
-        
+
+        started = time.perf_counter()
         records = []
         for i in range(sample_size):
             record = {}
-            
+
             for field_config in table_config['fields']:
                 field_name = field_config['name']
-                
+
                 # For self-referencing tables, pass existing records to handle parent_id
                 field_value = self.generate_field_value(
-                    field_config, 
-                    table_name, 
-                    i, 
+                    field_config,
+                    table_name,
+                    i,
                     records  # Pass existing records for self-referencing
                 )
                 record[field_name] = field_value
-            
+
             records.append(record)
-        
+
         # Store generated data for foreign key references
         self.generated_data[table_name] = records
-        
-        self.logger.info(f"✅ Generated {len(records)} records for {table_name}")
+        elapsed = time.perf_counter() - started
+
+        table_metric = self.metrics.table(table_name)
+        table_metric.rows = len(records)
+        table_metric.fields = len(table_config['fields'])
+        table_metric.declared_format = self.get_output_format(table_config)
+        table_metric.generate_s = round(elapsed, 6)
+        table_metric.engine = self.engine_name
+
+        self.logger.info(
+            f"Generated {len(records)} records for {table_name} "
+            f"in {elapsed:.2f}s"
+        )
         return records
     
-    def generate_all_data(self) -> Dict[str, List[Dict]]:
-        """Generate data for all tables in correct dependency order"""
+    def generate_all_data(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Generate data for all tables in correct dependency order.
+
+        Returns a mapping of table name to {'data', 'output_format', 'config'}.
+        The previous annotation claimed Dict[str, List[Dict]], which every
+        consumer already contradicted.
+        """
         self.logger.info("Starting data generation for all tables...")
         
         ordered_tables = self.get_table_generation_order()
@@ -356,5 +400,8 @@ class DataGenerator:
                 'config': table_config
             }
         
-        self.logger.info("✅ Data generation completed for all tables!")
+        self.metrics.set_graph(
+            generation_order=[t['name'] for t in ordered_tables]
+        )
+        self.logger.info("Data generation completed for all tables")
         return all_data

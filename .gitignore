@@ -79,3 +79,10 @@ Desktop.ini
 exports/
 log.txt
 *.sql
+
+# Run reports. Benchmark/headline reports live in runs/headline/ and are
+# committed deliberately as project evidence; ad-hoc local runs are not tracked.
+# Note: deliberately NOT placed under exports/, which is ignored wholesale.
+runs/
+!runs/headline/
+!runs/headline/**

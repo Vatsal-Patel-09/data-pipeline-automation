@@ -9,3 +9,11 @@ pandas==2.3.2
 sqlalchemy==2.0.45
 pydantic==2.11.7
 requests==2.32.4
+
+# Metrics, vectorized generation and the columnar sink.
+psutil==7.0.0
+numpy==2.3.2
+pyarrow==23.0.0
+
+# Test suite (replaces the assertion-free print-scripts).
+pytest==8.4.2
