@@ -1,0 +1,22 @@
+[tool.pytest.ini_options]
+# testpaths is load-bearing, not cosmetic.
+#
+# The four scripts at the repo root (test_api_server.py, test_data_generator.py,
+# test_db_connection.py, final_integration_test.py) are interactive
+# print-scripts, not tests: they contain no assertions, they require a live
+# PostgreSQL instance and a server already listening on port 8000, and one of
+# them "passes" green by printing a connection-error message. Without this
+# setting pytest collects them and the suite is red, or worse, falsely green.
+#
+# They are kept because they are documented demo scripts. They are simply not
+# part of the test suite.
+testpaths = ["tests"]
+
+addopts = "-ra --strict-markers"
+
+markers = [
+    "db: requires a reachable PostgreSQL instance; skipped when none is configured",
+    "slow: takes more than a few seconds",
+]
+
+filterwarnings = ["error::DeprecationWarning:src.*"]

@@ -9,8 +9,18 @@ from faker import Faker
 
 try:
     from src.metrics import NullMetrics
+    from src.model_graph import (
+        ModelGraph,
+        normalize_output_format,
+        parse_foreign_key as _parse_foreign_key,
+    )
 except ImportError:  # pragma: no cover - supports direct module execution
     from metrics import NullMetrics
+    from model_graph import (
+        ModelGraph,
+        normalize_output_format,
+        parse_foreign_key as _parse_foreign_key,
+    )
 
 class DataGenerator:
     DEFAULT_SEED = 42
@@ -64,6 +74,9 @@ class DataGenerator:
         # (ref_table, ref_field). See _parent_ids for why this is safe.
         self._parent_id_cache = {}
 
+        # Built lazily by the `graph` property.
+        self._graph = None
+
         self.logger = logging.getLogger(__name__)
 
     @classmethod
@@ -101,15 +114,15 @@ class DataGenerator:
         return max(1, int(round(declared * self.scale)))
     
     def get_output_format(self, table_config: Dict) -> str:
-        """Get output format for a table"""
-        format_mapping = {
-            'postgres': 'postgresql',
-            'postgresql': 'postgresql',
-            'csv': 'csv',
-            'json': 'json',
-            'api': 'api'
-        }
-        return format_mapping.get(table_config.get('output_format', 'postgresql'), 'postgresql')
+        """
+        Get the normalized output format for a table.
+
+        Delegates to the shared normalizer. The previous local copy carried its
+        own format map and fell back to 'postgresql' for anything it did not
+        recognise, so a format it had not been taught about -- 'parquet', or a
+        typo -- was silently routed to the database instead of being reported.
+        """
+        return normalize_output_format(table_config)
     
     def get_unique_value(self, generator_func, field_key: str, max_attempts: int = 100):
         """Generate unique value for fields with unique constraints"""
@@ -298,11 +311,17 @@ class DataGenerator:
             return {'field': self.fake.word(), 'value': self.fake.sentence()}
     
     def parse_foreign_key(self, fk_string: str) -> Dict:
-        """Parse foreign key string like 'categories.id' into table and field"""
-        if '.' in fk_string:
-            table, field = fk_string.split('.', 1)
-            return {'table': table, 'field': field}
-        return {'table': fk_string, 'field': 'id'}
+        """
+        Parse a foreign key string like 'categories.id' into table and field.
+
+        Kept as a method, and still returning a dict, so existing callers and
+        the root-level demo scripts keep working. The parsing itself now comes
+        from the shared module, which was previously duplicated byte-for-byte
+        here and in database_manager, and implemented a third incompatible way
+        inline in output_handlers.
+        """
+        table, field = _parse_foreign_key(fk_string)
+        return {'table': table, 'field': field}
     
     def _parent_ids(self, ref_table: str, ref_field: str) -> List[Any]:
         """
@@ -376,49 +395,28 @@ class DataGenerator:
             self.logger.warning(f"No data available for foreign key reference to {ref_table}.{ref_field}, using fallback value 1")
             return 1
     
+    @property
+    def graph(self) -> ModelGraph:
+        """The model's table graph, built once."""
+        if self._graph is None:
+            self._graph = ModelGraph(self.model)
+        return self._graph
+
     def get_table_generation_order(self) -> List[Dict]:
-        """Determine correct order to generate data based on dependencies"""
-        tables = {table['name']: table for table in self.model['tables']}
-        dependency_graph = {}
-        
-        # Build dependency graph (excluding self-references)
-        for table_config in self.model['tables']:
-            table_name = table_config['name']
-            dependencies = []
-            
-            for field in table_config['fields']:
-                if 'foreign_key' in field:
-                    fk_info = self.parse_foreign_key(field['foreign_key'])
-                    ref_table = fk_info['table']
-                    if ref_table != table_name:  # Exclude self-references for ordering
-                        dependencies.append(ref_table)
-            
-            dependency_graph[table_name] = list(set(dependencies))  # Remove duplicates
-        
-        # Topological sort
-        ordered_tables = []
-        remaining_tables = set(tables.keys())
-        
-        while remaining_tables:
-            # Find tables with no dependencies in remaining set
-            ready_tables = []
-            for table_name in remaining_tables:
-                if not any(dep in remaining_tables for dep in dependency_graph[table_name]):
-                    ready_tables.append(table_name)
-            
-            if not ready_tables:
-                # Handle circular dependencies - just pick one
-                ready_tables = [next(iter(remaining_tables))]
-                self.logger.warning(f"Circular dependency detected, processing {ready_tables[0]} first")
-            
-            # Sort ready tables for consistent ordering
-            ready_tables.sort()
-            
-            for table_name in ready_tables:
-                ordered_tables.append(tables[table_name])
-                remaining_tables.remove(table_name)
-        
-        return ordered_tables
+        """
+        Determine the correct order to generate data based on dependencies.
+
+        Delegates to the shared topological sort, which breaks ties by name and
+        therefore never depends on set iteration order. Returns table configs
+        rather than names, as before, so callers are unaffected.
+        """
+        graph = self.graph
+        for cycle in graph.cycles():
+            self.logger.warning(
+                "Circular foreign-key dependency among %s; breaking it at %s",
+                ", ".join(cycle), cycle[0],
+            )
+        return [graph.config(name) for name in graph.topological_order()]
     
     def generate_table_data(self, table_config: Dict) -> List[Dict]:
         """Generate all records for a table"""

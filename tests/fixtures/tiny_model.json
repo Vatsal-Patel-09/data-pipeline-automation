@@ -1,0 +1,92 @@
+{
+  "database": {
+    "name": "tiny_fixture",
+    "version": "1.0"
+  },
+  "tables": [
+    {
+      "name": "categories",
+      "sample_size": 8,
+      "output_format": "postgres",
+      "description": "Self-referencing hierarchy with a nullable parent.",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "name", "type": "string", "max_length": 50, "unique": true },
+        { "name": "parent_id", "type": "integer", "foreign_key": "categories.id", "nullable": true },
+        { "name": "is_active", "type": "boolean" },
+        { "name": "created_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "users",
+      "sample_size": 12,
+      "output_format": "csv",
+      "description": "Unique string fields plus both temporal types.",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "username", "type": "string", "max_length": 30, "unique": true },
+        { "name": "email", "type": "string", "max_length": 100, "unique": true },
+        { "name": "birth_date", "type": "date" },
+        { "name": "registration_date", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "products",
+      "sample_size": 15,
+      "output_format": "json",
+      "description": "Decimal scale, text, and a foreign key to a small parent.",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "sku", "type": "string", "max_length": 20, "unique": true },
+        { "name": "category_id", "type": "integer", "foreign_key": "categories.id" },
+        { "name": "price", "type": "decimal", "precision": 10, "scale": 2 },
+        { "name": "weight", "type": "decimal", "precision": 8, "scale": 3 },
+        { "name": "stock_quantity", "type": "integer" },
+        { "name": "description", "type": "text" },
+        { "name": "created_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "orders",
+      "sample_size": 10,
+      "output_format": "api",
+      "description": "Enum domain plus a JSON column.",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "order_number", "type": "string", "max_length": 25, "unique": true },
+        { "name": "user_id", "type": "integer", "foreign_key": "users.id" },
+        { "name": "status", "type": "enum", "values": ["pending", "processing", "shipped", "delivered", "cancelled"] },
+        { "name": "total_amount", "type": "decimal", "precision": 12, "scale": 2 },
+        { "name": "shipping_address", "type": "json" },
+        { "name": "order_date", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "order_items",
+      "sample_size": 20,
+      "output_format": "postgres",
+      "description": "Two foreign keys, no temporal field.",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "order_id", "type": "integer", "foreign_key": "orders.id" },
+        { "name": "product_id", "type": "integer", "foreign_key": "products.id" },
+        { "name": "quantity", "type": "integer" },
+        { "name": "unit_price", "type": "decimal", "precision": 10, "scale": 2 }
+      ]
+    },
+    {
+      "name": "reviews",
+      "sample_size": 10,
+      "output_format": "parquet",
+      "description": "Columnar sink, bounded rating, two parents.",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "product_id", "type": "integer", "foreign_key": "products.id" },
+        { "name": "user_id", "type": "integer", "foreign_key": "users.id" },
+        { "name": "rating", "type": "integer" },
+        { "name": "review_text", "type": "text" },
+        { "name": "created_at", "type": "timestamp" }
+      ]
+    }
+  ]
+}
