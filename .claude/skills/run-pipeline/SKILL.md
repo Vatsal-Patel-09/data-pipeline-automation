@@ -69,8 +69,9 @@ print(f'exports/json/products.json: {got} (expected 20000)', 'OK' if got == 2000
 "
 ```
 
-These paths are read-denied in `.claude/settings.json`, so count them with a script as
-above rather than reading them.
+Count these with a script as above rather than opening them. At full scale
+`products.json` is ~14 MB and `reviews.csv` ~7 MB, so reading them directly wastes a
+lot of context for a number a one-liner gives you.
 
 ## 5. Verify the database
 
