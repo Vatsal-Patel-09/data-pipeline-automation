@@ -1,10 +1,15 @@
- psycopg2-binary
- faker
- fastapi
- uvicorn
- python-dotenv
- click
- pandas
- sqlalchemy
- pydantic
-requests
+# Versions pinned to the development environment where available.
+python-dotenv==1.0.1
+click==8.2.1
+pandas==2.3.2
+sqlalchemy==2.0.45
+pydantic==2.11.7
+requests==2.32.4
+
+# Not installed in the dev environment at pin time, so left unpinned rather
+# than guessed. Pin these from `pip freeze` once a working venv exists.
+# See docs/known-issues.md.
+psycopg2-binary
+faker
+fastapi
+uvicorn

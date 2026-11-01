@@ -50,14 +50,17 @@ The system generates a complete e-commerce database with **6 interconnected tabl
 
 | Table | Records | Output Format | Description |
 |-------|---------|---------------|-------------|
-| `categories` | 25 | PostgreSQL | Product category hierarchy |
-| `users` | 150 | CSV + PostgreSQL* | Customer information |
-| `products` | 300 | JSON + PostgreSQL* | Product catalog |
-| `orders` | 200 | API (PostgreSQL) | Customer orders |
-| `order_items` | 500 | PostgreSQL | Order line items |
-| `reviews` | 400 | CSV | Product reviews |
+| `categories` | 400 | PostgreSQL | Product category hierarchy |
+| `users` | 10,000 | CSV + PostgreSQL* | Customer information |
+| `products` | 20,000 | JSON + PostgreSQL* | Product catalog |
+| `orders` | 15,000 | API (PostgreSQL) | Customer orders |
+| `order_items` | 40,000 | PostgreSQL | Order line items |
+| `reviews` | 15,000 | CSV | Product reviews |
 
-**Total Generated Records**: 1,575 across all formats
+**Total Generated Records**: 100,400 across all formats
+
+Record counts come from the `sample_size` field of each table in
+`ecommerce_model.json`. Change them there, not here.
 
 *Dual destination for foreign key integrity
 
@@ -72,8 +75,8 @@ The system generates a complete e-commerce database with **6 interconnected tabl
 
 1. **Clone Repository**
 ```
-git clone https://github.com/your-username/ecommerce-data-pipeline.git
-cd ecommerce-data-pipeline
+git clone https://github.com/Vatsal-Patel-09/data-pipeline-automation.git
+cd data-pipeline-automation
 ```
 
 2. **Create Virtual Environment**
@@ -93,7 +96,7 @@ source venv/bin/activate
 ```pip install -r requirements.txt```
 
 4. **Configure Environment**
-```cp .env.example .env```
+```cp example.env .env```
 
 Edit .env with your database credentials
 
@@ -109,7 +112,7 @@ Edit .env with your database credentials
 ### 1. Complete Pipeline Execution
 ```python data_pipeline.py --model ecommerce_model.json --env .env```
 
-**Output**: Creates database schema, generates 1,575 records, exports to all formats
+**Output**: Creates database schema, generates 100,400 records, exports to all formats
 
 ### 2. Database Export
 ```python data_pipeline.py export-db --env .env --output exports/database_dump.sql```
@@ -157,23 +160,51 @@ Maintaining foreign key relationships when data spans multiple formats:
 ## 📁 Project Structure
 
 ```
-ecommerce-data-pipeline/
-├── README.md # This file
-├── requirements.txt # Python dependencies
-├── .env.example # Environment template
-├── data_pipeline.py # Main CLI script
-├── api_server.py # FastAPI server
-├── ecommerce_model.json # Data model definition
-├── src/ # Core modules
-│ ├── database_manager.py # Database operations
-│ ├── data_generator.py # Data generation logic
-│ └── output_handlers.py # Multi-format output
-├── exports/ # Generated outputs
-│ ├── csv/ # CSV exports
-│ ├── json/ # JSON exports
-│ └── database_dump.sql # Database backup
-└── logs/ # Application logs
+data-pipeline-automation/
+├── README.md                 # This file
+├── CLAUDE.md                 # AI context: live vs archive, model contract, conventions
+├── requirements.txt          # Python dependencies
+├── example.env               # Environment template (copy to .env)
+├── data_pipeline.py          # Main CLI script
+├── api_server.py             # FastAPI server
+├── ecommerce_model.json      # Data model definition
+├── src/                      # Core modules
+│   ├── database_manager.py   # Schema creation from the model JSON
+│   ├── data_generator.py     # Faker-based data generation
+│   └── output_handlers.py    # Multi-format output
+├── docs/                     # Deep context, loaded on demand
+│   ├── architecture.md       # Call path and two-phase output strategy
+│   ├── data-model.md         # Model-JSON contract in full
+│   ├── branches.md           # What lives on each branch
+│   ├── archive.md            # Out-of-scope files explained
+│   └── known-issues.md       # Known bugs and rough edges
+├── .claude/skills/           # Repo-specific workflows
+│   ├── run-pipeline/         # Run and verify the pipeline
+│   └── add-table/            # Add a table to a model
+└── exports/                  # Generated outputs (untracked)
+    ├── csv/                  # CSV exports
+    ├── json/                 # JSON exports
+    └── database_dump.sql     # Database backup
 ```
+
+## 🤖 AI-Assisted Development
+
+This repo carries a context layer so an AI assistant can work in it without
+guessing. Start here:
+
+- **`CLAUDE.md`** - what is live, what is archived, the model-JSON contract,
+  and the project conventions. Read this first.
+- **`docs/architecture.md`** - the real call path and the two-phase output strategy.
+- **`docs/data-model.md`** - the model-JSON contract in full, plus how field
+  *names* drive generated data realism.
+- **`docs/branches.md`** - what lives on `master`, `vatsal` and `loan_mgmt`.
+  `master` is not the whole project.
+- **`docs/archive.md`** - why `backend.zip`, `report.txt` and the PDF are out of scope.
+- **`docs/known-issues.md`** - known bugs and rough edges, recorded rather than hidden.
+
+Note on the `test_*.py` files: despite the names they are manual print-based
+scripts that need a live database and a running server. They are not a pytest
+suite and there is no CI.
 
 ## 🧪 Testing & Verification
 
@@ -186,8 +217,8 @@ ls -la exports/csv/ # Should contain users.csv, reviews.csv
 ls -la exports/json/ # Should contain products.json
 
 3. Verify database content (using your database client)
-SELECT COUNT() FROM categories; # Should return 25
-SELECT COUNT() FROM order_items; # Should return 500
+SELECT COUNT(*) FROM categories; # Should return 400
+SELECT COUNT(*) FROM order_items; # Should return 40000
 
 4. Test API endpoints
 curl http://localhost:8000/orders?limit=5
@@ -235,7 +266,9 @@ The system includes comprehensive error handling:
 
 **Typical Performance** (on 4GB RAM system):
 - **Schema Creation**: < 30 seconds
-- **Data Generation**: 2-3 minutes for 1,575 records
+- **Data Generation**: 2-3 minutes at the original 1,575-record sample sizes;
+  substantially longer at the current 100,400 (inserts are row-by-row - see
+  `docs/known-issues.md`)
 - **Multi-Format Export**: < 1 minute
 - **API Response Time**: < 200ms for paginated queries
 

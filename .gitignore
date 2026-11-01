@@ -72,3 +72,10 @@ var/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Generated pipeline output - kept on disk, not tracked.
+# These were previously committed (a 34 MB SQL dump among them); untracking
+# them stops new versions landing in history. The old blobs remain in history.
+exports/
+log.txt
+*.sql
