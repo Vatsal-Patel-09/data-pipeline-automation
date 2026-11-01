@@ -2,8 +2,9 @@ import json
 import random
 import logging
 import time
+from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Dict, List, Any, Union
+from typing import Dict, List, Any, Optional, Union
 from faker import Faker
 
 try:
@@ -14,18 +15,36 @@ except ImportError:  # pragma: no cover - supports direct module execution
 class DataGenerator:
     DEFAULT_SEED = 42
 
+    # Fixed anchor for every generated date and timestamp.
+    #
+    # The generator previously anchored temporal fields to the wall clock
+    # ('today' / 'now'), which silently broke the reproducibility the project
+    # documented: a seeded run picked the same offset but from a different
+    # origin, so every table carrying a date or timestamp produced different
+    # data on every run. Measured before this change: five of the six tables in
+    # ecommerce_model.json were nonreproducible across processes, and the one
+    # stable table (order_items) was precisely the one with no temporal field.
+    #
+    # Anchoring to a constant makes the whole dataset reproducible. Pass
+    # reference_date='today' to opt back into wall-clock behaviour.
+    DEFAULT_REFERENCE_DATE = '2026-01-01'
+
     def __init__(self, model_file: str, seed: int = DEFAULT_SEED,
-                 scale: float = 1.0, metrics=None):
+                 scale: float = 1.0, metrics=None,
+                 reference_date: Optional[str] = None):
         """
         Initialize data generator with JSON model.
 
         seed and scale default to the historical values (42 and 1.0), so the
-        default construction is byte-identical to the pre-overhaul generator.
-        scale multiplies every table's sample_size, which turns a 90-minute
-        feedback loop into a seconds-long one during development.
+        default construction matches the pre-overhaul generator on every
+        non-temporal field. scale multiplies every table's sample_size, which
+        turns a 90-minute feedback loop into a seconds-long one during
+        development.
         """
         self.seed = seed
         self.scale = scale
+        self.reference_datetime = self._resolve_reference(reference_date)
+        self.reference_date = self.reference_datetime.date()
         self.metrics = metrics if metrics is not None else NullMetrics()
         self.engine_name = 'legacy'
 
@@ -42,6 +61,27 @@ class DataGenerator:
         self.used_unique_values = {}  # Track unique values to avoid duplicates
 
         self.logger = logging.getLogger(__name__)
+
+    @classmethod
+    def _resolve_reference(cls, reference_date: Optional[str]) -> datetime:
+        """
+        Resolve the temporal anchor.
+
+        None uses the fixed default, which is what makes runs reproducible.
+        'today' or 'now' explicitly opts into wall-clock anchoring and therefore
+        out of reproducibility.
+        """
+        if reference_date is None:
+            reference_date = cls.DEFAULT_REFERENCE_DATE
+        if reference_date.lower() in ('today', 'now'):
+            return datetime.now()
+        try:
+            return datetime.fromisoformat(reference_date)
+        except ValueError:
+            raise ValueError(
+                f"Invalid reference_date {reference_date!r}: expected an ISO "
+                "date such as 2026-01-01, or 'today' for wall-clock anchoring."
+            ) from None
 
     def get_sample_size(self, table_config: Dict) -> int:
         """
@@ -133,9 +173,15 @@ class DataGenerator:
         elif field_type == 'boolean':
             return self.fake.boolean()
         elif field_type == 'date':
-            return self.fake.date_between(start_date='-2y', end_date='today')
+            return self.fake.date_between_dates(
+                date_start=self.reference_date - timedelta(days=730),
+                date_end=self.reference_date,
+            )
         elif field_type == 'timestamp':
-            return self.fake.date_time_between(start_date='-1y', end_date='now')
+            return self.fake.date_time_between_dates(
+                datetime_start=self.reference_datetime - timedelta(days=365),
+                datetime_end=self.reference_datetime,
+            )
         elif field_type == 'text':
             return self.fake.text(max_nb_chars=500)
         elif field_type == 'json':
