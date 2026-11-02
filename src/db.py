@@ -15,6 +15,7 @@ database nobody intended.
 
 import logging
 import os
+import socket
 import statistics
 import time
 from dataclasses import dataclass, field
@@ -139,11 +140,98 @@ def require_db_config() -> DbConfig:
 
 
 def connect(config: Optional[DbConfig] = None):
-    """Open a psycopg2 connection to the resolved target."""
+    """
+    Open a psycopg2 connection to the resolved target.
+
+    On failure, append any address-family diagnosis to the error, so an
+    IPv6-only host reads as an explained problem with a fix rather than as a
+    bare name-resolution failure.
+    """
     import psycopg2
 
     cfg = config or require_db_config()
-    return psycopg2.connect(**cfg.connect_args())
+    try:
+        return psycopg2.connect(**cfg.connect_args())
+    except psycopg2.OperationalError as exc:
+        notes = diagnose_unreachable_host(cfg.host or "")
+        if not notes:
+            raise
+        detail = "\n  - ".join(notes)
+        raise psycopg2.OperationalError(
+            f"{exc}\n\nDiagnosis:\n  - {detail}"
+        ) from exc
+
+
+def diagnose_unreachable_host(host: str) -> List[str]:
+    """
+    Explain why a host could not be resolved or reached.
+
+    Supabase's direct hostnames (db.<ref>.supabase.co) publish only an AAAA
+    record, so they require IPv6. Networks without an IPv6 route get a bare
+    'could not translate host name' from libpq, which gives no hint that the
+    cause is address-family rather than a typo or a paused project. This turns
+    that into something actionable.
+    """
+    notes: List[str] = []
+    if not host:
+        return notes
+
+    has_ipv4 = has_ipv6 = False
+    try:
+        socket.getaddrinfo(host, None, socket.AF_INET)
+        has_ipv4 = True
+    except OSError:
+        pass
+    try:
+        socket.getaddrinfo(host, None, socket.AF_INET6)
+        has_ipv6 = True
+    except OSError:
+        pass
+
+    if not has_ipv4 and not has_ipv6:
+        notes.append(
+            f"'{host}' does not resolve from this machine. If it is a Supabase "
+            "direct host, the project may be paused, or your resolver may be "
+            "unable to return its IPv6-only address."
+        )
+    elif not has_ipv4:
+        notes.append(
+            f"'{host}' publishes no IPv4 address; it is IPv6-only. "
+            "Supabase direct hosts are IPv6-only unless the IPv4 add-on is "
+            "enabled."
+        )
+
+    if not has_ipv4:
+        route = _has_ipv6_route()
+        if route is False:
+            notes.append(
+                "This machine has no usable IPv6 route, so an IPv6-only host "
+                "cannot be reached at all."
+            )
+        notes.append(
+            "Fix: use the Supavisor session pooler instead, which is IPv4. In "
+            "the Supabase dashboard choose Connect, then 'Session pooler', and "
+            "put that URI in DATABASE_URL. Use its port 5432 (session mode), "
+            "not 6543 (transaction mode), because transaction mode does not "
+            "persist session-level SET and makes COPY unreliable."
+        )
+
+    return notes
+
+
+def _has_ipv6_route() -> Optional[bool]:
+    """Whether a global IPv6 destination is routable. None if undetermined."""
+    probe = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+    try:
+        probe.settimeout(3)
+        probe.connect(("2001:4860:4860::8888", 53))
+        return True
+    except OSError:
+        return False
+    except Exception:
+        return None
+    finally:
+        probe.close()
 
 
 def preflight(config: DbConfig, metrics=None) -> Dict[str, Any]:
