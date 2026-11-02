@@ -34,10 +34,12 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 REPO = os.path.dirname(os.path.abspath(__file__))
-PAGE = os.path.join(REPO, "overview.html")
+SITE = os.path.join(REPO, "site")
+PAGE = os.path.join(SITE, "index.html")
 
 # Load the environment up front so /api/status can report truthfully
 # whether a database is reachable before anyone presses the button.
@@ -324,6 +326,9 @@ async def events():
     )
 
 
+app.mount("/", StaticFiles(directory=SITE, html=True), name="site")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
@@ -339,7 +344,7 @@ def main() -> None:
     print("  Pipeline demo server")
     print("=" * 64)
     print(f"  Page:      {url}")
-    print(f"  Serving:   {PAGE}")
+    print(f"  Serving:   {SITE}")
     print("  The Live run section will offer a real run button.")
     print("  Press Ctrl+C to stop.")
     print("=" * 64)

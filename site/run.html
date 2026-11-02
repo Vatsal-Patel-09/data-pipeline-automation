@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live run &middot; SynthForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">Synth<span>Forge</span></a>
+    <ul id="nav-links"></ul>
+  </div>
+</nav>
+
+<section id="run" style="border-top:none;padding-top:54px">
+  <div class="wrap">
+    <div class="head">
+      <h2>Watch the pipeline run</h2>
+      <p class="sub">
+        A replay of a real run against PostgreSQL in Ireland, from a laptop in
+        India. Every duration, row count, byte count and round trip is measured,
+        not invented. Each stage reports its own state as it goes.
+      </p>
+      <p class="sub">
+        Served by <code>serve_demo.py</code> this page gets a second row of
+        controls that trigger the actual Python pipeline, and its stages and logs
+        stream back here as they happen.
+      </p>
+    </div>
+
+<div class="console">
+      <div class="cbar">
+        <button id="btn-run" class="solid">Run pipeline</button>
+        <button id="btn-reset">Reset</button>
+        <div class="seg" role="group" aria-label="Playback speed">
+          <button data-speed="1">1&times;</button>
+          <button data-speed="4" class="on">4&times;</button>
+          <button data-speed="12">12&times;</button>
+        </div>
+        <div class="seg grow" role="group" aria-label="Load strategy">
+          <button data-strat="copy" class="on">copy</button>
+          <button data-strat="execute_values">execute_values</button>
+          <button data-strat="rowwise">rowwise</button>
+        </div>
+        <div class="clock"><b id="clk">0.00</b> / <span id="clk-tot">69.60</span> s</div>
+      </div>
+      <div class="cbar" id="live-bar" hidden>
+        <span class="livedot"></span>
+        <span class="livetxt" id="live-txt">Server connected &mdash; this can run the real pipeline</span>
+        <button id="btn-live" class="solid">Run it for real</button>
+        <button id="btn-live-stop" disabled>Stop</button>
+        <div class="fld">
+          <label for="live-scale">volume</label>
+          <select id="live-scale">
+            <option value="0.01">1% &middot; ~1,000 rows</option>
+            <option value="0.05" selected>5% &middot; ~5,000 rows</option>
+            <option value="0.25">25% &middot; ~25,000 rows</option>
+            <option value="1">100% &middot; 100,400 rows</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="live-strat">strategy</label>
+          <select id="live-strat">
+            <option value="copy" selected>copy</option>
+            <option value="execute_values">execute_values</option>
+            <option value="rowwise">rowwise</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="live-seed">seed</label>
+          <input id="live-seed" type="number" value="42" min="0" style="width:78px">
+        </div>
+        <div class="fld">
+          <label for="live-offline">mode</label>
+          <select id="live-offline">
+            <option value="0" selected>database</option>
+            <option value="1">offline</option>
+          </select>
+        </div>
+      </div>
+      <div class="cgrid">
+        <div class="stagecol" id="stages"></div>
+        <div class="workcol">
+          <div class="wtitle" id="work-title">Idle &mdash; press Run pipeline</div>
+          <div id="work"></div>
+          <div class="sinks" id="sinks"></div>
+          <div class="verif" id="verif"></div>
+        </div>
+        <div class="logcol">
+          <div class="lh">run log</div>
+          <div class="log" id="log" role="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols" style="margin-top:26px">
+      <div>
+        <h3>What to try</h3>
+        <p class="sub" style="font-size:15.5px">
+          Switch the load strategy and watch the clock change. Row-at-a-time
+          sends one <code>INSERT</code> per row, which is 85,400 sequential
+          network round trips at roughly three tenths of a second each. The
+          replay compresses it, because the real thing takes over seven hours.
+        </p>
+      </div>
+      <div>
+        <h3>Something the measurement exposed</h3>
+        <p class="sub" style="font-size:15.5px">
+          Of the 35.03&nbsp;s write step, only 17.39&nbsp;s is loading. The rest
+          is <b>five separate connection handshakes</b>, one per table, because
+          the loader opens its own connection when none is passed in. Reusing one
+          would roughly halve that step. Listed as open work rather than quietly
+          fixed in the prose.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Replay figures come from <code>runs/headline/full-default-run.json</code>.
+      Live figures come from whatever the pipeline does on your machine, right
+      now.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+"use strict";
+var CONNECT_PER_TABLE = 3.42, PRE = 8.88, SCHEMA_S = 3.06, FINALIZE_S = 11.75;
+var STAGE_DEFS = [
+  { id: "preflight", nm: "preflight", note: "connect · probe round trip" },
+  { id: "schema",    nm: "schema",    note: "12 statements, 1 round trip" },
+  { id: "generate",  nm: "generate",  note: "topological order, then repair" },
+  { id: "output",    nm: "write",     note: "postgres, then file sinks" },
+  { id: "finalize",  nm: "finalize",  note: "constraints · sequences · verify" },
+  { id: "report",    nm: "report",    note: "run_report.json" }
+];
+
+function buildTimeline(strategy) {
+  var st = STRATS[strategy], scale = st.load / STRATS.copy.load, ph = [], t = 0;
+  function add(stage, kind, dur, data) {
+    ph.push({ stage: stage, kind: kind, t0: t, t1: t + dur, data: data || {} }); t += dur;
+  }
+  add("preflight", "connect", PRE * 0.42, {});
+  add("preflight", "rtt", PRE * 0.58, {});
+  add("schema", "ddl", SCHEMA_S, {});
+  TABLES.forEach(function (tb) { add("generate", "gen", tb.gen, { table: tb.n }); });
+  add("generate", "repair", 0.45, {});
+  LOAD_ORDER.forEach(function (name) {
+    var tb = TABLES.filter(function (x) { return x.n === name; })[0];
+    add("output", "connect", CONNECT_PER_TABLE, { table: name });
+    add("output", "load", Math.max(tb.load * scale, 0.05), { table: name });
+  });
+  FILES.forEach(function (f) {
+    add("output", "file", Math.max(f.s, 0.05), { table: f.t, sink: f.sink });
+  });
+  add("finalize", "constraints", FINALIZE_S * 0.55, {});
+  add("finalize", "sequences", FINALIZE_S * 0.16, {});
+  add("finalize", "verify", FINALIZE_S * 0.29, {});
+  add("report", "report", 0.01, {});
+  return { phases: ph, total: t, strategy: strategy, projected: st.projected };
+}
+
+function buildLog(tl) {
+  var L = [];
+  function at(t, cls, msg) { L.push({ t: t, cls: cls, msg: msg }); }
+  function find(stage, kind, table) {
+    return tl.phases.filter(function (p) {
+      return p.stage === stage && p.kind === kind && (table === undefined || p.data.table === table);
+    })[0];
+  }
+  at(0.02, "", "Pipeline initialized with model: ecommerce_model.json");
+  at(find("preflight", "connect").t1, "", "Database connection established (supabase, port 5432)");
+  at(find("preflight", "rtt").t1, "hi", "Median database round-trip time: 300.969 ms");
+  var sc = find("schema", "ddl");
+  at(sc.t0 + 0.1, "", "STEP 1  Creating database schema");
+  at(sc.t0 + 0.3, "", "Applying schema: 6 tables, 12 statements in one round trip");
+  at(sc.t1, "ok", "Schema created (foreign keys deferred)");
+  at(sc.t1 + 0.02, "", "STEP 2  Generating data");
+  TABLES.forEach(function (tb) {
+    var p = find("generate", "gen", tb.n);
+    at(p.t0, "", "Generating " + fmt(tb.rows) + " records for table: " + tb.n);
+    at(p.t1, "", "Generated " + fmt(tb.rows) + " records for " + tb.n + " in " + tb.gen.toFixed(2) + "s");
+  });
+  at(find("generate", "repair").t1, "ok",
+     "Semantic pass: 10,000 birth dates, 29,781 dates reordered, 40,000 line totals");
+  var first = find("output", "connect", "categories");
+  at(first.t0, "", "STEP 3  Writing to all destinations");
+  at(first.t0 + 0.05, "", "PHASE 1  PostgreSQL tables (dependencies first)");
+  LOAD_ORDER.forEach(function (name) {
+    var tb = TABLES.filter(function (x) { return x.n === name; })[0];
+    var c = find("output", "connect", name), l = find("output", "load", name);
+    at(c.t0, "warn", "Opening a new connection for " + name + " (handshake ~" + CONNECT_PER_TABLE.toFixed(1) + "s)");
+    at(l.t0, "", "Loading " + fmt(tb.rows) + " records into " + name + " via " + tl.strategy);
+    at(l.t1, "ok", "Loaded " + fmt(tb.rows) + " into " + name + " (" + fmt(tb.bytes) + " bytes)");
+  });
+  var f0 = find("output", "file");
+  if (f0) at(f0.t0 - 0.05, "", "PHASE 2  file destinations");
+  FILES.forEach(function (f) {
+    var p = tl.phases.filter(function (x) {
+      return x.kind === "file" && x.data.table === f.t && x.data.sink === f.sink; })[0];
+    at(p.t1, "", "Exported " + f.t + " to " + f.sink + " (" + fmt(f.bytes) + " bytes)");
+  });
+  var cn = find("finalize", "constraints");
+  at(cn.t0, "", "STEP 4  Finalising and verifying");
+  at(cn.t0 + 0.2, "", "Validating and adding 7 foreign key constraints");
+  at(cn.t1, "ok", "All foreign key constraints added and validated");
+  at(find("finalize", "sequences").t1, "ok", "Advanced 6 primary key sequences");
+  at(find("finalize", "verify").t1, "ok", "Row counts verified for 5 tables");
+  at(tl.total - 0.01, "hi", "PIPELINE EXECUTION FINISHED SUCCESSFULLY");
+  at(tl.total, "", "Run report written to runs/run_report.json");
+  return L.sort(function (a, b) { return a.t - b.t; });
+}
+
+/* ============ simulator ============ */
+(function () {
+  var strategy = "copy", speed = 4, tl = buildTimeline("copy"), logLines = buildLog(tl);
+  var clock = 0, running = false, raf = null, last = 0, emitted = 0;
+  var stagesHost = $("#stages"), workHost = $("#work"), sinkHost = $("#sinks");
+  var verifHost = $("#verif"), logHost = $("#log"), stageEls = {};
+
+  function paintStages() {
+    stagesHost.innerHTML = "";
+    STAGE_DEFS.forEach(function (sd) {
+      var d = el("div", "stage"), row = el("div", "srow");
+      row.appendChild(el("span", "dot"));
+      row.appendChild(el("span", "nm", sd.nm));
+      row.appendChild(el("span", "dur", "—"));
+      d.appendChild(row);
+      d.appendChild(el("div", "note", sd.note));
+      var pb = el("div", "pbar"); pb.appendChild(el("i")); d.appendChild(pb);
+      stagesHost.appendChild(d); stageEls[sd.id] = d;
+    });
+    var tot = el("div", "tot");
+    var b = el("b", null, "0.00 s"); b.id = "tot-v";
+    var sp = el("span", null, "idle"); sp.id = "tot-x";
+    tot.appendChild(b); tot.appendChild(document.createElement("br")); tot.appendChild(sp);
+    stagesHost.appendChild(tot);
+  }
+  function span(id) {
+    var ps = tl.phases.filter(function (p) { return p.stage === id; });
+    return ps.length ? { t0: ps[0].t0, t1: ps[ps.length - 1].t1 } : null;
+  }
+  function paintSinks() {
+    sinkHost.innerHTML = "";
+    ["postgres", "csv", "json", "parquet", "api"].forEach(function (s) {
+      var d = el("div", "sink"); d.setAttribute("data-sink", s);
+      d.appendChild(el("div", "sn", s));
+      d.appendChild(el("div", "sv", "0"));
+      d.appendChild(el("div", "sx", "waiting"));
+      sinkHost.appendChild(d);
+    });
+  }
+  function paintVerif() {
+    verifHost.innerHTML = "";
+    [["7 of 7 foreign key constraints validated", "constraints"],
+     ["0 referential integrity violations", "constraints"],
+     ["6 primary key sequences advanced", "sequences"],
+     ["row counts matched on every table", "verify"],
+     ["application write probe passed", "verify"]].forEach(function (v) {
+      var d = el("div"); d.setAttribute("data-after", v[1]);
+      d.appendChild(el("span", "tick", "✓"));
+      d.appendChild(el("span", null, v[0]));
+      verifHost.appendChild(d);
+    });
+  }
+  function reset() {
+    tl = buildTimeline(strategy); logLines = buildLog(tl);
+    clock = 0; emitted = 0; running = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    paintStages(); paintSinks(); paintVerif();
+    logHost.innerHTML = ""; workHost.innerHTML = "";
+    $("#work-title").textContent = "Idle — press Run pipeline";
+    $("#btn-run").textContent = "Run pipeline";
+    $("#clk-tot").textContent = tl.projected ? "25,961" : tl.total.toFixed(2);
+    render();
+  }
+  function emitLogs() {
+    while (emitted < logLines.length && logLines[emitted].t <= clock) {
+      var L = logLines[emitted++];
+      var line = el("div", "l" + (L.cls ? " " + L.cls : ""));
+      var pad = L.t.toFixed(2);
+      while (pad.length < 6) pad = " " + pad;
+      line.appendChild(el("span", "ts", pad + "  "));
+      line.appendChild(document.createTextNode(L.msg));
+      logHost.appendChild(line);
+      logHost.scrollTop = logHost.scrollHeight;
+    }
+  }
+  function bar(name, frac, value, done, active) {
+    var row = el("div", "trow" + (done ? " d" : "") + (active ? " a" : ""));
+    row.appendChild(el("div", "tn", name));
+    var t = el("div", "tb"), i = el("i");
+    i.style.width = (frac * 100) + "%"; t.appendChild(i); row.appendChild(t);
+    row.appendChild(el("div", "tv", value));
+    return row;
+  }
+  function frac(p) { return p ? Math.max(0, Math.min(1, (clock - p.t0) / (p.t1 - p.t0))) : 0; }
+  function phase(kind, table) {
+    return tl.phases.filter(function (x) {
+      return x.kind === kind && (table === undefined || x.data.table === table); })[0];
+  }
+  function setSink(name, value, extra, lit) {
+    var node = $('.sink[data-sink="' + name + '"]');
+    if (!node) return;
+    $(".sv", node).textContent = value;
+    $(".sx", node).textContent = extra;
+    node.classList.toggle("lit", !!lit);
+  }
+  function renderWork(cur) {
+    var title = $("#work-title");
+    if (!cur) return;
+    workHost.innerHTML = "";
+    if (cur.stage === "generate") {
+      title.textContent = cur.kind === "repair" ? "Generate · semantic repair"
+        : "Generate · " + (cur.data.table || "");
+      TABLES.forEach(function (tb) {
+        var f = frac(phase("gen", tb.n));
+        workHost.appendChild(bar(tb.n, f, fmt(tb.rows * f) + " / " + fmt(tb.rows), f >= 1, cur.data.table === tb.n));
+      });
+    } else if (cur.stage === "output") {
+      title.textContent = cur.kind === "connect" ? "Write · opening connection for " + cur.data.table
+        : cur.kind === "file" ? "Write · file sinks"
+        : "Write · loading " + cur.data.table + " via " + tl.strategy;
+      LOAD_ORDER.forEach(function (name) {
+        var tb = TABLES.filter(function (x) { return x.n === name; })[0];
+        var cf = frac(phase("connect", name)), lf = frac(phase("load", name));
+        var label = lf > 0 ? fmt(tb.rows * lf) + " / " + fmt(tb.rows)
+          : (cf > 0 && cf < 1 ? "handshake…" : "queued");
+        workHost.appendChild(bar(name, lf, label, lf >= 1, cur.data.table === name));
+      });
+    } else if (cur.stage === "finalize") {
+      title.textContent = "Finalize · " + cur.kind;
+      [["add foreign keys", "constraints"], ["advance sequences", "sequences"], ["verify row counts", "verify"]]
+        .forEach(function (x) {
+          var f = frac(phase(x[1]));
+          workHost.appendChild(bar(x[0], f, f >= 1 ? "done" : (f > 0 ? "running" : "queued"), f >= 1, cur.kind === x[1]));
+        });
+    } else if (cur.stage === "preflight" || cur.stage === "schema") {
+      title.textContent = cur.stage === "schema" ? "Schema · creating 6 tables"
+        : (cur.kind === "rtt" ? "Preflight · probing round-trip time" : "Preflight · connecting");
+      var f = frac(cur);
+      if (cur.kind === "rtt") workHost.appendChild(bar("20 probes", f, fmt(20 * f) + " / 20", f >= 1, true));
+      else if (cur.stage === "schema") workHost.appendChild(bar("12 statements", f, f >= 1 ? "committed" : "sending", f >= 1, true));
+      else workHost.appendChild(bar("tcp + tls", f, f >= 1 ? "established" : "connecting", f >= 1, true));
+    } else {
+      title.textContent = "Complete · run report written";
+    }
+  }
+  function render() {
+    var shown = tl.projected ? clock / tl.total * STRATS.rowwise.load : clock;
+    $("#clk").textContent = tl.projected ? fmt(shown) : clock.toFixed(2);
+
+    STAGE_DEFS.forEach(function (sd) {
+      var sp = span(sd.id), node = stageEls[sd.id];
+      if (!sp || !node) return;
+      // At clock 0 the first stage is technically inside its own span, which
+      // made the console look like it had already started before Run was
+      // pressed. Nothing is active until the clock has actually moved.
+      var done = clock >= sp.t1;
+      var active = clock > 0 && clock >= sp.t0 && clock < sp.t1;
+      node.classList.toggle("done", done);
+      node.classList.toggle("active", active);
+      var pct = Math.max(0, Math.min(1, (clock - sp.t0) / (sp.t1 - sp.t0)));
+      $(".pbar i", node).style.width = (pct * 100) + "%";
+      var dur = sp.t1 - sp.t0;
+      $(".dur", node).textContent = (done || active)
+        ? ((sd.id === "output" && tl.projected) ? fmt(dur / tl.total * STRATS.rowwise.load) + " s" : dur.toFixed(2) + " s")
+        : "—";
+    });
+    var tv = $("#tot-v"), tx = $("#tot-x");
+    if (tv) {
+      tv.textContent = (tl.projected ? fmt(shown) : clock.toFixed(2)) + " s";
+      tx.textContent = clock >= tl.total ? "complete"
+        : (running ? "running · " + speed + "×" : (clock > 0 ? "paused" : "idle"));
+    }
+
+    var cur = tl.phases.filter(function (p) { return clock >= p.t0 && clock < p.t1; })[0];
+    if (!cur && clock >= tl.total) cur = { stage: "report", kind: "report", data: {} };
+    if (!cur) cur = tl.phases[0];
+    renderWork(cur);
+
+    var pgRows = 0;
+    LOAD_ORDER.forEach(function (name) {
+      var tb = TABLES.filter(function (x) { return x.n === name; })[0];
+      pgRows += tb.rows * frac(phase("load", name));
+    });
+    setSink("postgres", fmt(pgRows), pgRows > 0 ? "rows loaded" : "waiting", pgRows > 0);
+    ["csv", "json", "parquet"].forEach(function (sink) {
+      var fs = FILES.filter(function (f) { return f.sink === sink; });
+      if (!fs.length) { setSink(sink, "—", "not used by this model", false); return; }
+      var rows = 0, any = false;
+      fs.forEach(function (f) {
+        var p = tl.phases.filter(function (x) {
+          return x.kind === "file" && x.data.table === f.t && x.data.sink === sink; })[0];
+        var ff = frac(p);
+        rows += TABLES.filter(function (x) { return x.n === f.t; })[0].rows * ff;
+        if (ff > 0) any = true;
+      });
+      setSink(sink, fmt(rows), any ? "rows written" : "waiting", any);
+    });
+    var of = frac(phase("load", "orders"));
+    setSink("api", fmt(15000 * of), of > 0 ? "rows servable" : "waiting", of > 0);
+
+    $$("#verif div").forEach(function (d) {
+      var p = phase(d.getAttribute("data-after"));
+      d.classList.toggle("on", !!p && clock >= p.t1);
+    });
+  }
+  function frame(ts) {
+    if (!last) last = ts;
+    var dt = Math.min((ts - last) / 1000, 0.2); last = ts;
+    clock = Math.min(clock + dt * speed, tl.total);
+    emitLogs(); render();
+    if (clock >= tl.total) { running = false; $("#btn-run").textContent = "Run again"; render(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+
+  reset();
+  $("#btn-run").addEventListener("click", function () {
+    if (clock >= tl.total) reset();
+    running = !running;
+    $("#btn-run").textContent = running ? "Pause" : "Resume";
+    if (running) { last = 0; raf = requestAnimationFrame(frame); }
+    else if (raf) { cancelAnimationFrame(raf); raf = null; render(); }
+  });
+  $("#btn-reset").addEventListener("click", reset);
+  // Live mode takes over the same console, so it needs to halt the replay.
+  window.__replay = { stop: function () {
+    running = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    $("#btn-run").textContent = "Run pipeline";
+  } };
+  $$("[data-speed]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      $$("[data-speed]").forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on"); speed = parseFloat(b.getAttribute("data-speed")); render();
+    });
+  });
+  $$("[data-strat]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      $$("[data-strat]").forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on"); strategy = b.getAttribute("data-strat"); reset();
+    });
+  });
+})();
+
+
+/* ============ live mode ============
+   When this page is served by serve_demo.py it can trigger the real Python
+   pipeline. Stage transitions, per-table completions and every log line arrive
+   over Server-Sent Events and drive the same console the replay uses. Opened
+   straight from disk there is no server, so the page stays in replay mode. */
+(function () {
+  var LIVE_STAGES = [
+    { id: "schema",   nm: "schema",   note: "DDL, foreign keys deferred" },
+    { id: "generate", nm: "generate", note: "topological order, then repair" },
+    { id: "output",   nm: "write",    note: "postgres, then file sinks" },
+    { id: "finalize", nm: "finalize", note: "constraints · sequences · verify" },
+    { id: "report",   nm: "report",   note: "run_report.json" }
+  ];
+  var stagesHost = document.getElementById("stages");
+  var workHost = document.getElementById("work");
+  var sinkHost = document.getElementById("sinks");
+  var verifHost = document.getElementById("verif");
+  var logHost = document.getElementById("log");
+  var titleEl = document.getElementById("work-title");
+  var clkEl = document.getElementById("clk");
+  var clkTot = document.getElementById("clk-tot");
+  if (!stagesHost) return;
+
+  var es = null, t0 = 0, ticker = null;
+  var stageEls = {}, tableRows = {}, sinkRows = {}, plan = null;
+
+  function mk(t, c, x) {
+    var n = document.createElement(t);
+    if (c) n.className = c;
+    if (x !== undefined) n.textContent = x;
+    return n;
+  }
+  function num(n) { return Math.round(n).toLocaleString("en-US"); }
+
+  function paintStages() {
+    stagesHost.innerHTML = "";
+    stageEls = {};
+    LIVE_STAGES.forEach(function (sd) {
+      var d = mk("div", "stage"), row = mk("div", "srow");
+      row.appendChild(mk("span", "dot"));
+      row.appendChild(mk("span", "nm", sd.nm));
+      row.appendChild(mk("span", "dur", "—"));
+      d.appendChild(row);
+      d.appendChild(mk("div", "note", sd.note));
+      var pb = mk("div", "pbar"); pb.appendChild(mk("i")); d.appendChild(pb);
+      stagesHost.appendChild(d);
+      stageEls[sd.id] = d;
+    });
+    var tot = mk("div", "tot");
+    var b = mk("b", null, "0.00 s"); b.id = "live-tot";
+    var sp = mk("span", null, "waiting"); sp.id = "live-tot-x";
+    tot.appendChild(b);
+    tot.appendChild(document.createElement("br"));
+    tot.appendChild(sp);
+    stagesHost.appendChild(tot);
+  }
+
+  function paintSinks() {
+    sinkHost.innerHTML = "";
+    sinkRows = {};
+    ["postgres", "csv", "json", "parquet", "api"].forEach(function (s) {
+      var d = mk("div", "sink");
+      d.appendChild(mk("div", "sn", s));
+      var v = mk("div", "sv", "0");
+      var x = mk("div", "sx", "waiting");
+      d.appendChild(v); d.appendChild(x);
+      sinkHost.appendChild(d);
+      sinkRows[s] = { node: d, v: v, x: x, rows: 0, bytes: 0 };
+    });
+  }
+
+  function bumpSink(name, rows, bytes, label) {
+    var s = sinkRows[name];
+    if (!s) return;
+    s.rows += rows || 0;
+    s.bytes += bytes || 0;
+    s.v.textContent = num(s.rows);
+    s.x.textContent = label || (s.bytes ? num(s.bytes / 1024) + " KB" : "rows");
+    s.node.classList.add("lit");
+  }
+
+  function planRows(stage) {
+    workHost.innerHTML = "";
+    tableRows = {};
+    if (!plan) return;
+    plan.tables.forEach(function (t) {
+      if (stage === "output" && plan.postgres_closure.indexOf(t.table) < 0) return;
+      var row = mk("div", "trow");
+      row.appendChild(mk("div", "tn", t.table));
+      var tb = mk("div", "tb"), i = mk("i");
+      tb.appendChild(i); row.appendChild(tb);
+      var tv = mk("div", "tv", "queued");
+      row.appendChild(tv);
+      workHost.appendChild(row);
+      tableRows[t.table] = { row: row, bar: i, val: tv, rows: t.rows };
+    });
+  }
+
+  function markTable(name, label, done) {
+    var r = tableRows[name];
+    if (!r) return;
+    r.bar.style.width = done ? "100%" : "60%";
+    r.val.textContent = label;
+    r.row.classList.toggle("d", !!done);
+    r.row.classList.toggle("a", !done);
+  }
+
+  function logLine(level, msg) {
+    var cls = "l";
+    if (level === "ERROR" || level === "CRITICAL" || level === "WARNING") cls += " warn";
+    else if (/verified|validated|passed|SUCCESS|added and/i.test(msg)) cls += " ok";
+    var line = mk("div", cls);
+    var secs = (performance.now() - t0) / 1000;
+    var pad = (secs > 0 ? secs.toFixed(2) : "0.00");
+    while (pad.length < 6) pad = " " + pad;
+    line.appendChild(mk("span", "ts", pad + "  "));
+    line.appendChild(document.createTextNode(msg));
+    logHost.appendChild(line);
+    while (logHost.childNodes.length > 600) logHost.removeChild(logHost.firstChild);
+    logHost.scrollTop = logHost.scrollHeight;
+  }
+
+  function setStage(id, state, duration) {
+    var node = stageEls[id];
+    if (!node) return;
+    if (state === "start") {
+      node.classList.add("active");
+      node.querySelector(".pbar i").style.width = "45%";
+      node.querySelector(".dur").textContent = "running";
+      titleEl.textContent = "Live · " + id;
+      if (id === "generate" || id === "output") planRows(id);
+    } else {
+      node.classList.remove("active");
+      node.classList.add("done");
+      node.querySelector(".pbar i").style.width = "100%";
+      if (duration !== undefined && duration !== null) {
+        node.querySelector(".dur").textContent = duration.toFixed(2) + " s";
+      }
+    }
+  }
+
+  function resetLive() {
+    paintStages();
+    paintSinks();
+    verifHost.innerHTML = "";
+    workHost.innerHTML = "";
+    logHost.innerHTML = "";
+    tableRows = {};
+    plan = null;
+    titleEl.textContent = "Live — waiting for the pipeline";
+    clkTot.textContent = "live";
+  }
+
+  function startTicker() {
+    t0 = performance.now();
+    if (ticker) clearInterval(ticker);
+    ticker = setInterval(function () {
+      var secs = (performance.now() - t0) / 1000;
+      clkEl.textContent = secs.toFixed(2);
+      var tv = document.getElementById("live-tot");
+      if (tv) tv.textContent = secs.toFixed(2) + " s";
+    }, 100);
+  }
+  function stopTicker() { if (ticker) { clearInterval(ticker); ticker = null; } }
+
+  function showVerification(report) {
+    verifHost.innerHTML = "";
+    var v = (report && report.verification) || {};
+    var items = [];
+    if (v.fk_constraints_added !== undefined) {
+      items.push([v.fk_violations === 0, v.fk_constraints_added + " foreign key constraints validated"]);
+    }
+    if (v.fk_violations !== undefined) {
+      items.push([v.fk_violations === 0, v.fk_violations + " referential integrity violations"]);
+    }
+    if (v.sequences_advanced !== undefined) {
+      items.push([true, v.sequences_advanced + " primary key sequences advanced"]);
+    }
+    if (v.row_counts_match !== undefined) {
+      items.push([v.row_counts_match, "row counts " + (v.row_counts_match ? "matched on every table" : "DID NOT match")]);
+    }
+    if (v.write_probe !== undefined) {
+      items.push([v.write_probe === "passed", "application write probe " + v.write_probe]);
+    }
+    items.forEach(function (it) {
+      var d = mk("div", it[0] ? "on" : "fail");
+      d.appendChild(mk("span", "tick", it[0] ? "✓" : "✗"));
+      d.appendChild(mk("span", null, it[1]));
+      verifHost.appendChild(d);
+    });
+  }
+
+  function setBusy(b) {
+    var run = document.getElementById("btn-live");
+    var stop = document.getElementById("btn-live-stop");
+    if (!run) return;
+    run.disabled = b;
+    stop.disabled = !b;
+    run.textContent = b ? "Running…" : "Run it for real";
+  }
+
+  function handle(ev) {
+    if (ev.type === "run" && ev.state === "start") {
+      resetLive();
+      startTicker();
+      logLine("INFO", "Run started · scale " + ev.options.scale
+        + " · " + ev.options.strategy
+        + (ev.options.offline ? " · offline" : ""));
+    } else if (ev.type === "plan") {
+      plan = ev;
+      logLine("INFO", "Plan: " + ev.tables.length + " tables · "
+        + ev.order.join(" → "));
+      planRows("generate");
+    } else if (ev.type === "stage") {
+      setStage(ev.stage, ev.state, ev.duration_s);
+    } else if (ev.type === "table") {
+      if (ev.phase === "generate") {
+        markTable(ev.table, num(ev.rows) + " rows · " + ev.duration_s.toFixed(2) + "s", true);
+      } else if (ev.phase === "load") {
+        markTable(ev.table, num(ev.rows) + " rows · " + ev.duration_s.toFixed(2) + "s", true);
+        bumpSink("postgres", ev.rows, ev.bytes_sent, num(ev.roundtrips) + " trips");
+      }
+    } else if (ev.type === "file") {
+      bumpSink(ev.sink, ev.rows, ev.bytes, num(ev.bytes / 1024) + " KB");
+    } else if (ev.type === "log") {
+      logLine(ev.level, ev.msg);
+    } else if (ev.type === "run") {
+      stopTicker();
+      if (ev.duration_s !== undefined) clkEl.textContent = ev.duration_s.toFixed(2);
+      var tx = document.getElementById("live-tot-x");
+      if (tx) tx.textContent = ev.state === "done" ? "complete" : "failed";
+      titleEl.textContent = ev.state === "done" ? "Live · complete" : "Live · failed";
+      if (ev.report) showVerification(ev.report);
+      if (ev.error) logLine("ERROR", ev.error);
+      setBusy(false);
+    }
+  }
+
+  function connect() {
+    if (es) return;
+    es = new EventSource("/api/events");
+    es.onmessage = function (m) {
+      try { handle(JSON.parse(m.data)); } catch (e) { /* ignore a bad frame */ }
+    };
+  }
+
+  fetch("/api/status", { cache: "no-store" }).then(function (r) {
+    if (!r.ok) throw new Error("no server");
+    return r.json();
+  }).then(function (s) {
+    if (!s.live) return;
+    var bar = document.getElementById("live-bar");
+    bar.hidden = false;
+    document.getElementById("live-txt").textContent = s.database_configured
+      ? "Server connected · database " + s.database_kind + " · this runs the real pipeline"
+      : "Server connected · no database configured · use offline mode";
+    if (!s.database_configured) document.getElementById("live-offline").value = "1";
+    connect();
+
+    document.getElementById("btn-live").addEventListener("click", function () {
+      if (window.__replay && window.__replay.stop) window.__replay.stop();
+      setBusy(true);
+      resetLive();
+      fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scale: parseFloat(document.getElementById("live-scale").value),
+          seed: parseInt(document.getElementById("live-seed").value, 10) || 42,
+          strategy: document.getElementById("live-strat").value,
+          offline: document.getElementById("live-offline").value === "1",
+          realism: true,
+          verify_writes: true
+        })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (j.error) { logLine("ERROR", j.error); setBusy(false); }
+      }).catch(function (e) { logLine("ERROR", String(e)); setBusy(false); });
+    });
+
+    document.getElementById("btn-live-stop").addEventListener("click", function () {
+      fetch("/api/stop", { method: "POST" });
+    });
+  }).catch(function () {
+    var host = document.querySelector("#run .wrap");
+    if (!host || document.getElementById("live-hint")) return;
+    var hint = document.createElement("div");
+    hint.className = "hintbar";
+    hint.id = "live-hint";
+    hint.innerHTML = "Replay mode. To trigger the real Python pipeline from this "
+      + "page and stream its stages and logs back here, run "
+      + "<code>python serve_demo.py</code> and open the address it prints.";
+    host.appendChild(hint);
+  });
+})();
+
+
+</script>
+</body>
+</html>

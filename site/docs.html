@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs &middot; SynthForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">Synth<span>Forge</span></a>
+    <ul id="nav-links"></ul>
+  </div>
+</nav>
+
+<section style="border-top:none;padding-top:54px">
+  <div class="wrap">
+    <div class="head">
+      <h2>Get started</h2>
+      <p class="sub">Nothing here needs a database except
+        <code>run</code> and <code>export-db</code>.</p>
+    </div>
+<div class="cols3">
+      <div>
+        <h3>Install</h3>
+        <pre class="code">pip install -r requirements.txt
+cp example.env .env</pre>
+      </div>
+      <div>
+        <h3>Without a database</h3>
+        <pre class="code"><span class="c"># plan only, sub-second</span>
+python data_pipeline.py --dry-run
+
+<span class="c"># render DDL + payloads</span>
+python data_pipeline.py --offline
+
+<span class="c"># serve with no database</span>
+python api_server.py --offline</pre>
+      </div>
+      <div>
+        <h3>With a database</h3>
+        <pre class="code"><span class="c"># full run, then verify</span>
+python data_pipeline.py run \
+  --verify-writes
+
+<span class="c"># 1% volume, fast loop</span>
+python data_pipeline.py run \
+  --scale 0.01
+
+<span class="c"># compare load strategies</span>
+python data_pipeline.py run \
+  --load-strategy copy</pre>
+      </div>
+    </div>
+
+    <div style="margin-top:46px">
+      <h3>Honest limits</h3>
+      <ul class="lim">
+        <li><b>Not a privacy tool.</b> It does not learn a distribution from real data and emit a private imitation. There is no real data anywhere in the process.</li>
+        <li><b>No GPU path, on purpose.</b> Faker is pure Python over CPython's RNG with no CUDA path; a first CuPy call initialises the CUDA context in 0.5&ndash;2 seconds, more than the entire CPU cost of every numeric column combined; cuDF has no native Windows build. The run is bandwidth-bound anyway. The prediction, recorded before building it, is that a GPU path would be <i>slower</i> at this scale.</li>
+        <li><b>The loader opens one connection per table.</b> Roughly 17 of the 35-second write step is handshakes. Reusing a connection is open work.</li>
+        <li><b>Parallel loading is implemented but unmeasured</b>, and predicted to be close to flat.</li>
+        <li><b>The API serves only <code>orders</code>.</b> Response models are hand-written, so a second <code>api</code> table is loaded but not exposed.</li>
+        <li><b>There is no CI.</b></li>
+      </ul>
+    </div>
+    <div style="margin-top:46px">
+      <h3>Run this site with a live pipeline behind it</h3>
+      <pre class="code">python serve_demo.py</pre>
+      <p class="cap">
+        Serves these pages and gives the Live run page a button that
+        executes the real pipeline, streaming its stages and logs back to
+        the browser over Server-Sent Events. Without it the page stays in
+        replay mode.
+      </p>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="wrap"><p>Python 3.13 &middot; PostgreSQL 17 &middot; FastAPI &middot; pytest. 165 tests, 149 of them offline.</p></div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

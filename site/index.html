@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SynthForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">Synth<span>Forge</span></a>
+    <ul id="nav-links"></ul>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <h1>Realistic data,<br>at any volume you ask for.</h1>
+    <p class="lede" style="margin-top:22px">
+      Describe a domain once as JSON. Get a complete, referentially-consistent
+      dataset materialised into PostgreSQL, CSV, JSON, Parquet and a live REST
+      API <b>at the same time</b>, with foreign keys that stay valid across
+      every one of them.
+    </p>
+    <div class="cta">
+      <a class="btn solid" href="run.html">Watch a run</a>
+      <a class="btn" href="model.html">Build a model</a>
+    </div>
+    <dl class="strip">
+      <div><dt>records generated</dt><dd>100,400<small>6 tables, 49 fields</small></dd></div>
+      <div><dt>end to end</dt><dd>69.6s<small>schema to verified</small></dd></div>
+      <div><dt>destinations</dt><dd>5<small>one dataset, one set of ids</small></dd></div>
+      <div><dt>foreign keys</dt><dd>7<small>validated by the server</small></dd></div>
+      <div><dt>volume knob</dt><dd>&times;50<small>same model, 5M records</small></dd></div>
+    </dl>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <h2>Why it exists</h2>
+      <p class="sub">
+        The engineering that matters only becomes visible at scale. A query plan
+        at ten thousand rows and the same plan at ten million are different
+        plans. Indexes that look pointless become load-bearing. Join order starts
+        to matter, and so do cardinality skew, cache residency and the cost of a
+        network round trip.
+      </p>
+      <p class="sub">
+        The data that exhibits scale is held by organisations that will not
+        release it. They publish papers about their scale, not the data behind
+        it. So the ability to practise at scale ends up gated by employment.
+        Making volume a parameter rather than a property of a handed-over dataset
+        removes that gate.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <h2>One dataset, five destinations</h2>
+      <p class="sub">
+        Foreign keys survive leaving the database because every sink is
+        materialised from a single in-memory dataset rather than generated per
+        sink. The id a CSV row carries is the same object the PostgreSQL parent
+        row carries. Select any stage.
+      </p>
+    </div>
+
+    <figure class="svgbox">
+      <svg viewBox="0 0 960 292" role="img" aria-label="Pipeline: the model file feeds generation, then semantic repair, then fans out to PostgreSQL, CSV, JSON, Parquet and a REST API served from PostgreSQL.">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
+        <g stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.38" marker-end="url(#ah)">
+          <path id="w1" d="M 132 146 L 206 146"></path>
+          <path id="w2" d="M 312 146 L 386 146"></path>
+          <path d="M 494 146 L 540 146"></path>
+          <path id="f1" d="M 540 146 C 594 146 602 40 684 40"></path>
+          <path id="f2" d="M 540 146 C 594 146 602 93 684 93"></path>
+          <path id="f3" d="M 540 146 L 684 146"></path>
+          <path id="f4" d="M 540 146 C 594 146 602 199 684 199"></path>
+          <path id="f5" d="M 540 146 C 594 146 602 252 684 252"></path>
+        </g>
+        <path d="M 778 40 C 842 40 848 226 848 242 L 848 252 L 790 252" stroke="var(--accent)" stroke-width="1.3" fill="none" opacity="0.8" marker-end="url(#ah)"></path>
+        <text x="860" y="143" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">served</text>
+        <text x="860" y="156" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">from pg</text>
+        <g class="stage-node" data-stage="model" tabindex="0" role="button" aria-label="Model file">
+          <rect x="14" y="118" width="118" height="56" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="73" y="142" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor">model.json</text>
+          <text x="73" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">6 tables</text>
+        </g>
+        <g class="stage-node" data-stage="generate" tabindex="0" role="button" aria-label="Generation">
+          <rect x="206" y="110" width="106" height="72" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="259" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor">generate</text>
+          <text x="259" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">topological</text>
+          <text x="259" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--accent)">9.98 s</text>
+        </g>
+        <g class="stage-node" data-stage="repair" tabindex="0" role="button" aria-label="Semantic repair">
+          <rect x="386" y="110" width="108" height="72" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="440" y="138" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor">repair</text>
+          <text x="440" y="153" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">causality,</text>
+          <text x="440" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">money</text>
+        </g>
+        <circle cx="540" cy="146" r="4.5" fill="currentColor"></circle>
+        <g class="stage-node" data-stage="postgres" tabindex="0" role="button" aria-label="PostgreSQL">
+          <rect x="684" y="22" width="94" height="37" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="731" y="39" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">postgres</text>
+          <text x="731" y="51" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">85,400 rows</text>
+        </g>
+        <g class="stage-node" data-stage="csv" tabindex="0" role="button" aria-label="CSV">
+          <rect x="684" y="75" width="94" height="37" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="731" y="92" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">csv</text>
+          <text x="731" y="104" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">25,000 rows</text>
+        </g>
+        <g class="stage-node" data-stage="json" tabindex="0" role="button" aria-label="JSON">
+          <rect x="684" y="128" width="94" height="37" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="731" y="145" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">json</text>
+          <text x="731" y="157" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">20,000 rows</text>
+        </g>
+        <g class="stage-node" data-stage="parquet" tabindex="0" role="button" aria-label="Parquet">
+          <rect x="684" y="181" width="94" height="37" fill="var(--bg)" stroke="currentColor" stroke-width="1.3"></rect>
+          <text x="731" y="198" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">parquet</text>
+          <text x="731" y="210" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">columnar</text>
+        </g>
+        <g class="stage-node" data-stage="api" tabindex="0" role="button" aria-label="REST API">
+          <rect x="684" y="234" width="106" height="37" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.3"></rect>
+          <text x="737" y="251" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="var(--accent)">rest api</text>
+          <text x="737" y="263" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">GET /orders</text>
+        </g>
+        <g id="flow"></g>
+      </svg>
+    </figure>
+
+    <div class="box pad" style="border-top:none">
+      <div style="font-family:var(--serif);font-size:23px" id="d-title">PostgreSQL</div>
+      <div style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:3px 0 11px" id="d-meta"></div>
+      <p class="sub" style="font-size:15.5px;margin-bottom:12px" id="d-body"></p>
+      <dl style="display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:12px 16px;margin:0" id="d-dl"></dl>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="cols">
+      <figure>
+        <h3>The relationship graph</h3>
+        <div class="svgbox">
+          <svg viewBox="0 0 850 248" role="img" aria-label="Foreign key graph. categories references itself; products references categories; orders references users; order_items references orders and products; reviews references products and users.">
+            <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
+            <g stroke="currentColor" stroke-width="1.1" fill="none" opacity="0.42" marker-end="url(#ah2)">
+              <path d="M 192 58 L 124 58"></path><path d="M 59 42 C 59 19 20 19 20 42 L 20 50"></path>
+              <path d="M 262 76 L 262 104"></path><path d="M 192 186 L 124 186"></path>
+              <path d="M 332 186 L 400 186"></path><path d="M 460 168 L 460 126 L 332 126 L 332 138"></path>
+              <path d="M 460 204 C 460 234 592 234 592 204"></path><path d="M 628 186 L 696 186"></path>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="11">
+              <g><rect x="192" y="40" width="140" height="36" fill="var(--bg)" stroke="currentColor" stroke-width="1.2"></rect>
+                <text x="262" y="56" text-anchor="middle" font-weight="600" fill="currentColor">categories</text>
+                <text x="262" y="69" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">400 &middot; postgres</text></g>
+              <g><rect x="192" y="104" width="140" height="36" fill="var(--bg)" stroke="var(--cool)" stroke-width="1.4"></rect>
+                <text x="262" y="120" text-anchor="middle" font-weight="600" fill="currentColor">products</text>
+                <text x="262" y="133" text-anchor="middle" font-size="9" fill="var(--cool)">20,000 &middot; json + pg</text></g>
+              <g><rect x="192" y="168" width="140" height="36" fill="var(--bg)" stroke="var(--cool)" stroke-width="1.4"></rect>
+                <text x="262" y="184" text-anchor="middle" font-weight="600" fill="currentColor">users</text>
+                <text x="262" y="197" text-anchor="middle" font-size="9" fill="var(--cool)">10,000 &middot; csv + pg</text></g>
+              <g><rect x="400" y="168" width="120" height="36" fill="var(--bg)" stroke="currentColor" stroke-width="1.2"></rect>
+                <text x="460" y="184" text-anchor="middle" font-weight="600" fill="currentColor">orders</text>
+                <text x="460" y="197" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">15,000 &middot; api</text></g>
+              <g><rect x="532" y="168" width="96" height="36" fill="var(--bg)" stroke="currentColor" stroke-width="1.2"></rect>
+                <text x="580" y="184" text-anchor="middle" font-weight="600" fill="currentColor">order_items</text>
+                <text x="580" y="197" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">40,000 &middot; pg</text></g>
+              <g><rect x="696" y="168" width="120" height="36" fill="var(--bg)" stroke="currentColor" stroke-width="1.2"></rect>
+                <text x="756" y="184" text-anchor="middle" font-weight="600" fill="currentColor">reviews</text>
+                <text x="756" y="197" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">15,000 &middot; csv</text></g>
+            </g>
+            <text x="20" y="32" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">self-ref</text>
+          </svg>
+        </div>
+        <p class="cap">
+          Green marks the two tables that land in two places at once: their
+          declared file sink, and PostgreSQL, because <code>orders</code> and
+          <code>order_items</code> reference them. That dual destination is where
+          the integrity claim is actually tested.
+        </p>
+      </figure>
+      <div>
+        <h3>Proven by the server, not asserted</h3>
+        <p class="sub" style="font-size:15.5px">
+          Constraints are created <i>after</i> the bulk load, so PostgreSQL
+          validates every generated reference in one sequential pass. If
+          generation were wrong, the constraint is refused and the offending row
+          named.
+        </p>
+        <table class="tb" style="margin-top:14px">
+          <tbody>
+            <tr><td>foreign key constraints</td><td>7 of 7</td></tr>
+            <tr><td>violations</td><td class="is">0</td></tr>
+            <tr><td>row counts</td><td class="is">all matched</td></tr>
+            <tr><td>sequences advanced</td><td>6</td></tr>
+            <tr><td>application write probe</td><td class="is">passed</td></tr>
+          </tbody>
+        </table>
+        <p class="cap">
+          An integration test checks it from the other side too, reading foreign
+          keys out of <code>exports/csv/reviews.csv</code> and resolving them
+          against rows in PostgreSQL.
+        </p>
+        <div class="acts"><a class="btn" href="benchmarks.html">See the measurements</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      Python 3.13 &middot; PostgreSQL 17 &middot; psycopg2 &middot; Faker &middot;
+      pandas &middot; PyArrow &middot; FastAPI &middot; pytest. 165 tests, 149 of
+      them offline. Measured on an i5-13420H against Supabase in eu-west-1 at a
+      287&ndash;301&nbsp;ms median round trip. Harnesses and raw results are in
+      <code>runs/headline/</code>.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+"use strict";
+var STAGES = {
+  model: { title: "The model file", meta: "src/model_graph.py",
+    body: "Tables, fields, types, relationships and volumes. This is the whole interface: a new domain is a new file, not a code change. Field names drive both the generated values and the inferred relationships.",
+    dl: [["tables", "6"], ["fields", "49"], ["foreign keys", "7"], ["validated", "before anything runs"]] },
+  generate: { title: "Generation", meta: "src/data_generator.py · 9.98 s",
+    body: "Records are built table by table in topological order, so a foreign key can draw from parent ids that already exist. Parent id lists are memoized, which is the fix worth 10.1x.",
+    dl: [["throughput", "9,980 rows/s"], ["before the fix", "101.24 s"], ["probes removed", "~2.0 billion"], ["reproducible", "6 hash seeds"]] },
+  repair: { title: "Semantic repair", meta: "src/realism.py · ~0.8 s",
+    body: "Runs once every table exists, because almost every rule is cross-table. Birth dates become adult, child entities stop predating their parents, totals become arithmetic, cost sits below price.",
+    dl: [["dates reordered", "29,781"], ["line totals", "40,000"], ["parent totals", "15,000"], ["names composed", "20,000"]] },
+  postgres: { title: "PostgreSQL", meta: "src/load_strategies.py · 17.39 s via COPY",
+    body: "The dominant cost of a run, and the reason the load strategy is pluggable. Constraints are added after the load, which avoids 85,400 per-row index probes and makes the server prove referential integrity in one pass.",
+    dl: [["rows", "85,400"], ["bytes sent", "16.5 MB"], ["round trips", "5"], ["rowwise, projected", "7.21 h"]] },
+  csv: { title: "CSV", meta: "exports/csv/ · users, reviews",
+    body: "Row-oriented and universally readable. Nullable integers go through pandas' nullable Int64 type, because one null used to promote the whole column to float and a foreign key came out as 1.0 instead of 1.",
+    dl: [["users", "10,000 rows"], ["reviews", "15,000 rows"], ["products size", "10.55 MB"], ["also in pg", "users"]] },
+  json: { title: "JSON", meta: "exports/json/ · products",
+    body: "Document-oriented, and the one sink deliberately left unoptimised: a few tens of megabytes and a couple of seconds is not a bottleneck, and streaming it would change the indentation of a submitted artefact.",
+    dl: [["products", "20,000 rows"], ["size", "14.51 MB"], ["vs CSV", "1.38x larger"], ["also in pg", "yes"]] },
+  parquet: { title: "Parquet", meta: "exports/parquet/ · columnar",
+    body: "Typed, compressed, and the format analytical tooling actually consumes. Smallest on disk and fastest to read, and the gap widens sharply when you want a subset of columns rather than all of them.",
+    dl: [["size", "6.32 MB"], ["vs CSV", "40% smaller"], ["2 of 11 columns", "15.6x faster"], ["aggregate 1", "19.6x faster"]] },
+  api: { title: "REST API", meta: "api_server.py · FastAPI over orders",
+    body: "Served from PostgreSQL through a connection pool, so a request no longer pays a TLS handshake. A missing order returns 404 rather than 500, and a file-backed repository lets the whole thing run with no database at all.",
+    dl: [["endpoints", "6"], ["pagination", "offset or keyset"], ["status filter", "from the model"], ["offline", "serves a JSON file"]] }
+};
+(function () {
+  var nodes = $$(".stage-node");
+  function show(key) {
+    var s = STAGES[key]; if (!s) return;
+    nodes.forEach(function (n) { n.classList.toggle("on", n.getAttribute("data-stage") === key); });
+    $("#d-title").textContent = s.title;
+    $("#d-meta").textContent = s.meta;
+    $("#d-body").textContent = s.body;
+    var dl = $("#d-dl"); dl.innerHTML = "";
+    s.dl.forEach(function (p) {
+      var pair = el("div");
+      var dt = el("dt", null, p[0]);
+      dt.style.cssText = "font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)";
+      var dd = el("dd", null, p[1]);
+      dd.style.cssText = "font-family:var(--mono);font-size:13.5px;margin:2px 0 0";
+      pair.appendChild(dt); pair.appendChild(dd); dl.appendChild(pair);
+    });
+  }
+  nodes.forEach(function (n) {
+    n.addEventListener("click", function () { show(n.getAttribute("data-stage")); });
+    n.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(n.getAttribute("data-stage")); }
+    });
+  });
+  show("postgres");
+
+  var host = $("#flow");
+  if (!host || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var wires = ["w1","w2","f1","f2","f3","f4","f5"]
+    .map(function (id) { return document.getElementById(id); })
+    .filter(function (x) { return !!x; });
+  var dots = [];
+  wires.forEach(function (w, wi) {
+    var len = w.getTotalLength(), count = wi < 2 ? 3 : 2;
+    for (var i = 0; i < count; i++) {
+      var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("r", wi < 2 ? "3.2" : "2.6");
+      c.setAttribute("fill", wi < 2 ? "currentColor" : "var(--accent)");
+      c.setAttribute("opacity", "0.8");
+      host.appendChild(c);
+      dots.push({ node: c, wire: w, len: len, t: i / count, speed: 0.00021 + wi * 0.00002 });
+    }
+  });
+  var last = 0;
+  (function step(ts) {
+    if (!last) last = ts;
+    var dt = Math.min(ts - last, 60); last = ts;
+    dots.forEach(function (d) {
+      d.t += d.speed * dt; if (d.t > 1) d.t -= 1;
+      var p = d.wire.getPointAtLength(d.t * d.len);
+      d.node.setAttribute("cx", p.x); d.node.setAttribute("cy", p.y);
+    });
+    requestAnimationFrame(step);
+  })(0);
+})();
+</script>
+</body>
+</html>

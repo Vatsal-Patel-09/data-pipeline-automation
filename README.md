@@ -42,25 +42,18 @@ offer.
 
 Full argument: **[docs/why-synthetic-data.md](docs/why-synthetic-data.md)**.
 
-### Interactive overview
+### Interactive site
 
-An animated pipeline schematic with clickable stages, every measurement below
-rendered as charts, the foreign-key graph, and a model builder that derives the
-execution plan live and exports a `model.json` the CLI accepts.
+A small static site with its own pages: an overview, a live run console, a model
+builder, the measurements, an API reference and the docs.
 
-- **[`overview.html`](overview.html)** — the file in this repository. Open it in
-  any browser; no server, no build step and no network needed. Print or save to
-  PDF for a paper copy. **Use this one if you cannot open Claude links.**
-- **[Hosted copy](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro)** — the same
-  page, for sharing by link. Requires a Claude account.
-
-Both are generated from the same source; `overview.html` is the canonical one.
-
-The project's own development is the evidence for the claim. Two defects
-dominated its runtime, and neither is observable at small volume — a
-foreign-key lookup that was accidentally quadratic, and a load path issuing one
-network round trip per row. Both were found by instrumenting and measuring at
-scale, not by reading the code.
+- **[`site/index.html`](site/index.html)** — open it in any browser. No server,
+  no build step, no network needed. Print or save to PDF for a paper copy.
+- **`python serve_demo.py`** — serves the same site *and* gives the Live run
+  page a button that executes the real Python pipeline, streaming its stages and
+  logs back to the browser over Server-Sent Events.
+- **[Hosted copy](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro)** — for
+  sharing by link. Requires a Claude account, and is replay-only.
 
 ---
 
@@ -288,7 +281,8 @@ than an empty 200. `after_id` gives keyset pagination, which does not pay
 data_pipeline.py          CLI entrypoint and orchestrator
 api_server.py             FastAPI app, repository-backed, offline-capable
 ecommerce_model.json      The model that drives everything
-overview.html             Self-contained interactive overview (open in a browser)
+site/                     Static site: overview, live run, builder, benchmarks
+serve_demo.py             Serves the site and runs the real pipeline behind it
 
 src/
   model_graph.py          THE model loader: validate, order, closure, waves
@@ -313,7 +307,7 @@ exports/                  Generated output (gitignored)
 
 | Document | Contents |
 |---|---|
-| [`overview.html`](overview.html) | Interactive overview: schematic, charts, model builder. Also [hosted](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro) |
+| [`site/`](site/index.html) | Interactive site: live run, model builder, benchmarks, API |
 | [why-synthetic-data.md](docs/why-synthetic-data.md) | The thesis: why this project exists |
 | [performance.md](docs/performance.md) | Every measurement, with method |
 | [architecture.md](docs/architecture.md) | How a run flows through the system |

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build a model &middot; SynthForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">Synth<span>Forge</span></a>
+    <ul id="nav-links"></ul>
+  </div>
+</nav>
+
+<section style="border-top:none;padding-top:54px">
+  <div class="wrap">
+    <div class="head">
+      <h2>Build a model, get the plan</h2>
+      <p class="sub">
+        This is the real contract. Add tables and relationships; the plan
+        derives the creation order, which tables must reach PostgreSQL, and
+        the parallel load waves. These are the pipeline&rsquo;s own
+        algorithms running here. Export the JSON and the CLI accepts it.
+      </p>
+    </div>
+<div class="cols">
+      <div>
+        <h3>Tables</h3>
+        <div id="tbl-list"></div>
+        <div style="border-top:1px solid var(--line);margin-top:16px">
+          <div class="pair">
+            <div><label for="nt-name">table name</label><input id="nt-name" value="shipments" spellcheck="false"></div>
+            <div><label for="nt-rows">sample_size</label><input id="nt-rows" type="number" value="5000" min="1"></div>
+          </div>
+          <div class="pair">
+            <div><label for="nt-fmt">output_format</label><select id="nt-fmt"><option>postgres</option><option>csv</option><option>json</option><option>parquet</option><option>api</option></select></div>
+            <div><label for="nt-fk">references</label><select id="nt-fk"></select></div>
+          </div>
+          <div class="acts"><button id="add-tbl" class="solid">Add table</button><button id="reset-tbl">Reset</button></div>
+        </div>
+      </div>
+      <div>
+        <h3>Derived plan</h3>
+        <dl class="plan" id="plan"></dl>
+        <h3 style="margin-top:24px">model.json</h3>
+        <pre class="code json" id="json-out"></pre>
+        <div class="acts">
+          <button id="copy-json">Copy</button>
+          <button id="dl-json">Download</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="cap" style="margin-top:20px">
+      Save the exported file beside the pipeline and run
+      <code>python data_pipeline.py validate --model your_model.json</code>,
+      then <code>--dry-run</code>, then a real run. The plan shown here and
+      the one the CLI prints come from the same algorithms.
+    </p>
+  </div>
+</section>
+<footer>
+  <div class="wrap"><p>The builder runs the pipeline&rsquo;s own ordering, closure and wave algorithms, checked against the Python implementation.</p></div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+"use strict";
+var MODEL = JSON.parse(JSON.stringify(SHIPPED));
+/* ============ model builder: the real algorithms ============ */
+/* The shipped model, with its real field definitions, so the in-browser
+   generator produces the same shape the Python pipeline does. */
+var SHIPPED = [{"name":"categories","rows":400,"fmt":"postgres","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"name","t":"string","uq":1,"len":100},{"n":"description","t":"text","null":1},{"n":"parent_id","t":"integer","fk":"categories.id","null":1},{"n":"is_active","t":"boolean"},{"n":"created_at","t":"timestamp"}]},{"name":"users","rows":10000,"fmt":"csv","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"username","t":"string","uq":1,"len":50},{"n":"email","t":"string","uq":1,"len":255},{"n":"full_name","t":"string","len":200},{"n":"phone","t":"string","null":1,"len":20},{"n":"birth_date","t":"date","null":1},{"n":"registration_date","t":"timestamp"},{"n":"status","t":"enum","v":["active","inactive","suspended"]},{"n":"total_spent","t":"decimal","p":12,"s":2}]},{"name":"products","rows":20000,"fmt":"json","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"sku","t":"string","uq":1,"len":50},{"n":"name","t":"string","len":255},{"n":"description","t":"text","null":1},{"n":"category_id","t":"integer","fk":"categories.id"},{"n":"price","t":"decimal","p":10,"s":2},{"n":"cost","t":"decimal","p":10,"s":2},{"n":"stock_quantity","t":"integer"},{"n":"weight","t":"decimal","null":1,"p":8,"s":3},{"n":"is_active","t":"boolean"},{"n":"created_at","t":"timestamp"}]},{"name":"orders","rows":15000,"fmt":"api","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"order_number","t":"string","uq":1,"len":20},{"n":"user_id","t":"integer","fk":"users.id"},{"n":"order_date","t":"timestamp"},{"n":"total_amount","t":"decimal","p":12,"s":2},{"n":"tax_amount","t":"decimal","p":10,"s":2},{"n":"shipping_cost","t":"decimal","p":8,"s":2},{"n":"status","t":"enum","v":["pending","processing","shipped","delivered","cancelled"]},{"n":"shipping_address","t":"json"},{"n":"payment_method","t":"string","len":50}]},{"name":"order_items","rows":40000,"fmt":"postgres","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"order_id","t":"integer","fk":"orders.id"},{"n":"product_id","t":"integer","fk":"products.id"},{"n":"quantity","t":"integer"},{"n":"unit_price","t":"decimal","p":10,"s":2},{"n":"total_price","t":"decimal","p":12,"s":2},{"n":"discount_amount","t":"decimal","p":8,"s":2}]},{"name":"reviews","rows":15000,"fmt":"csv","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"product_id","t":"integer","fk":"products.id"},{"n":"user_id","t":"integer","fk":"users.id"},{"n":"rating","t":"integer"},{"n":"review_text","t":"text","null":1},{"n":"created_at","t":"timestamp"}]}];
+var MODEL = JSON.parse(JSON.stringify(SHIPPED));
+
+function toModelJson(model) {
+  return {
+    database: { name: "custom_domain", version: "1.0" },
+    tables: model.map(function (t) {
+      return {
+        name: t.name, sample_size: t.rows, output_format: t.fmt,
+        fields: t.fields.map(function (f) {
+          var o = { name: f.n, type: f.t };
+          if (f.pk) o.primary_key = true;
+          if (f.ai) o.auto_increment = true;
+          if (f.fk) o.foreign_key = f.fk;
+          if (f.uq) o.unique = true;
+          if (f["null"]) o.nullable = true;
+          if (f.len) o.max_length = f.len;
+          if (f.p) o.precision = f.p;
+          if (f.s) o.scale = f.s;
+          if (f.v) o.values = f.v;
+          return o;
+        })
+      };
+    })
+  };
+}
+
+/* Fields for a table the visitor adds. Named so the generator's own
+   inference has something to work with. */
+function defaultFields(name, ref) {
+  var f = [{ n: "id", t: "integer", pk: 1, ai: 1 }];
+  if (ref) f.push({ n: ref.replace(/s$/, "") + "_id", t: "integer", fk: ref + ".id" });
+  f.push({ n: "name", t: "string", len: 200 });
+  f.push({ n: "status", t: "enum", v: ["pending", "active", "closed"] });
+  f.push({ n: "total_amount", t: "decimal", p: 12, s: 2 });
+  f.push({ n: "created_at", t: "timestamp" });
+  return f;
+}
+
+function renderBuilder() {
+  var host = $("#tbl-list"); host.innerHTML = "";
+  var closure = pgClosure(MODEL);
+  MODEL.forEach(function (t, i) {
+    var card = el("div", "card"), top = el("div", "ct");
+    top.appendChild(el("span", "cn2", t.name));
+    top.appendChild(el("span", "cs", t.rows.toLocaleString("en-US") + " rows · " + t.fmt
+      + " · " + t.fields.length + " fields"));
+    card.appendChild(top);
+    var tags = el("div", "tags");
+    tags.appendChild(el("span", "tag", "id PK"));
+    fksOf(t).forEach(function (fk) {
+      tags.appendChild(el("span", "tag fk", fk.field + " → " + fk.ref));
+    });
+    if (closure[t.name] && PG_BACKED.indexOf(t.fmt) < 0) {
+      tags.appendChild(el("span", "tag dual", "+ postgres"));
+    }
+    card.appendChild(tags);
+    if (MODEL.length > 1) {
+      var rm = el("button", "sm", "Remove");
+      rm.style.marginTop = "8px";
+      rm.addEventListener("click", function () {
+        var gone = MODEL[i].name;
+        MODEL.splice(i, 1);
+        MODEL.forEach(function (x) {
+          x.fields = x.fields.filter(function (f) {
+            return !f.fk || String(f.fk).split(".")[0] !== gone;
+          });
+        });
+        renderBuilder();
+      });
+      card.appendChild(rm);
+    }
+    host.appendChild(card);
+  });
+  var sel = $("#nt-fk"), prev = sel.value;
+  sel.innerHTML = "";
+  var none = el("option", null, "(none)"); none.value = ""; sel.appendChild(none);
+  MODEL.forEach(function (t) {
+    var o = el("option", null, t.name); o.value = t.name; sel.appendChild(o);
+  });
+  if (prev && MODEL.some(function (t) { return t.name === prev; })) sel.value = prev;
+
+  var order = topoOrder(MODEL), cl = Object.keys(closure).sort(), cyc = cycles(MODEL);
+  var totalRows = MODEL.reduce(function (a, t) { return a + t.rows; }, 0);
+  var pgRows = MODEL.filter(function (t) { return closure[t.name]; })
+                    .reduce(function (a, t) { return a + t.rows; }, 0);
+  var d = $("#plan"); d.innerHTML = "";
+  function line(k, v, cls) { d.appendChild(el("dt", null, k)); d.appendChild(el("dd", cls || null, v)); }
+  line("creation order", order.join("  →  "));
+  line("must reach postgres", cl.length ? cl.join(", ") : "(none)");
+  line("parallel load waves", waves(MODEL, cl).map(function (w) {
+    return "[" + w.join(", ") + "]"; }).join("  then  ") || "(none)");
+  line("records", totalRows.toLocaleString("en-US") + "   (" + pgRows.toLocaleString("en-US") + " into postgres)");
+  line("at --scale 50", (totalRows * 50).toLocaleString("en-US") + " records");
+  if (cyc.length) line("circular dependency", cyc.map(function (c) { return c.join(" ↔ "); }).join("; "), "no");
+  else line("validation", "no cycles, every reference resolves", "ok");
+  $("#json-out").textContent = JSON.stringify(toModelJson(MODEL), null, 2);
+}
+$("#add-tbl").addEventListener("click", function () {
+  var raw = $("#nt-name").value.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_");
+  if (!raw || MODEL.some(function (t) { return t.name === raw; })) { $("#nt-name").focus(); return; }
+  var ref = $("#nt-fk").value;
+  MODEL.push({
+    name: raw,
+    rows: Math.max(1, parseInt($("#nt-rows").value, 10) || 100),
+    fmt: $("#nt-fmt").value,
+    fields: defaultFields(raw, ref)
+  });
+  $("#nt-name").value = "";
+  renderBuilder();
+});
+$("#reset-tbl").addEventListener("click", function () {
+  MODEL = JSON.parse(JSON.stringify(SHIPPED)); renderBuilder();
+});
+$("#copy-json").addEventListener("click", function () {
+  var b = $("#copy-json");
+  try {
+    navigator.clipboard.writeText($("#json-out").textContent).then(function () {
+      b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1700);
+    }, function () {
+      b.textContent = "Select manually"; setTimeout(function () { b.textContent = "Copy"; }, 1700);
+    });
+  } catch (e) {
+    b.textContent = "Select manually"; setTimeout(function () { b.textContent = "Copy"; }, 1700);
+  }
+});
+renderBuilder();
+
+
+
+</script>
+</body>
+</html>

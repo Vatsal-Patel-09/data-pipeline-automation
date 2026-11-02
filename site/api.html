@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API &middot; SynthForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<nav>
+  <div class="wrap">
+    <a class="mark" href="index.html">Synth<span>Forge</span></a>
+    <ul id="nav-links"></ul>
+  </div>
+</nav>
+
+<section style="border-top:none;padding-top:54px">
+  <div class="wrap">
+    <div class="head">
+      <h2>The dataset, served</h2>
+      <p class="sub">
+        Tables declared <code>api</code> are loaded into PostgreSQL and
+        served from a FastAPI process behind a connection pool. Pick an
+        endpoint to see its response.
+      </p>
+    </div>
+<div class="cols">
+      <div><div class="eps" id="eps"></div></div>
+      <div>
+        <h3 id="ep-title">GET /orders</h3>
+        <p class="sub" style="font-size:15px" id="ep-desc"></p>
+        <pre class="code" id="ep-body" style="max-height:330px"></pre>
+      </div>
+    </div>
+    <p class="cap" style="margin-top:18px">
+      <code>status</code> is validated against the model's enum, so a typo
+      returns <b>422</b> rather than an empty 200. A missing order returns
+      <b>404</b>, not 500. <code>after_id</code> gives keyset pagination, which
+      does not pay <code>OFFSET</code>'s increasing cost on deep pages. Started
+      with <code>--offline</code> the same server reads a generated JSON file and
+      needs no database at all.
+    </p>
+  </div>
+</section>
+<footer>
+  <div class="wrap"><p>Start it with <code>python api_server.py</code>, or <code>--offline</code> to serve a generated file with no database.</p></div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+"use strict";
+/* ============ api explorer ============ */
+var ENDPOINTS = [
+  { m: "GET", p: "/", d: "metadata",
+    desc: "What this server is, which tables it serves and where the docs are.",
+    body: { message: "Synthetic Data Pipeline API", version: "2.0.0", mode: "database",
+      model: "ecommerce_model.json", api_tables: ["orders"],
+      endpoints: { orders: "/orders", order_by_id: "/orders/{order_id}",
+        summary: "/orders/stats/summary", health: "/health" } } },
+  { m: "GET", p: "/health", d: "liveness",
+    desc: "A real timestamp, not a hardcoded one. Reports which backend is serving.",
+    body: { status: "healthy", backend: "postgresql", timestamp: "2026-11-02T04:27:12.481Z" } },
+  { m: "GET", p: "/orders", d: "paginated list",
+    desc: "Filter by status or user_id. Paginate with skip and limit, or with after_id for keyset pagination that does not pay OFFSET's cost on deep pages.",
+    body: { orders: [{ id: 1, order_number: "ORD-5196247660", user_id: 7342,
+        order_date: "2025-08-14T09:21:44", total_amount: 990.18, tax_amount: 71.3,
+        shipping_cost: 18.4, status: "cancelled",
+        shipping_address: { street: "714 Patel Causeway", city: "Pune", state: "MH",
+          zip_code: "411014", country: "India" },
+        payment_method: "credit_card" }],
+      total_count: 15000, skip: 0, limit: 1, has_more: true, next_cursor: 1 } },
+  { m: "GET", p: "/orders/{id}", d: "one order · 404", status: "404 Not Found",
+    desc: "A missing order returns 404. It used to return 500, because the connection wrapper caught the 404 raised inside its own body and reported it as a connection failure.",
+    body: { detail: "Order not found" } },
+  { m: "GET", p: "/orders?status=x", d: "validation · 422", status: "422 Unprocessable Entity",
+    desc: "status is validated against the enum declared in the model. A typo returns 422 rather than an empty 200 that reads like 'no such orders'.",
+    body: { detail: { error: "invalid status", received: "shippd",
+      allowed: ["pending", "processing", "shipped", "delivered", "cancelled"] } } },
+  { m: "GET", p: "/orders/stats/summary", d: "aggregates",
+    desc: "Dashboard-shaped aggregates computed in the database.",
+    body: { total_orders: 15000, unique_customers: 9502, average_order_value: 6714.51,
+      total_revenue: 100717650.0, min_order_value: 154.49, max_order_value: 21313.7,
+      status_breakdown: { cancelled: 3021, delivered: 3011, processing: 2994,
+        pending: 2991, shipped: 2983 } } }
+];
+(function () {
+  var host = $("#eps");
+  ENDPOINTS.forEach(function (e, i) {
+    var b = el("button", "ep");
+    b.appendChild(el("span", "verb", e.m));
+    b.appendChild(el("span", "path", e.p));
+    b.appendChild(el("span", "d", e.d));
+    b.addEventListener("click", function () {
+      $$(".ep").forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on");
+      $("#ep-title").textContent = e.m + " " + e.p + (e.status ? "  →  " + e.status : "");
+      $("#ep-desc").textContent = e.desc;
+      $("#ep-body").textContent = JSON.stringify(e.body, null, 2);
+    });
+    host.appendChild(b);
+    if (i === 2) b.click();
+  });
+})();
+
+
+</script>
+</body>
+</html>
