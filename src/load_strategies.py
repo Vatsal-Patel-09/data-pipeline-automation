@@ -100,10 +100,11 @@ class RowwiseStrategy(LoadStrategy):
             column_list,
             sql.SQL(", ").join(sql.Placeholder() * len(columns)),
         )
+        rendered = statement.as_string(getattr(cursor, "raw", cursor))
         count = 0
         for record in records:
             cursor.execute(
-                statement, [to_pg_param(record.get(c)) for c in columns]
+                rendered, [to_pg_param(record.get(c)) for c in columns]
             )
             count += 1
         return self._stats(
@@ -133,6 +134,13 @@ class ExecuteValuesStrategy(LoadStrategy):
             identifier, column_list
         )
 
+        # execute_values renders a Composable via sql.as_string(cur), which
+        # type-checks at the C level and would reject the instrumented wrapper.
+        # Render it here against the real cursor and pass a plain string, so
+        # execute_values still calls execute() on the wrapper and each page is
+        # counted as a round trip.
+        rendered = statement.as_string(getattr(cursor, "raw", cursor))
+
         rows = [
             tuple(to_pg_param(record.get(c)) for c in columns)
             for record in records
@@ -149,7 +157,7 @@ class ExecuteValuesStrategy(LoadStrategy):
             )
             bytes_exact = True
 
-        execute_values(cursor, statement, rows, page_size=self.page_size)
+        execute_values(cursor, rendered, rows, page_size=self.page_size)
         batches = (len(rows) + self.page_size - 1) // self.page_size
         return self._stats(
             cursor, started, len(rows), batches, self.page_size,
@@ -186,7 +194,11 @@ class CopyStrategy(LoadStrategy):
             "COPY {} ({}) FROM STDIN WITH (FORMAT text)"
         ).format(identifier, column_list)
 
-        cursor.copy_expert(statement.as_string(cursor), buffer)
+        # as_string type-checks at the C level and rejects a wrapper, so hand it
+        # the underlying cursor while still calling copy_expert on the wrapper
+        # (which is what counts the round trip and the bytes).
+        rendered = statement.as_string(getattr(cursor, "raw", cursor))
+        cursor.copy_expert(rendered, buffer)
         return self._stats(
             cursor, started, count, 1, None, payload_bytes, True, self.name
         )

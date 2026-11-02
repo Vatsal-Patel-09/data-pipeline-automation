@@ -25,6 +25,7 @@ from src.db import preflight, resolve_db_config
 from src.load_strategies import DEFAULT_PAGE_SIZE, DEFAULT_STRATEGY, STRATEGIES
 from src.metrics import MetricsCollector
 from src.model_graph import ModelGraph
+from src.serialization import to_pg_param
 from src.output_handlers import OutputHandler
 
 logging.basicConfig(
@@ -523,8 +524,12 @@ class DataPipeline:
                     template = "(" + ", ".join(["%s"] * len(columns)) + ")"
                     for row in stream:
                         # mogrify applies PostgreSQL's own quoting rules, so
-                        # dates, strings, JSON and NULL are all correct.
-                        values = cursor.mogrify(template, row).decode("utf-8")
+                        # dates, strings and NULL are all correct. JSONB comes
+                        # back as a Python dict, which has no SQL adapter, so
+                        # the shared converter encodes it first.
+                        values = cursor.mogrify(
+                            template, [to_pg_param(value) for value in row]
+                        ).decode("utf-8")
                         handle.write(
                             f'INSERT INTO "{name}" ({column_list}) VALUES {values};\n'
                         )

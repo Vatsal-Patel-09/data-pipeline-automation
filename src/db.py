@@ -385,6 +385,19 @@ class InstrumentedCursor:
         return self._cursor.__exit__(exc_type, exc, tb)
 
     @property
+    def raw(self):
+        """
+        The underlying psycopg2 cursor.
+
+        Needed because some psycopg2 entry points type-check their argument at
+        the C level rather than duck-typing it: psycopg2.sql.Composed.as_string
+        rejects anything that is not literally a connection or cursor, so
+        attribute delegation is not enough. Callers that must hand a real cursor
+        to psycopg2 should use `getattr(cursor, "raw", cursor)`.
+        """
+        return self._cursor
+
+    @property
     def counts(self) -> Dict[str, int]:
         return {
             "statements": self.statements,
