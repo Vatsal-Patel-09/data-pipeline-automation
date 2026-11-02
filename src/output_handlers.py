@@ -85,7 +85,8 @@ class OutputHandler:
                  offline: bool = False,
                  export_dir: str = "exports",
                  measure_bytes: bool = False,
-                 defer_constraints: bool = True):
+                 defer_constraints: bool = True,
+                 load_all: bool = False):
         """
         Initialize output handler.
 
@@ -105,6 +106,9 @@ class OutputHandler:
         self.export_dir = export_dir
         self.measure_bytes = measure_bytes
         self.defer_constraints = defer_constraints
+        # When set, every declared table is loaded into PostgreSQL, not only
+        # those foreign-key integrity requires. See find_postgresql_dependencies.
+        self.load_all = load_all
 
         self.db_config: DbConfig = resolve_db_config()
         # Retained for backwards compatibility with existing callers.
@@ -191,8 +195,40 @@ class OutputHandler:
         omitted and its children's constraints would fail at load. That happened
         to be harmless on the shipped model, where the one-level result was
         already complete, and would bite on any model with a deeper chain.
+
+        Note what this does NOT include: a table that declares a file
+        destination and that nothing PostgreSQL-backed references is created by
+        the schema and then never loaded, leaving an empty table in the
+        database. On ecommerce_model.json that is `reviews`. Pass load_all=True
+        (the --load-all flag) to materialise every declared table instead.
         """
-        return self.graph_for(generated_data).postgres_closure()
+        graph = self.graph_for(generated_data)
+        if self.load_all:
+            return set(graph.table_names)
+        return graph.postgres_closure()
+
+    def tables_not_loaded(self, generated_data: Dict[str, Dict]) -> List[Dict[str, Any]]:
+        """
+        Tables the schema creates but the load never fills, with the reason.
+
+        Surfacing this matters: verification only checks the tables it loaded,
+        so without it an empty table can sit in the database while the run
+        reports that every row count matched.
+        """
+        graph = self.graph_for(generated_data)
+        loaded = self.find_postgresql_dependencies(generated_data)
+        missing = []
+        for name in graph.table_names:
+            if name in loaded:
+                continue
+            info = generated_data.get(name) or {}
+            missing.append({
+                "table": name,
+                "rows_generated": len(info.get("data", [])),
+                "declared": graph.output_format(name),
+                "referenced_by": graph.dependents(name),
+            })
+        return missing
 
     def get_postgresql_insertion_order(self, generated_data: Dict[str, Dict],
                                        required_tables: Set[str]) -> List[str]:

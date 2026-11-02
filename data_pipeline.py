@@ -47,6 +47,7 @@ class DataPipeline:
                  page_size: int = DEFAULT_PAGE_SIZE,
                  parallel_loads: int = 1,
                  defer_constraints: bool = True,
+                 load_all: bool = False,
                  truncate: bool = False,
                  offline: bool = False,
                  keep_partial: bool = False,
@@ -80,6 +81,7 @@ class DataPipeline:
             page_size=page_size if load_strategy == "execute_values" else None,
             parallel_loads=parallel_loads,
             defer_constraints=defer_constraints,
+            load_all=load_all,
             offline=offline,
         )
         self.metrics.set_graph(**self.graph.describe())
@@ -94,6 +96,7 @@ class DataPipeline:
             page_size=page_size, parallel_loads=parallel_loads,
             truncate=truncate, offline=offline, export_dir=export_dir,
             measure_bytes=measure_bytes, defer_constraints=defer_constraints,
+            load_all=load_all,
         )
 
         logger.info(f"Pipeline initialized with model: {model_file}")
@@ -310,6 +313,20 @@ class DataPipeline:
         }
         self.db_manager.verify_row_counts(expected)
 
+        # Verification only covers what was loaded. A table the schema created
+        # and the load skipped would otherwise sit empty while the run reported
+        # that every row count matched, so record it explicitly.
+        skipped = self.output_handler.tables_not_loaded(generated_data)
+        self.metrics.set_verification(tables_not_loaded=skipped)
+        for entry in skipped:
+            logger.warning(
+                "Table '%s' was created in PostgreSQL but never loaded: it "
+                "declares '%s' and no PostgreSQL-backed table references it, so "
+                "its %s generated rows exist only in the file sink. Use "
+                "--load-all to materialise every declared table.",
+                entry["table"], entry["declared"], f"{entry['rows_generated']:,}",
+            )
+
         if self.verify_writes:
             self.db_manager.write_probe(self.model)
 
@@ -382,6 +399,21 @@ class DataPipeline:
         logger.info(
             f"bytes to database     : {totals['bytes_sent_db']:,}"
         )
+        skipped = report.get("verification", {}).get("tables_not_loaded") or []
+        if skipped:
+            short = ", ".join(
+                f"{e['table']} ({e['rows_generated']:,})" for e in skipped
+            )
+            logger.info(
+                f"rows into PostgreSQL  : {totals['rows_loaded']:,} of "
+                f"{totals['rows_generated']:,} generated"
+            )
+            logger.info(f"  not loaded          : {short}")
+            logger.info(
+                "  these tables exist in the database but are empty; they "
+                "declare a file destination and nothing references them. "
+                "Re-run with --load-all to fill them."
+            )
         logger.info(
             f"bytes to files        : {totals['bytes_written_files']:,}"
         )
@@ -593,6 +625,11 @@ def _pipeline_options(function):
                      show_default=True,
                      help="Add foreign keys after loading, which also makes the "
                           "server validate cross-destination integrity"),
+        click.option("--load-all", is_flag=True,
+                     help="Load every declared table into PostgreSQL, not only "
+                          "those foreign-key integrity requires. Without it a "
+                          "table that declares a file destination and that "
+                          "nothing references is created but left empty."),
         click.option("--truncate/--no-truncate", default=False, show_default=True,
                      help="Truncate tables before loading"),
         click.option("--offline", is_flag=True,

@@ -222,6 +222,22 @@ PostgreSQL.
 
 ## Still open
 
+**A0. A declared table can be created in PostgreSQL and never loaded.** A table
+whose `output_format` is a file sink, and which no PostgreSQL-backed table
+references, falls outside the load closure. The schema creates it; nothing fills
+it. On `ecommerce_model.json` that is `reviews`: its rows are written to
+`exports/csv/reviews.csv` and the table sits empty in the database.
+
+This is the intended routing, but it used to be invisible. The summary counted
+the rows under a single generated total, and `verify_row_counts` only checked
+the tables it had loaded, so a run could report `row_counts_match: True` with an
+empty table in the database. Reported now: the run warns per table, the summary
+prints rows-into-PostgreSQL against rows-generated, and `run_report.json`
+carries `verification.tables_not_loaded`. Pass `--load-all` to materialise every
+declared table instead.
+
+
+
 **A. The API server only serves `orders`.** Response models are hand-written, so
 declaring a second `api` table loads it into PostgreSQL but exposes no endpoint.
 The status enum is now model-driven, but the response shape is not.

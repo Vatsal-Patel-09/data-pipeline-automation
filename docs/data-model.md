@@ -203,9 +203,11 @@ python -m pytest
   generator has combinatorial room.
 - **The API server only serves `orders`.** Declaring a second `api` table loads
   it into PostgreSQL but no endpoint exposes it.
-- **`reviews` is a leaf.** Nothing references it, so it is created in PostgreSQL
-  but only written to CSV. If you add a table referencing it, it joins the
-  closure and starts being loaded.
+- **`reviews` is a leaf, and the database table stays empty.** Nothing
+  references it, so it falls outside the load closure: the schema creates it
+  and only the CSV is written. The run warns about this and the summary
+  reports rows-into-PostgreSQL separately from rows-generated. Add a table
+  referencing it, or pass `--load-all`, to have it loaded.
 
 ## The shipped model
 
