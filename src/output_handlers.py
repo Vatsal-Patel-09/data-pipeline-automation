@@ -321,6 +321,13 @@ class OutputHandler:
             f"Preparing {len(data)} records for API access: {table_name}"
         )
         self.handle_postgresql_output(table_name, data, config, conn=conn)
+
+        # Record 'api' alongside 'postgresql' so the run report shows that this
+        # table is served, not merely stored.
+        table_metric = self.metrics.table(table_name)
+        if "api" not in table_metric.destinations:
+            table_metric.destinations.append("api")
+
         if self.offline:
             self._write_file(
                 table_name, data, sink="api",

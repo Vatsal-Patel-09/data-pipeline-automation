@@ -1,0 +1,449 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-11-02T04-27-12Z-017476",
+  "started_at": "2026-11-02T04:27:12.404654Z",
+  "finished_at": "2026-11-02T04:28:21.112618Z",
+  "duration_s": 68.711369,
+  "status": "success",
+  "db_state": "loaded_constrained",
+  "config": {
+    "model_file": "ecommerce_model.json",
+    "model_hash": "sha256:ddb1f1419c954f8d31d0d730da4cde50",
+    "engine": "legacy",
+    "seed": 42,
+    "scale": 1.0,
+    "realism": true,
+    "reference_date": "2026-01-01",
+    "load_strategy": "copy",
+    "page_size": null,
+    "parallel_loads": 1,
+    "defer_constraints": true,
+    "offline": false,
+    "session_tuning": {
+      "applied": {
+        "statement_timeout": "0",
+        "synchronous_commit": "off"
+      },
+      "rejected": []
+    }
+  },
+  "environment": {
+    "python": "3.13.7",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cores": 12,
+    "numpy": "2.3.2",
+    "cupy": null,
+    "faker": "40.44.0",
+    "pandas": "2.3.2",
+    "psycopg2": "2.9.13",
+    "db_host_kind": "supabase-direct",
+    "db_rtt_ms": 300.969,
+    "peak_rss_mb": 253.7
+  },
+  "steps": [
+    {
+      "name": "schema",
+      "start_wall": "2026-11-02T04:27:21.286149Z",
+      "duration_s": 3.055894,
+      "status": "success",
+      "attrs": {}
+    },
+    {
+      "name": "generate",
+      "start_wall": "2026-11-02T04:27:24.341923Z",
+      "duration_s": 9.982277,
+      "status": "success",
+      "attrs": {}
+    },
+    {
+      "name": "output",
+      "start_wall": "2026-11-02T04:27:34.323731Z",
+      "duration_s": 35.030358,
+      "status": "success",
+      "attrs": {}
+    },
+    {
+      "name": "finalize",
+      "start_wall": "2026-11-02T04:28:09.352374Z",
+      "duration_s": 11.750122,
+      "status": "success",
+      "attrs": {}
+    },
+    {
+      "name": "report",
+      "start_wall": "2026-11-02T04:28:21.101939Z",
+      "duration_s": 0.010619,
+      "status": "success",
+      "attrs": {}
+    }
+  ],
+  "tables": [
+    {
+      "table": "categories",
+      "rows": 400,
+      "fields": 6,
+      "declared_format": "postgresql",
+      "destinations": [
+        "postgresql"
+      ],
+      "generate_s": 0.047516,
+      "generate_rows_per_s": 8418.2,
+      "engine": "legacy",
+      "load": {
+        "strategy": "copy",
+        "duration_s": 2.034932,
+        "rows": 400,
+        "rows_per_s": 196.6,
+        "roundtrips": 1,
+        "bytes_sent": 200029,
+        "bytes_exact": true,
+        "batches": 1,
+        "page_size": null,
+        "simulated": false
+      },
+      "files": [],
+      "fields_detail": []
+    },
+    {
+      "table": "users",
+      "rows": 10000,
+      "fields": 9,
+      "declared_format": "csv",
+      "destinations": [
+        "postgresql",
+        "csv"
+      ],
+      "generate_s": 2.522274,
+      "generate_rows_per_s": 3964.7,
+      "engine": "legacy",
+      "load": {
+        "strategy": "copy",
+        "duration_s": 3.116501,
+        "rows": 10000,
+        "rows_per_s": 3208.7,
+        "roundtrips": 1,
+        "bytes_sent": 1173648,
+        "bytes_exact": true,
+        "batches": 1,
+        "page_size": null,
+        "simulated": false
+      },
+      "files": [
+        {
+          "sink": "csv",
+          "path": "exports\\csv\\users.csv",
+          "duration_s": 0.084336,
+          "bytes": 1180773
+        }
+      ],
+      "fields_detail": []
+    },
+    {
+      "table": "orders",
+      "rows": 15000,
+      "fields": 10,
+      "declared_format": "api",
+      "destinations": [
+        "postgresql"
+      ],
+      "generate_s": 2.033439,
+      "generate_rows_per_s": 7376.7,
+      "engine": "legacy",
+      "load": {
+        "strategy": "copy",
+        "duration_s": 3.93694,
+        "rows": 15000,
+        "rows_per_s": 3810.1,
+        "roundtrips": 1,
+        "bytes_sent": 3267675,
+        "bytes_exact": true,
+        "batches": 1,
+        "page_size": null,
+        "simulated": false
+      },
+      "files": [],
+      "fields_detail": []
+    },
+    {
+      "table": "products",
+      "rows": 20000,
+      "fields": 11,
+      "declared_format": "json",
+      "destinations": [
+        "postgresql",
+        "json"
+      ],
+      "generate_s": 2.765024,
+      "generate_rows_per_s": 7233.2,
+      "engine": "legacy",
+      "load": {
+        "strategy": "copy",
+        "duration_s": 5.156305,
+        "rows": 20000,
+        "rows_per_s": 3878.7,
+        "roundtrips": 1,
+        "bytes_sent": 11015108,
+        "bytes_exact": true,
+        "batches": 1,
+        "page_size": null,
+        "simulated": false
+      },
+      "files": [
+        {
+          "sink": "json",
+          "path": "exports\\json\\products.json",
+          "duration_s": 0.323847,
+          "bytes": 15218899
+        }
+      ],
+      "fields_detail": []
+    },
+    {
+      "table": "order_items",
+      "rows": 40000,
+      "fields": 7,
+      "declared_format": "postgresql",
+      "destinations": [
+        "postgresql"
+      ],
+      "generate_s": 0.381164,
+      "generate_rows_per_s": 104941.7,
+      "engine": "legacy",
+      "load": {
+        "strategy": "copy",
+        "duration_s": 3.135187,
+        "rows": 40000,
+        "rows_per_s": 12758.4,
+        "roundtrips": 1,
+        "bytes_sent": 1603369,
+        "bytes_exact": true,
+        "batches": 1,
+        "page_size": null,
+        "simulated": false
+      },
+      "files": [],
+      "fields_detail": []
+    },
+    {
+      "table": "reviews",
+      "rows": 15000,
+      "fields": 6,
+      "declared_format": "csv",
+      "destinations": [
+        "csv"
+      ],
+      "generate_s": 1.784997,
+      "generate_rows_per_s": 8403.4,
+      "engine": "legacy",
+      "load": null,
+      "files": [
+        {
+          "sink": "csv",
+          "path": "exports\\csv\\reviews.csv",
+          "duration_s": 0.120486,
+          "bytes": 7335580
+        }
+      ],
+      "fields_detail": []
+    }
+  ],
+  "totals": {
+    "rows_generated": 100400,
+    "rows_loaded": 85400,
+    "bytes_written_files": 23735252,
+    "bytes_sent_db": 17259829,
+    "roundtrips_db": 5,
+    "generate_s": 9.534414,
+    "load_s": 17.379865,
+    "generate_rows_per_s": 10530.3,
+    "load_rows_per_s": 4913.7
+  },
+  "counters": {},
+  "verification": {
+    "schema_tables": 6,
+    "schema_statements": 12,
+    "foreign_keys_deferred": true,
+    "realism": {
+      "birth_dates_corrected": 10000,
+      "dates_reordered": 29781,
+      "unit_prices_linked": 40000,
+      "line_totals_reconciled": 40000,
+      "parent_totals_reconciled": 15000,
+      "rollups_reconciled": 10000,
+      "costs_adjusted": 20000,
+      "names_composed": 20000,
+      "details": {
+        "parent_totals": [
+          {
+            "parent": "orders",
+            "child": "order_items",
+            "field": "total_amount",
+            "additive_fields": [
+              "tax_amount",
+              "shipping_cost"
+            ],
+            "parents_with_no_children": 1031
+          }
+        ]
+      }
+    },
+    "realism_s": 0.446845,
+    "fk_constraints_added": 7,
+    "fk_violations": 0,
+    "sequences_advanced": 6,
+    "row_counts_match": true,
+    "per_table": [
+      {
+        "table": "categories",
+        "expected": 400,
+        "actual": 400,
+        "ok": true
+      },
+      {
+        "table": "order_items",
+        "expected": 40000,
+        "actual": 40000,
+        "ok": true
+      },
+      {
+        "table": "orders",
+        "expected": 15000,
+        "actual": 15000,
+        "ok": true
+      },
+      {
+        "table": "products",
+        "expected": 20000,
+        "actual": 20000,
+        "ok": true
+      },
+      {
+        "table": "users",
+        "expected": 10000,
+        "actual": 10000,
+        "ok": true
+      }
+    ],
+    "write_probe": "passed",
+    "write_probe_table": "categories"
+  },
+  "graph": {
+    "tables": 6,
+    "topological_order": [
+      "categories",
+      "users",
+      "orders",
+      "products",
+      "order_items",
+      "reviews"
+    ],
+    "postgres_closure": [
+      "categories",
+      "order_items",
+      "orders",
+      "products",
+      "users"
+    ],
+    "waves": [
+      [
+        "categories",
+        "users"
+      ],
+      [
+        "orders",
+        "products"
+      ],
+      [
+        "order_items",
+        "reviews"
+      ]
+    ],
+    "postgres_waves": [
+      [
+        "categories",
+        "users"
+      ],
+      [
+        "orders",
+        "products"
+      ],
+      [
+        "order_items"
+      ]
+    ],
+    "cycles": [],
+    "model_hash": "sha256:ddb1f1419c954f8d31d0d730da4cde50",
+    "foreign_keys": [
+      {
+        "table": "categories",
+        "field": "parent_id",
+        "references": "categories.id",
+        "nullable": true,
+        "self_ref": true
+      },
+      {
+        "table": "order_items",
+        "field": "order_id",
+        "references": "orders.id",
+        "nullable": false,
+        "self_ref": false
+      },
+      {
+        "table": "order_items",
+        "field": "product_id",
+        "references": "products.id",
+        "nullable": false,
+        "self_ref": false
+      },
+      {
+        "table": "orders",
+        "field": "user_id",
+        "references": "users.id",
+        "nullable": false,
+        "self_ref": false
+      },
+      {
+        "table": "products",
+        "field": "category_id",
+        "references": "categories.id",
+        "nullable": false,
+        "self_ref": false
+      },
+      {
+        "table": "reviews",
+        "field": "product_id",
+        "references": "products.id",
+        "nullable": false,
+        "self_ref": false
+      },
+      {
+        "table": "reviews",
+        "field": "user_id",
+        "references": "users.id",
+        "nullable": false,
+        "self_ref": false
+      }
+    ],
+    "generation_order": [
+      "categories",
+      "users",
+      "orders",
+      "products",
+      "order_items",
+      "reviews"
+    ],
+    "load_waves": [
+      [
+        "categories",
+        "order_items",
+        "orders",
+        "products",
+        "users"
+      ]
+    ]
+  },
+  "warnings": [],
+  "errors": []
+}

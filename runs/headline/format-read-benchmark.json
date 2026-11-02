@@ -1,0 +1,26 @@
+{
+  "benchmark": "format read patterns",
+  "rows": 20000,
+  "fields": 11,
+  "best_of": 5,
+  "seconds": {
+    "read_all": {
+      "csv": 0.0809,
+      "json": 0.0714,
+      "parquet": 0.022
+    },
+    "read_2_of_11": {
+      "csv": 0.0302,
+      "parquet": 0.0019
+    },
+    "aggregate_1": {
+      "csv": 0.0288,
+      "parquet": 0.0015
+    }
+  },
+  "mb": {
+    "csv": 10.55,
+    "json": 14.51,
+    "parquet": 6.32
+  }
+}

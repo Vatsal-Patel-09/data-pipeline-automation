@@ -1,0 +1,242 @@
+{
+  "benchmark": "PostgreSQL load strategies",
+  "method": "Each configuration is a full pipeline invocation in its own subprocess, run strictly sequentially with nothing else executing. Round trips are counted by an instrumented cursor, not estimated. Byte counts are exact for COPY.",
+  "database": "Supabase PostgreSQL 17.11, eu-west-1",
+  "db_rtt_ms": 286.986,
+  "runs": [
+    {
+      "label": "small_rowwise",
+      "strategy": "rowwise",
+      "scale": 0.01,
+      "rows_loaded": 854,
+      "load_s": 259.613,
+      "roundtrips": 854,
+      "bytes_sent": 0,
+      "load_rows_per_s": 3.3,
+      "generate_s": 0.09,
+      "wall_s": 297.83,
+      "per_table": {
+        "categories": {
+          "rows": 4,
+          "load_s": 1.170749,
+          "roundtrips": 4,
+          "bytes_sent": 0
+        },
+        "users": {
+          "rows": 100,
+          "load_s": 28.924216,
+          "roundtrips": 100,
+          "bytes_sent": 0
+        },
+        "orders": {
+          "rows": 150,
+          "load_s": 47.261961,
+          "roundtrips": 150,
+          "bytes_sent": 0
+        },
+        "products": {
+          "rows": 200,
+          "load_s": 56.789539,
+          "roundtrips": 200,
+          "bytes_sent": 0
+        },
+        "order_items": {
+          "rows": 400,
+          "load_s": 125.466554,
+          "roundtrips": 400,
+          "bytes_sent": 0
+        }
+      }
+    },
+    {
+      "label": "small_execute_values",
+      "strategy": "execute_values",
+      "scale": 0.01,
+      "rows_loaded": 854,
+      "load_s": 2.78,
+      "roundtrips": 5,
+      "bytes_sent": 0,
+      "load_rows_per_s": 307.2,
+      "generate_s": 0.1,
+      "wall_s": 40.67,
+      "per_table": {
+        "categories": {
+          "rows": 4,
+          "load_s": 0.305502,
+          "roundtrips": 1,
+          "bytes_sent": 0
+        },
+        "users": {
+          "rows": 100,
+          "load_s": 0.29453,
+          "roundtrips": 1,
+          "bytes_sent": 0
+        },
+        "orders": {
+          "rows": 150,
+          "load_s": 0.576809,
+          "roundtrips": 1,
+          "bytes_sent": 0
+        },
+        "products": {
+          "rows": 200,
+          "load_s": 1.309701,
+          "roundtrips": 1,
+          "bytes_sent": 0
+        },
+        "order_items": {
+          "rows": 400,
+          "load_s": 0.293775,
+          "roundtrips": 1,
+          "bytes_sent": 0
+        }
+      }
+    },
+    {
+      "label": "small_copy",
+      "strategy": "copy",
+      "scale": 0.01,
+      "rows_loaded": 854,
+      "load_s": 4.158,
+      "roundtrips": 5,
+      "bytes_sent": 169255,
+      "load_rows_per_s": 205.4,
+      "generate_s": 0.09,
+      "wall_s": 41.78,
+      "per_table": {
+        "categories": {
+          "rows": 4,
+          "load_s": 0.590023,
+          "roundtrips": 1,
+          "bytes_sent": 2120
+        },
+        "users": {
+          "rows": 100,
+          "load_s": 0.583883,
+          "roundtrips": 1,
+          "bytes_sent": 11409
+        },
+        "orders": {
+          "rows": 150,
+          "load_s": 0.911216,
+          "roundtrips": 1,
+          "bytes_sent": 32010
+        },
+        "products": {
+          "rows": 200,
+          "load_s": 1.478658,
+          "roundtrips": 1,
+          "bytes_sent": 110088
+        },
+        "order_items": {
+          "rows": 400,
+          "load_s": 0.593862,
+          "roundtrips": 1,
+          "bytes_sent": 13628
+        }
+      }
+    },
+    {
+      "label": "full_execute_values",
+      "strategy": "execute_values",
+      "scale": 1.0,
+      "rows_loaded": 85400,
+      "load_s": 40.671,
+      "roundtrips": 86,
+      "bytes_sent": 0,
+      "load_rows_per_s": 2099.8,
+      "generate_s": 9.3,
+      "wall_s": 89.89,
+      "per_table": {
+        "categories": {
+          "rows": 400,
+          "load_s": 1.588203,
+          "roundtrips": 1,
+          "bytes_sent": 0
+        },
+        "users": {
+          "rows": 10000,
+          "load_s": 5.255997,
+          "roundtrips": 10,
+          "bytes_sent": 0
+        },
+        "orders": {
+          "rows": 15000,
+          "load_s": 7.993592,
+          "roundtrips": 15,
+          "bytes_sent": 0
+        },
+        "products": {
+          "rows": 20000,
+          "load_s": 11.550898,
+          "roundtrips": 20,
+          "bytes_sent": 0
+        },
+        "order_items": {
+          "rows": 40000,
+          "load_s": 14.282609,
+          "roundtrips": 40,
+          "bytes_sent": 0
+        }
+      }
+    },
+    {
+      "label": "full_copy",
+      "strategy": "copy",
+      "scale": 1.0,
+      "rows_loaded": 85400,
+      "load_s": 18.605,
+      "roundtrips": 5,
+      "bytes_sent": 17259829,
+      "load_rows_per_s": 4590.1,
+      "generate_s": 9.11,
+      "wall_s": 67.08,
+      "per_table": {
+        "categories": {
+          "rows": 400,
+          "load_s": 2.127969,
+          "roundtrips": 1,
+          "bytes_sent": 200029
+        },
+        "users": {
+          "rows": 10000,
+          "load_s": 2.719724,
+          "roundtrips": 1,
+          "bytes_sent": 1173648
+        },
+        "orders": {
+          "rows": 15000,
+          "load_s": 4.391472,
+          "roundtrips": 1,
+          "bytes_sent": 3267675
+        },
+        "products": {
+          "rows": 20000,
+          "load_s": 6.209552,
+          "roundtrips": 1,
+          "bytes_sent": 11015108
+        },
+        "order_items": {
+          "rows": 40000,
+          "load_s": 3.15672,
+          "roundtrips": 1,
+          "bytes_sent": 1603369
+        }
+      }
+    }
+  ],
+  "rowwise_full_scale_projection": {
+    "basis": {
+      "scale": 0.01,
+      "measured_roundtrips": 854,
+      "measured_load_s": 259.61,
+      "measured_s_per_roundtrip": 0.304,
+      "db_rtt_ms": 286.986
+    },
+    "full_scale_pg_rows": 85400,
+    "projected_roundtrips": 85400,
+    "projected_load_s": 25961.3,
+    "projected_load_hours": 7.21,
+    "note": "Row-at-a-time issues one round trip per row. Measured at reduced scale and projected, because a full-scale run would take hours. Labelled as projected, never as measured."
+  }
+}

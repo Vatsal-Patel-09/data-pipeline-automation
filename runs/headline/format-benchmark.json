@@ -1,0 +1,26 @@
+{
+  "benchmark": "file format comparison",
+  "table": "products",
+  "rows": 20000,
+  "fields": 11,
+  "results": {
+    "csv": {
+      "bytes": 11059797,
+      "mb": 10.55,
+      "write_s": 0.279,
+      "read_s": 0.118
+    },
+    "json": {
+      "bytes": 15218899,
+      "mb": 14.51,
+      "write_s": 0.343,
+      "read_s": 0.093
+    },
+    "parquet": {
+      "bytes": 6624650,
+      "mb": 6.32,
+      "write_s": 0.228,
+      "read_s": 0.518
+    }
+  }
+}
