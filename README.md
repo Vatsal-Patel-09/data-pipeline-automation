@@ -42,10 +42,19 @@ offer.
 
 Full argument: **[docs/why-synthetic-data.md](docs/why-synthetic-data.md)**.
 
-**Interactive overview:**
-[claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro)
-— animated pipeline schematic, every measurement, and a model builder that
-derives the execution plan live. Source: `docs/artifact/index.html`.
+### Interactive overview
+
+An animated pipeline schematic with clickable stages, every measurement below
+rendered as charts, the foreign-key graph, and a model builder that derives the
+execution plan live and exports a `model.json` the CLI accepts.
+
+- **[`overview.html`](overview.html)** — the file in this repository. Open it in
+  any browser; no server, no build step and no network needed. Print or save to
+  PDF for a paper copy. **Use this one if you cannot open Claude links.**
+- **[Hosted copy](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro)** — the same
+  page, for sharing by link. Requires a Claude account.
+
+Both are generated from the same source; `overview.html` is the canonical one.
 
 The project's own development is the evidence for the claim. Two defects
 dominated its runtime, and neither is observable at small volume — a
@@ -279,6 +288,7 @@ than an empty 200. `after_id` gives keyset pagination, which does not pay
 data_pipeline.py          CLI entrypoint and orchestrator
 api_server.py             FastAPI app, repository-backed, offline-capable
 ecommerce_model.json      The model that drives everything
+overview.html             Self-contained interactive overview (open in a browser)
 
 src/
   model_graph.py          THE model loader: validate, order, closure, waves
@@ -303,6 +313,7 @@ exports/                  Generated output (gitignored)
 
 | Document | Contents |
 |---|---|
+| [`overview.html`](overview.html) | Interactive overview: schematic, charts, model builder. Also [hosted](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro) |
 | [why-synthetic-data.md](docs/why-synthetic-data.md) | The thesis: why this project exists |
 | [performance.md](docs/performance.md) | Every measurement, with method |
 | [architecture.md](docs/architecture.md) | How a run flows through the system |

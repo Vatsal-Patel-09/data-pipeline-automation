@@ -25,9 +25,16 @@
   --warm:       #eb6834;   /* validated categorical slot 2 */
   --cool:       #1baf7a;   /* validated categorical slot 3 */
 
-  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-body:    "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-mono:    "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  /* Webfonts are a progressive enhancement. This file is meant to open from
+     disk with no network, so every stack below degrades to something that is
+     already installed on Windows, macOS and most Linux desktops. */
+  --font-display: "Archivo", "Segoe UI", -apple-system, BlinkMacSystemFont,
+                  "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body:    "Archivo", "Segoe UI", -apple-system, BlinkMacSystemFont,
+                  "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono:    "IBM Plex Mono", "Cascadia Mono", Consolas,
+                  "SFMono-Regular", "SF Mono", Menlo, "DejaVu Sans Mono",
+                  monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -211,6 +218,57 @@ footer { border-top: 1px solid var(--rule); margin-top: 56px; padding-top: 22px;
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ---- print / save-as-PDF ----
+   This file is a submission document as well as a web page, so printing has to
+   produce something readable. Browsers drop background fills by default, which
+   would erase every bar and stacked proportion, so the data marks are given
+   print-colour-adjust and everything else is re-expressed with borders. */
+@media print {
+  :root {
+    color-scheme: light;
+    --ink: #000; --ink-2: #333; --ink-3: #555;
+    --surface: #fff; --panel: #fff;
+    --rule: #bbb; --rule-firm: #777;
+    --accent: #1a4f91; --warm: #a8431d; --cool: #0f7050;
+  }
+  body { background: #fff; font-size: 10.5pt; line-height: 1.45; }
+  .wrap { max-width: none; padding: 0; }
+  section { padding: 18pt 0 0; break-inside: avoid-page; }
+  header.masthead { padding: 0 0 6pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; break-after: avoid; }
+  h3 { break-after: avoid; }
+  .lede { font-size: 11.5pt; }
+
+  /* Keep the data marks visible on paper. */
+  .bar, .stack span, .legend i, .tile.lead .v {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .panel, .tile, .schematic, .detail, .fkgraph, .tbl-card {
+    border: 1px solid var(--rule) !important;
+    background: #fff !important;
+    break-inside: avoid;
+  }
+  .tiles { grid-template-columns: repeat(5, 1fr); gap: 6pt; }
+  .tile .v { font-size: 16pt; }
+  table.data, table.rl { break-inside: avoid; font-size: 9pt; }
+  figure, .regime-row, .grid2 > * { break-inside: avoid; }
+  .scroller, .schematic, .fkgraph { overflow: visible; }
+  .schematic svg, .fkgraph svg { min-width: 0; }
+
+  /* Controls cannot be operated on paper. */
+  .ctrl-row, #copy-json, #add-tbl, #reset-tbl, .tbl-card button,
+  label, input, select { display: none !important; }
+  .builder { grid-template-columns: 1fr 1fr; }
+  pre.out { max-height: none; font-size: 8pt; }
+
+  a { color: var(--ink); text-decoration: none; }
+  footer { break-inside: avoid; }
+}
+@page { margin: 14mm; }
 </style>
 </head>
 <body data-palette="#2a78d6,#eb6834,#1baf7a">
@@ -715,11 +773,19 @@ footer { border-top: 1px solid var(--rule); margin-top: 56px; padding-top: 22px;
 </section>
 
 <footer>
-  <p style="margin:0">
+  <p style="margin:0 0 10px">
     Python 3.13 &middot; PostgreSQL 17 &middot; psycopg2 &middot; Faker &middot;
     pandas &middot; PyArrow &middot; FastAPI &middot; pytest. Measured on an
     i5-13420H against Supabase in eu-west-1. Harnesses and raw results are
     committed under <code>runs/headline/</code>.
+  </p>
+  <p style="margin:0">
+    This is a single self-contained file. Open
+    <code>overview.html</code> in any browser, with or without a network
+    connection &mdash; there is no build step, no server and no external data.
+    Webfonts are the only thing it fetches, and it falls back to system faces
+    without them. Print or save to PDF for a paper copy; the layout and the data
+    marks are styled for it.
   </p>
 </footer>
 
