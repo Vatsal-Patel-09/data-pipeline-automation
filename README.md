@@ -1,305 +1,350 @@
-# E-commerce Data Pipeline Automation System
-
-A comprehensive data engineering solution that automates the generation, transformation, and distribution of realistic e-commerce data across multiple platforms while maintaining referential integrity.
-
-## Demo video 
-https://www.loom.com/share/d52908593c834a7a878a1c5d30a54eb3?sid=e54bf7d4-832c-4975-871a-fb75a55a7893
-
-## 🎯 Project Overview
-
-This system demonstrates advanced data pipeline capabilities by:
-- **Parsing JSON data models** to dynamically create database schemas
-- **Generating realistic test data** using context-aware algorithms
-- **Maintaining referential integrity** across PostgreSQL, CSV, JSON, and API formats
-- **Serving data via REST API** with pagination and filtering
-- **Supporting cloud database integration** with automated deployment
-
-**Key Achievement**: Successfully maintains foreign key relationships across different data destinations (e.g., CSV files reference PostgreSQL primary keys).
-
-## 🏗️ System Architecture
-
-```
-┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
-│ JSON Model │───▶│ Schema Manager │───▶│ PostgreSQL │
-│ Definition │ │ │ │ Database │
-└─────────────────┘ └──────────────────┘ └─────────────────┘
-│ │ │
-▼ ▼ ▼
-┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
-│ Data Generator │───▶│ Output Handlers │───▶│ Multi-Format │
-│ (Faker) │ │ & Dependencies │ │ Outputs │
-└─────────────────┘ └──────────────────┘ └─────────────────┘
-│ │ │
-▼ ▼ ▼
-┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐
-│ CLI Interface │ │ FastAPI Server │ │ CSV/JSON/API │
-│ │ │ │ │ Files │
-└─────────────────┘ └──────────────────┘ └─────────────────┘
-```
-
-
-### Core Components:
-- **Database Manager**: Automated schema creation and transaction management
-- **Data Generator**: Realistic data generation with business context awareness
-- **Output Handlers**: Multi-format export with referential integrity
-- **API Server**: Production-ready REST API with comprehensive endpoints
-
-## 📊 Data Model
-
-The system generates a complete e-commerce database with **6 interconnected tables**:
-
-| Table | Records | Output Format | Description |
-|-------|---------|---------------|-------------|
-| `categories` | 400 | PostgreSQL | Product category hierarchy |
-| `users` | 10,000 | CSV + PostgreSQL* | Customer information |
-| `products` | 20,000 | JSON + PostgreSQL* | Product catalog |
-| `orders` | 15,000 | API (PostgreSQL) | Customer orders |
-| `order_items` | 40,000 | PostgreSQL | Order line items |
-| `reviews` | 15,000 | CSV | Product reviews |
-
-**Total Generated Records**: 100,400 across all formats
-
-Record counts come from the `sample_size` field of each table in
-`ecommerce_model.json`. Change them there, not here.
-
-*Dual destination for foreign key integrity
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.8+
-- Cloud PostgreSQL database (Supabase recommended)
-- 4GB+ RAM for data generation
-
-### Installation
-
-1. **Clone Repository**
-```
-git clone https://github.com/Vatsal-Patel-09/data-pipeline-automation.git
-cd data-pipeline-automation
-```
-
-2. **Create Virtual Environment**
-```
-python -m venv venv
-
-Windows:
-venv\Scripts\activate
-Powershell:
-venv\Scripts\Activate.ps1
-
-macOS/Linux:
-source venv/bin/activate
-```
-
-3. **Install Dependencies**
-```pip install -r requirements.txt```
-
-4. **Configure Environment**
-```cp example.env .env```
-
-Edit .env with your database credentials
-
-### Database Setup (Supabase)
-
-1. Create account at [supabase.com](https://supabase.com/)
-2. Create new project
-3. Go to Settings > Database
-4. Copy connection details to `.env` file
-
-## 💻 Usage
-
-### 1. Complete Pipeline Execution
-```python data_pipeline.py --model ecommerce_model.json --env .env```
-
-**Output**: Creates database schema, generates 100,400 records, exports to all formats
-
-### 2. Database Export
-```python data_pipeline.py export-db --env .env --output exports/database_dump.sql```
-
-**Output**: Complete SQL dump with schema and data
-
-### 3. API Server
-```python api_server.py --model ecommerce_model.json --env .env --port 8000```
-
-**Access**: http://localhost:8000/docs for interactive API documentation
-
-## 📡 API Endpoints
-
-| Endpoint | Method | Description | Example |
-|----------|--------|-------------|---------|
-| `/` | GET | API information | `curl http://localhost:8000/` |
-| `/health` | GET | Health check | `curl http://localhost:8000/health` |
-| `/orders` | GET | Paginated orders | `curl http://localhost:8000/orders?limit=10` |
-| `/orders/{id}` | GET | Single order | `curl http://localhost:8000/orders/123` |
-| `/orders/stats/summary` | GET | Order analytics | `curl http://localhost:8000/orders/stats/summary` |
-
-### API Features
-- **Pagination**: `?skip=0&limit=50`
-- **Filtering**: `?status=pending&user_id=123`
-- **Statistics**: Revenue, customer metrics, status breakdown
-- **Error Handling**: Proper HTTP status codes and error messages
-
-## 🔗 Cross-Format Referential Integrity
-
-### The Challenge
-Maintaining foreign key relationships when data spans multiple formats:
-- `orders.user_id` (PostgreSQL) must reference `users.id` (CSV file)
-- `reviews.product_id` (CSV file) must reference `products.id` (JSON file)
-
-### Our Solution: Dual-Destination Strategy
-1. **Dependency Analysis**: Automatically detect which tables need PostgreSQL presence
-2. **Dual Insertion**: Referenced tables inserted into both PostgreSQL AND primary destination
-3. **Topological Ordering**: Generate parent tables before child tables
-4. **Transaction Safety**: Rollback on errors, commit on success
-
-**Example**:
-- `users` table → Primary: CSV file, Secondary: PostgreSQL (for `orders.user_id`)
-- `products` table → Primary: JSON file, Secondary: PostgreSQL (for `order_items.product_id`)
-
-## 📁 Project Structure
-
-```
-data-pipeline-automation/
-├── README.md                 # This file
-├── CLAUDE.md                 # AI context: live vs archive, model contract, conventions
-├── requirements.txt          # Python dependencies
-├── example.env               # Environment template (copy to .env)
-├── data_pipeline.py          # Main CLI script
-├── api_server.py             # FastAPI server
-├── ecommerce_model.json      # Data model definition
-├── src/                      # Core modules
-│   ├── database_manager.py   # Schema creation from the model JSON
-│   ├── data_generator.py     # Faker-based data generation
-│   └── output_handlers.py    # Multi-format output
-├── docs/                     # Deep context, loaded on demand
-│   ├── architecture.md       # Call path and two-phase output strategy
-│   ├── data-model.md         # Model-JSON contract in full
-│   ├── branches.md           # What lives on each branch
-│   └── known-issues.md       # Known bugs and rough edges
-├── .claude/skills/           # Repo-specific workflows
-│   ├── run-pipeline/         # Run and verify the pipeline
-│   └── add-table/            # Add a table to a model
-└── exports/                  # Generated outputs (untracked)
-    ├── csv/                  # CSV exports
-    ├── json/                 # JSON exports
-    └── database_dump.sql     # Database backup
-```
-
-## 🤖 AI-Assisted Development
-
-This repo carries a context layer so an AI assistant can work in it without
-guessing. Start here:
-
-- **`CLAUDE.md`** - what is live, what is archived, the model-JSON contract,
-  and the project conventions. Read this first.
-- **`docs/architecture.md`** - the real call path and the two-phase output strategy.
-- **`docs/data-model.md`** - the model-JSON contract in full, plus how field
-  *names* drive generated data realism.
-- **`docs/branches.md`** - what lives on `master`, `vatsal` and `loan_mgmt`.
-  `master` is not the whole project.
-- **`docs/known-issues.md`** - known bugs and rough edges, recorded rather than hidden.
-
-Note on the `test_*.py` files: despite the names they are manual print-based
-scripts that need a live database and a running server. They are not a pytest
-suite and there is no CI.
-
-## 🧪 Testing & Verification
-
-### Verify Complete Pipeline
-```1. Run complete pipeline
-python data_pipeline.py --model ecommerce_model.json --env .env
-
-2. Check generated files
-ls -la exports/csv/ # Should contain users.csv, reviews.csv
-ls -la exports/json/ # Should contain products.json
-
-3. Verify database content (using your database client)
-SELECT COUNT(*) FROM categories; # Should return 400
-SELECT COUNT(*) FROM order_items; # Should return 40000
-
-4. Test API endpoints
-curl http://localhost:8000/orders?limit=5
-curl http://localhost:8000/orders/stats/summary
-```
-
-### Verify Referential Integrity
-```
-Check cross-format relationships
-1. Get a product category_id from products.json
-2. Verify it exists in PostgreSQL categories table
-3. Confirm reviews.csv user_id values exist in PostgreSQL users table
-```
-
-## 🔧 Technical Implementation
-
-### Data Generation Strategy
-- **Context-Aware Generation**: Products have realistic names for their categories
-- **Self-Referencing Relationships**: Categories can have parent-child hierarchies
-- **Realistic Constraints**: Unique emails, valid phone formats
-
-Two caveats, both verified by running the generator and recorded in
-`docs/known-issues.md`: order totals are **not** reconciled against their line items
-(every field is generated independently), and dates have **no causal ordering**, so an
-order can predate the registration of the user who placed it.
-
-### Dependency Resolution
-Uses **topological sorting** algorithm to determine table creation/population order:
-```
-Actual order, verified by running the generator:
-categories → users → orders → products → order_items → reviews
-```
-
-### Performance Optimizations
-- **Batch Processing**: Database insertions in configurable batches
-- **Connection Pooling**: Reused database connections
-- **Memory Management**: Streaming data processing for large datasets
-- **Transaction Management**: Atomic operations with rollback capability
-
-## 🚨 Error Handling
-
-The system includes comprehensive error handling:
-- **Database Connection**: Automatic retry with exponential backoff
-- **Data Validation**: Field-level validation before insertion
-- **Transaction Safety**: Complete rollback on any failure
-- **Resource Cleanup**: Proper connection and file handle management
-
-## 📈 Performance Metrics
-
-**Typical Performance** (on 4GB RAM system):
-- **Schema Creation**: < 30 seconds
-- **Data Generation**: 2-3 minutes at the original 1,575-record sample sizes;
-  substantially longer at the current 100,400 (inserts are row-by-row - see
-  `docs/known-issues.md`)
-- **Multi-Format Export**: < 1 minute
-- **API Response Time**: < 200ms for paginated queries
-
-## 🔐 Security Considerations
-
-- **Environment Variables**: Sensitive credentials stored in `.env`
-- **SQL Injection Prevention**: Parameterized queries throughout
-- **Input Validation**: Comprehensive validation on all user inputs
-- **Connection Security**: SSL-enabled database connections
-
-## 🎯 Submission Deliverables
-
-This project demonstrates:
-
-✅ **End-to-End Functionality**: Complete workflow from JSON model to all outputs  
-✅ **Data Integrity**: Foreign key relationships maintained across all formats  
-✅ **Cloud Database Integration**: Supabase PostgreSQL setup and population  
-✅ **Code Quality**: Clean, readable, well-structured codebase  
-✅ **Output Accuracy**: All formats generated with realistic, consistent data  
-✅ **Error Handling**: Robust database connections and edge case management  
-
-## 📞 Support & Contact
-
-For questions about this implementation:
-- Review the comprehensive logging output for debugging
-- Check the `/health` endpoint for system status
-- Verify `.env` configuration matches your database setup
+# Declarative Synthetic Data Pipeline
+
+**Generating referentially-consistent synthetic datasets at arbitrary scale,
+across heterogeneous storage systems.**
+
+A Big Data Analytics (semester 7) project. Describe a domain once as JSON —
+tables, fields, types, relationships, volumes — and the pipeline produces a
+complete synthetic dataset and materialises it simultaneously into PostgreSQL,
+CSV, JSON, Parquet and a live REST API, with foreign keys that remain valid
+*across* all of them.
+
+> A short product name is still to be chosen; `SynthForge` is the current
+> proposal. Nothing depends on it — it is a find-replace over three files.
 
 ---
 
-**Built with**: Python, FastAPI, PostgreSQL, Faker, Pandas, Click  
-**Architecture**: Cloud-native, microservices-ready, production-scalable
+## Why this exists
+
+Everything worth knowing in data engineering only becomes visible at scale. A
+query plan at ten thousand rows and the same plan at ten million are different
+plans. Indexes that look pointless become load-bearing. Join order starts to
+matter, and so do cardinality skew, cache residency and the cost of a network
+round trip.
+
+The data that exhibits scale is held by organisations that will not release it.
+Amazon has the order graph; a bank has the full ledger. They publish papers
+*about* their scale, not the data behind it — it is simultaneously their
+competitive advantage, their regulatory liability and their customers' private
+information. What is publicly available is small, single-table, or stripped of
+exactly the relational structure that makes a dataset worth studying.
+
+So the ability to *learn and practise* at scale is gated by employment. People
+inside those organisations get better at operating at scale because they can
+practise; everyone else practises on a 500-row CSV and finds out what a
+ten-million-row join costs in production.
+
+This project removes the gate by making volume a parameter rather than a
+property of a dataset you were handed. `--scale 1` gives 100,400 rows;
+`--scale 50` gives five million from the same model. That lets you study the
+*curve* instead of a single point, which is the one thing no public dataset can
+offer.
+
+Full argument: **[docs/why-synthetic-data.md](docs/why-synthetic-data.md)**.
+
+The project's own development is the evidence for the claim. Two defects
+dominated its runtime, and neither is observable at small volume — a
+foreign-key lookup that was accidentally quadratic, and a load path issuing one
+network round trip per row. Both were found by instrumenting and measuring at
+scale, not by reading the code.
+
+---
+
+## What it does
+
+```mermaid
+flowchart LR
+    M["model.json"] --> G["generate<br/>FK-aware,<br/>topologically ordered"]
+    G --> R["semantic repair<br/>causal dates,<br/>reconciled money"]
+    R --> PG[("PostgreSQL")]
+    R --> C["CSV"]
+    R --> J["JSON"]
+    R --> P["Parquet"]
+    PG --> A["REST API"]
+```
+
+Three claims, each of which the project actually supports:
+
+**Declarative.** A new domain is a JSON file, not a code change. Field *names*
+drive both the generated values and the inferred relationships, so a model that
+names a column `cost` and another `price` gets a sane margin for free.
+
+**Referentially consistent across heterogeneous sinks.** A `user_id` in a CSV
+row resolves to a real row in PostgreSQL, because every destination is
+materialised from one in-memory dataset rather than generated per sink. Foreign
+keys are added *after* the bulk load, so PostgreSQL itself validates every
+generated reference in one pass and names the offending row if any fails. The
+claim is proven, not asserted.
+
+**Measured.** The pipeline reports its own throughput, round-trip counts and
+byte volumes to `runs/run_report.json`. Round trips are counted by an
+instrumented cursor, not estimated.
+
+---
+
+## Results
+
+All figures produced by harnesses committed in `runs/headline/`, run uncontended
+and repeated. Method in **[docs/performance.md](docs/performance.md)**.
+
+### Generation throughput, full scale (100,400 records)
+
+The foreign-key lookup rebuilt its entire candidate list on every field call —
+roughly 2.0 billion dictionary probes per run — for a result that is invariant
+per `(table, field)`. Memoizing it is byte-identical output, verified across all
+six tables and all 49 fields.
+
+| table | rows | before | after | speedup |
+|---|---|---|---|---|
+| `order_items` | 40,000 | 62.93s | 0.41s | **151.6x** |
+| `reviews` | 15,000 | 24.24s | 1.74s | 13.9x |
+| `orders` | 15,000 | 8.30s | 2.09s | 4.0x |
+| `products` | 20,000 | 3.08s | 2.65s | 1.2x |
+| `users` | 10,000 | 2.62s | 2.60s | 1.0x |
+| `categories` | 400 | 0.07s | 0.05s | 1.4x |
+| **total** | **100,400** | **101.24s** | **10.06s** | **10.1x** |
+
+The speedup tracks rows x parent-rows, and the three tables with no meaningful
+foreign-key load are flat — the signature of the right fix rather than a lucky
+one.
+
+### Data realism, full scale
+
+Structural validity is easy and not very useful. A dataset where every user is
+an infant and no order total matches its line items teaches you nothing about a
+real query plan, because no real plan ever sees data shaped like that.
+
+| metric | before | after |
+|---|---|---|
+| `users.birth_date` implied age | 0.0–2.0 years | 18.0–79.99 years |
+| users under 18 | 10,000 / 10,000 | 0 / 10,000 |
+| orders placed before the user registered | 49.8% (7,467) | 0% |
+| reviews written before the product existed | 49.9% (7,479) | 0% |
+| line totals != qty x price − discount | 100% (40,000) | 0% |
+| order totals != sum of line items | 100% (13,969) | 0% |
+| `users.total_spent` != order history | 100% (10,000) | 0% |
+| `unit_price` unrelated to the product's price | 58.4% (23,368) | 0% |
+| products priced at or below cost | 50.0% (9,992) | 0% |
+| category names using the `_N` fallback | ~370 / 400 | 0 / 400 |
+| distinct product names | 30 / 20,000 | 20,000 / 20,000 |
+
+Every repair rule is driven by field names and the foreign-key graph, never by
+hardcoded table names — which is what keeps the declarative claim intact.
+
+### Load path
+
+The dominant cost of a run. Measured against a Supabase PostgreSQL 17.11
+instance in eu-west-1 with a **285 ms** median round-trip time, where a
+row-at-a-time load of 85,400 rows would spend hours purely waiting.
+
+See **[docs/performance.md](docs/performance.md#load-strategies)** for the
+strategy comparison, the round-trip counts and the projection method.
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/Vatsal-Patel-09/data-pipeline-automation.git
+cd data-pipeline-automation
+pip install -r requirements.txt
+cp example.env .env        # then fill in your database credentials
+```
+
+Nothing below needs a database except `run` and `export-db`:
+
+```bash
+# Check a model against the contract
+python data_pipeline.py validate
+
+# Print the execution plan: order, closure, row counts. Sub-second.
+python data_pipeline.py --dry-run
+
+# Everything except the network: renders DDL and COPY payloads to exports/
+python data_pipeline.py --offline
+
+# Serve the generated data with no database at all
+python api_server.py --offline
+
+# The test suite (db-marked tests skip automatically)
+python -m pytest
+```
+
+With a database:
+
+```bash
+# Full pipeline, then verify
+python data_pipeline.py run --verify-writes
+
+# Fast iteration at 1% volume
+python data_pipeline.py run --scale 0.01
+
+# Compare load strategies
+python data_pipeline.py run --load-strategy rowwise
+python data_pipeline.py run --load-strategy execute_values --page-size 1000
+python data_pipeline.py run --load-strategy copy      # default
+
+# Restorable SQL dump, pure Python, no pg_dump needed
+python data_pipeline.py export-db --output exports/database_dump.sql
+
+# API server, interactive docs at /docs
+python api_server.py --port 8000
+```
+
+### Database connection note
+
+Supabase's direct host `db.<ref>.supabase.co` publishes **only an AAAA record**,
+so it requires IPv6. On a network without an IPv6 route, use the Supavisor
+session pooler on **port 5432** — not 6543, which is transaction mode and does
+not persist session-level `SET`, making `COPY` unreliable and any session-tuning
+measurement meaningless. The pipeline diagnoses this at the point of failure
+rather than reporting a bare name-resolution error.
+
+---
+
+## The data model
+
+```json
+{
+  "database": { "name": "ecommerce_platform", "version": "1.0" },
+  "tables": [
+    {
+      "name": "orders",
+      "sample_size": 15000,
+      "output_format": "api",
+      "fields": [
+        { "name": "id", "type": "integer", "primary_key": true, "auto_increment": true },
+        { "name": "user_id", "type": "integer", "foreign_key": "users.id" },
+        { "name": "total_amount", "type": "decimal", "precision": 12, "scale": 2 },
+        { "name": "status", "type": "enum", "values": ["pending", "shipped", "delivered"] }
+      ]
+    }
+  ]
+}
+```
+
+The shipped model, `ecommerce_model.json` — 6 tables, 49 fields, 100,400 rows:
+
+| table | rows | declared destination | also in PostgreSQL |
+|---|---|---|---|
+| `categories` | 400 | postgres | — |
+| `users` | 10,000 | csv | yes |
+| `products` | 20,000 | json | yes |
+| `orders` | 15,000 | api | yes |
+| `order_items` | 40,000 | postgres | — |
+| `reviews` | 15,000 | csv | no (leaf) |
+
+`users` and `products` land in **two** places each: their declared file sink,
+*and* PostgreSQL, because `orders` and `order_items` reference them. That dual
+destination is where the integrity claim is actually tested. 85,400 of the
+100,400 rows reach the database.
+
+Row counts come from `sample_size` in the model. Change them there, not here.
+
+Full contract: **[docs/data-model.md](docs/data-model.md)**.
+
+---
+
+## API
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | API metadata and available endpoints |
+| GET | `/health` | Liveness, with a real timestamp |
+| GET | `/orders` | Paginated orders; filter by `status`, `user_id`; `skip`/`limit` or `after_id` |
+| GET | `/orders/{id}` | One order, or 404 |
+| GET | `/orders/stats/summary` | Aggregates and status breakdown |
+| GET | `/docs` | Interactive OpenAPI documentation |
+
+```bash
+curl "http://localhost:8000/orders?status=shipped&limit=5"
+curl "http://localhost:8000/orders/42"
+curl "http://localhost:8000/orders/stats/summary"
+```
+
+`status` is validated against the model's enum, so a typo returns **422** rather
+than an empty 200. `after_id` gives keyset pagination, which does not pay
+`OFFSET`'s increasing cost on deep pages.
+
+---
+
+## Project layout
+
+```
+data_pipeline.py          CLI entrypoint and orchestrator
+api_server.py             FastAPI app, repository-backed, offline-capable
+ecommerce_model.json      The model that drives everything
+
+src/
+  model_graph.py          THE model loader: validate, order, closure, waves
+  data_generator.py       Record generation, field-name driven
+  realism.py              Post-generation semantic repair
+  output_handlers.py      Routing and writing to five destinations
+  load_strategies.py      rowwise | execute_values | copy
+  serialization.py        Per-sink value conversion, in one place
+  database_manager.py     DDL synthesis, constraint deferral, verification
+  db.py                   Connection config, instrumented cursor, diagnosis
+  metrics.py              Spans, per-table metrics, run report
+
+tests/                    165 tests: 149 offline, 16 db-marked
+runs/headline/            Committed benchmark evidence and its harnesses
+docs/                     See below
+exports/                  Generated output (gitignored)
+```
+
+---
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [why-synthetic-data.md](docs/why-synthetic-data.md) | The thesis: why this project exists |
+| [performance.md](docs/performance.md) | Every measurement, with method |
+| [architecture.md](docs/architecture.md) | How a run flows through the system |
+| [data-model.md](docs/data-model.md) | The model-JSON contract, and how to extend it |
+| [known-issues.md](docs/known-issues.md) | What is fixed, open, and deliberately declined |
+| [branches.md](docs/branches.md) | `master` is not the whole project |
+
+---
+
+## Testing
+
+```bash
+python -m pytest           # 149 offline tests
+python -m pytest -m db     # 16 more, against a live database
+```
+
+The most important test is `test_every_foreign_key_resolves_to_a_real_parent`,
+which converts the project's central claim from prose into a checked invariant.
+Its integration counterpart does the same from the other direction: it takes
+foreign keys out of a CSV file and resolves them against rows in PostgreSQL.
+
+The suite also pins the *before* state of several defects, so the comparison
+tables above stay checked rather than remembered.
+
+---
+
+## Honest limitations
+
+Read **[docs/known-issues.md](docs/known-issues.md)** before relying on
+anything. In brief:
+
+- The API serves only `orders`; response models are hand-written, so a second
+  `api` table is loaded but not exposed.
+- `--parallel-loads` is implemented but unmeasured. The expectation is that it
+  is roughly flat, because once rows are batched the work is bandwidth-bound.
+- The vectorized and GPU generation engines are **not built**. The honest
+  expectation, recorded before building: a GPU path is *slower* at this scale,
+  because initialising the CUDA context costs more than the entire CPU cost of
+  every numeric column, and the real remaining cost is string work a GPU cannot
+  touch.
+- There is no CI.
+- This is a coursework demonstrator, not a production ELT tool. Correctness,
+  measurement and clarity were the goals; multi-node horizontal scale was not.
+
+---
+
+## Built with
+
+Python 3.13 · PostgreSQL 17 (Supabase) · psycopg2 · Faker · pandas · PyArrow ·
+NumPy · FastAPI · uvicorn · Pydantic · Click · pytest

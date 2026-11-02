@@ -1,169 +1,289 @@
 # Known issues
 
-Found while mapping the repo (2026-11-01) and deliberately **not fixed** — the cleanup
-pass was scoped to removing misleading material, not changing behaviour. Recorded here
-so they are visible rather than rediscovered. None of these is a regression; all predate
-the context work.
+Three sections: what was **fixed** (with the measurement that proves it), what
+is **still open**, and what was **deliberately declined**.
 
-All findings below the first heading were **confirmed by executing the pipeline**
-(generation and file output run without a database; the API was exercised through
-FastAPI's `TestClient` against a stubbed connection), not by reading the code.
+The register exists because an earlier pass through this repo found that the
+README claimed capabilities the code did not have. Keeping a measured, honest
+defect list is more useful than a feature list, and the fixed section below is
+effectively the project's results.
 
-## Data realism — the generated data is less correct than the README claims
+Every figure here was produced by a harness committed in `runs/headline/`, run
+uncontended and repeated. See [performance.md](performance.md) for method.
 
-### `date` and `timestamp` ignore the field name
-Every other type (`string`, `integer`, `decimal`, `json`) pattern-matches the field
-name to pick a realistic value. `date` and `timestamp` do not
-(`src/data_generator.py:109-112`): they always return
-`date_between('-2y', 'today')` and `date_time_between('-1y', 'now')`.
+---
 
-Measured consequence: `users.birth_date` produces implied ages of **0.1 to 2.0 years**.
-Every user in the dataset is an infant.
+## Fixed
 
-Affected fields: `users.birth_date`, `users.registration_date`, `categories.created_at`,
-`products.created_at`, `orders.order_date`, `reviews.created_at`.
+### Performance
 
-### No causal ordering between dates
-Because each date is drawn independently, nothing enforces that related events happen
-in a sensible sequence. Measured on a 150-order sample: **57% of orders were placed
-before the user who placed them registered.** The same applies to reviews predating the
-orders they review.
+**1. Foreign-key resolution was accidentally quadratic.** `generate_foreign_key_value`
+rebuilt the entire candidate parent-id list on every single field call, for a
+result that is invariant per `(table, field)`. For the shipped model that is
+roughly 2.0 billion dictionary probes per run.
 
-The README's "proper date sequences" claim has been corrected.
+Memoized. This is behaviour-preserving rather than merely equivalent: tables are
+generated in topological order, so the parent list is complete and immutable
+before any child reads it, which means the cached list is the identical list in
+the identical order and `random.choice` consumes the identical RNG draw.
+Verified byte-identical on all six tables, all 49 fields.
 
-### Order totals are not reconciled with their line items
-`orders.total_amount`, `tax_amount` and `shipping_cost` are generated independently of
-the `order_items` rows that reference the order. Measured: **138 of 138 orders** whose
-line-item `total_price` values do not sum to the order's `total_amount`. Not most —
-all of them.
+| table | rows | before | after | speedup |
+|---|---|---|---|---|
+| `order_items` | 40,000 | 62.93s | 0.41s | **151.6x** |
+| `reviews` | 15,000 | 24.24s | 1.74s | 13.9x |
+| `orders` | 15,000 | 8.30s | 2.09s | 4.0x |
+| `products` | 20,000 | 3.08s | 2.65s | 1.2x |
+| `users` | 10,000 | 2.62s | 2.60s | 1.0x |
+| `categories` | 400 | 0.07s | 0.05s | 1.4x |
+| **total** | **100,400** | **101.24s** | **10.06s** | **10.1x** |
 
-The README claimed "Order totals mathematically consistent with line items". That claim
-was false and has been removed. Fixing it means a post-generation reconciliation pass
-over `order_items` grouped by `order_id`.
+The speedup tracks rows x parent-rows, and the three tables with no meaningful
+foreign-key load are flat — which is the signature of the right fix rather than
+a lucky one.
 
-### `products.name` draws from the category list
-`generate_string_value` treats a field named exactly `name` as a category name
-(`src/data_generator.py:134-144`). `products.name` is exactly that, so all 20,000
-products are named from a hardcoded 30-item category list. Measured on a 200-product
-sample: **30 distinct names**, every one a category ("Fiction", "Tablets",
-"Home & Garden"). Renaming the column to `product_name` would not help either — it
-would fall through to a single random word. Realistic product names need a new branch
-in `generate_string_value`.
+**2. The PostgreSQL load issued one network round trip per row.** ~85,400
+sequential round trips for the shipped model. Replaced by three interchangeable
+strategies (`rowwise`, `execute_values`, `copy`) so the comparison is measurable
+rather than asserted. Measurements in [performance.md](performance.md#load-strategies).
 
-## Bugs
+**3. All DDL was sent one statement at a time.** 6 drops + 6 creates + 7
+constraint additions, each its own round trip. Now a single multi-statement
+execute: 19 round trips become 1.
 
-### Schema creation order is not reproducible
-`DatabaseManager.get_table_dependency_order` (`src/database_manager.py:187`) iterates a
-`set` without sorting, so CREATE TABLE order follows randomised string hash order.
-Verified: five `PYTHONHASHSEED` values produce five different orders. All are valid
-topological orders, so nothing breaks — but it undercuts the project's reproducibility
-story, which `Faker.seed(42)` otherwise delivers. One `ready_tables.sort()` fixes it.
-See `docs/architecture.md`.
+**4. Foreign key constraints existed during the bulk load,** so every inserted
+row paid index probes against its parents. Constraint creation moved to after
+the load. Beyond the speed, this makes PostgreSQL itself prove cross-destination
+referential integrity in one sequential pass.
 
-### `/health` reports a frozen timestamp
-`api_server.py:132` returns the string literal `"2025-08-02T00:00:00Z"` as the health
-check's timestamp. It never changes, so the endpoint cannot be used to tell a live
-server from a stale cached response. Should be `datetime.now(timezone.utc).isoformat()`.
+**5. The API opened a fresh connection per request** — a TCP and TLS handshake
+on every call, which for a small response is the dominant cost. Now a
+`ThreadedConnectionPool`.
 
-### The `status` filter is not validated
-`/orders?status=` takes an unconstrained `Optional[str]` (`api_server.py:142`) rather
-than the model's enum (`pending`, `processing`, `shipped`, `delivered`, `cancelled`).
-A typo returns an empty result set with HTTP 200 instead of a 422. The `orders` table
-does carry a `CHECK` constraint on the column, so only the API surface is loose.
+**6. Three redundant full-dataset copies** were built during output. One was
+provably a no-op (its conversions were already performed by the JSON encoder
+immediately afterwards) and was removed byte-identically.
 
-### `export-db` rejects a `DATABASE_URL`-only config
-`data_pipeline.py:168` — `export_database` guards on
-`all([db_host, db_name, db_user, db_password])` and raises
-`ValueError("Missing database connection parameters")` if any is missing. But
-`generate_sql_dump`, called immediately after, prefers `DATABASE_URL` and only falls
-back to the individual vars. So a `.env` containing just `DATABASE_URL` — the form
-`CLAUDE.md` recommends, and the form Supabase hands you — makes `export-db` fail even
-though the code underneath it would have worked.
+### Correctness
 
-Fix would be to accept either shape in the guard, matching `generate_sql_dump`.
+**7. The documented reproducibility guarantee was false.** The project claimed
+generation was reproducible because of `Faker.seed(42)` and `random.seed(42)`.
+Date fields were anchored to the wall clock (`'-2y'` to `'today'`), so a seeded
+run picked the same offset from a different origin.
 
-### Row-by-row inserts at 100k scale
-`src/output_handlers.py:142-144` — `handle_postgresql_output` loops over records calling
-`cursor.execute` once each. The ecommerce model generates 100,400 records, of which
-~85,400 go to PostgreSQL across `categories`, `users`, `products`, `orders` and
-`order_items`. That is ~85,000 individual round trips to a cloud database.
+Measured before the fix: **five of six tables produced different data on every
+run**, and the only stable table was precisely the one with no temporal field.
+Varying `PYTHONHASHSEED` across 0–4 gave the same result, ruling out hash
+ordering. Dates are now anchored to a fixed reference date; reproducible across
+six runs spanning six hash seeds.
 
-The README claims "Batch Processing: Database insertions in configurable batches" and
-"Connection Pooling: Reused database connections". Neither exists in the code.
+**8. `GET /orders/<missing>` returned 500, not 404.** The connection context
+manager wrapped its own `yield` in `except Exception`, so the `HTTPException(404)`
+raised inside the `with` body was caught and re-raised as "Database connection
+failed". The same bug reported every genuine SQL error as a connection problem,
+destroying diagnosability of every endpoint.
 
-Fix would be `psycopg2.extras.execute_values` with a batch size, which is a
-few lines and a large speedup.
+**9. A failing output destination was swallowed, then the run reported success
+with exit code 0.** Losing 35,000 CSV rows to a full disk while announcing
+success is the worst available outcome for anything scripted. Failures are now
+collected and re-raised, and the run report records them.
 
-### Emoji in log strings will crash Windows consoles
-`data_pipeline.py` was rewritten once specifically to strip emoji, because Windows
-consoles on the `cp1252` code page raise `UnicodeEncodeError` when `logging` tries to
-write them. That rewrite missed the `src/` modules:
+**10. Sequences were never advanced after inserting explicit primary keys,** so
+every `SERIAL` sequence sat at 1 and the delivered database rejected the first
+application-level `INSERT` with a duplicate-key error. Fixed with `setval` using
+`COALESCE(max, 0) + 1, false`, which also handles the empty-table case — real
+here, because `reviews` is created and never loaded. A `--verify-writes` probe
+proves it.
 
-- `src/database_manager.py` — 4 occurrences (e.g. `:257`, `:264`, `:268`, `:273`)
-- `src/output_handlers.py` — 9 occurrences
+**11. The SQL dump could not be restored,** for two independent reasons. DDL was
+reconstructed from `information_schema.columns.data_type`, which carries no
+length or precision, so `VARCHAR(50)` became `CHARACTER VARYING` and
+`DECIMAL(12,2)` became `NUMERIC`; no primary keys, unique constraints, foreign
+keys or enum checks were emitted at all, while `column_default` was copied
+verbatim, so a `DEFAULT nextval(...)` survived even though `DROP TABLE CASCADE`
+had just destroyed the sequence. Separately, values went through `str()`, so
+every temporal column produced an unquoted literal and a syntax error. DDL now
+comes from the model and psycopg2 quotes the values; a test asserts the output
+contains typed columns, real keys and no orphaned `nextval`.
 
-A run that reaches schema creation on such a console can still fail on a log line
-rather than on anything real. `api_server.py` has the same exposure.
+**12. `export-db` rejected a `DATABASE_URL`-only configuration** — exactly the
+config Supabase hands you and the docs recommend — while the dump routine it
+called preferred `DATABASE_URL`. The guard was wrong, not the code beneath it.
 
-See the no-emoji convention in `CLAUDE.md`.
+**13. Four independent connection resolvers with two different precedence
+orders.** A config carrying both `DATABASE_URL` and the five `DB_*` variables
+could create the schema in one database and insert rows into another. One
+resolver now, `DATABASE_URL` wins consistently, and an incomplete config is
+reported rather than falling through to libpq defaults and connecting to some
+unintended local database.
 
-## Rough edges
+**14. Schema creation order was not reproducible.** An unsorted set iteration
+meant the order varied with `PYTHONHASHSEED`. All three topological sorts
+consolidated into one that breaks ties by name.
 
-### Identifiers interpolated into SQL
-`generate_sql_dump` (`data_pipeline.py`) and `handle_postgresql_output`
-(`src/output_handlers.py`) build SQL with f-string interpolation of table and column
-names. **Not currently exploitable** — those identifiers come from the trusted local
-model JSON, and all *values* are properly parameterised with `%s`. Worth knowing if the
-model file ever becomes user-supplied, in which case `psycopg2.sql.Identifier` is the
-right tool.
+**15. The PostgreSQL closure was not transitive.** Foreign keys were expanded
+only one level from the seed set, so a dependency of a dependency was silently
+omitted from the load plan. Combined with issue 16 this is a *latent hard
+failure*: a real constraint is created with valid values whose parent table was
+never loaded. Pinned by a test as a provable no-op on the shipped model, where
+the one-level result happened to already be complete.
 
-### Four independent connection paths
-`DatabaseManager.connect`, `OutputHandler.connect_db`,
-`DatabaseConnection.get_connection` and `DataPipeline.generate_sql_dump` each read the
-environment and open their own connection, with slightly different `DATABASE_URL`
-precedence. Changing configuration handling means touching all four.
-See `docs/architecture.md`.
+**16. The documented bare-table `foreign_key` shorthand was silently ignored by
+one module.** `"categories"` was honoured by the generator and the DDL but
+skipped by the output handler. One shared parser now.
 
-### Topological sort implemented three times
-Once per module, with the copies already diverged. See `docs/architecture.md`.
+**17. `Decimal` was downcast to `float` before insert** — slower *and* lossier
+than psycopg2's native adapter. Visible on any column whose scale is not 2, such
+as `products.weight` at scale 3.
 
-### The `test_*.py` files are not tests
-`test_api_server.py`, `test_data_generator.py`, `test_db_connection.py` and
-`final_integration_test.py` are manual print-based scripts. They have no assertions,
-require a live database and (for the API ones) a server already running on
-`localhost:8000`, and `pytest` would collect them and then fail on connection errors.
-There is no CI. Treat "the tests pass" as meaningless in this repo until a real suite
-exists.
+**18. Nullable integers were written to CSV as `1.0`.** A single `None` promotes
+a pandas integer column to float64. Now pandas' nullable `Int64`.
 
-### `api_server.py` response models are hand-written
-`OrderResponse` and `OrderListResponse` are maintained by hand against the `orders`
-table rather than generated from the model JSON. `APIConfig` loads the model and
-exposes `get_orders_table_config`, but no endpoint uses it. Change `orders` in the
-model and the API will drift silently until something 500s.
+**19. `/health` returned a hardcoded timestamp** (`"2025-08-02T00:00:00Z"`), so
+a healthy response was indistinguishable from a stale one, defeating the purpose
+of the endpoint.
 
-### Repo history carries ~57 MB of generated data
-`exports/` and `log.txt` are gitignored and no longer tracked, but their old blobs
-remain in pre-2026-11-01 commits: `exports/database_dump.sql` at 34 MB,
-`exports/json/products.json` at 14 MB, `exports/csv/reviews.csv` at 7 MB. That is
-essentially all of the ~15 MB packed `.git`.
+**20. The `status` filter was unvalidated.** A typo returned an empty list with
+HTTP 200, reading as "no such orders" rather than "bad request". The allowed
+values now come from the model's enum declaration, and an invalid one is a 422.
 
-Clearing it was considered on 2026-11-01 and **deliberately declined**. The reason is
-measurable: `master`, `origin/vatsal` and `origin/loan_mgmt` each carry the same
-~57 MB of export blobs, so a `git filter-repo` purge of `master` alone shrinks nothing
-— the blobs stay reachable through the other two. An effective purge means rewriting
-all three branches and force-pushing all three, which would renumber every commit on
-the unmerged `loan_mgmt` work. Not worth 14 MB on a college project.
+**21. `if user_id:` silently discarded `user_id=0`,** returning every order
+instead of none.
 
-Verify the claim yourself rather than trusting this paragraph:
+**22. Two bare `except:` clauses** around `json.loads` also swallowed
+`KeyboardInterrupt` and `SystemExit`, and made malformed JSONB indistinguishable
+from an empty address.
 
-```bash
-for ref in master origin/vatsal origin/loan_mgmt; do
-  echo "=== $ref ==="
-  git rev-list --objects "$ref" \
-    | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' \
-    | awk '$1=="blob" && $3>100000 {s+=$3} END {printf "  %.1f MB in blobs >100KB\n", s/1048576}'
-done
-```
+**23. An unknown field type produced a `TEXT` column full of the literal string
+`"sample_<type>"`,** with no warning. Now raises, and the type map is wider, so
+a declared `bigint` no longer becomes `TEXT` and break its own foreign key.
 
-Do not propose the purge again as a new idea. If it is ever wanted, it is a
-three-branch rewrite, not a `master` cleanup.
+**24. 35 emoji in log strings across four modules,** several on *error* paths,
+so a `cp1252` Windows console could replace a real failure with a
+`UnicodeEncodeError`. All live modules are now clean.
+
+**25. `handle_api_output` was dead code.** Defined, documented in the
+architecture notes as the API path, and never called. Now actually routed, which
+also gives the offline API sink a home.
+
+**26. `psycopg2.sql.Composed.as_string()` rejected the instrumented cursor**
+because it type-checks at the C level, so attribute delegation could not help.
+Found only by running against a live database.
+
+**27. `export-db` could not re-encode JSONB.** Columns come back from psycopg2
+as Python dicts, which have no SQL adapter. Also found only against a live
+database.
+
+### Data realism
+
+The generator produced structurally sound and semantically absurd data. All
+figures at full scale, 100,400 records.
+
+| metric | before | after |
+|---|---|---|
+| `users.birth_date` implied age | 0.0–2.0 years | 18.0–79.99 years |
+| users under 18 | 10,000 / 10,000 | 0 / 10,000 |
+| orders placed before the user registered | 49.8% (7,467) | 0% |
+| reviews written before the product existed | 49.9% (7,479) | 0% |
+| line totals != qty x price − discount | 100% (40,000) | 0% |
+| order totals != sum of line items | 100% (13,969) | 0% |
+| `users.total_spent` != order history | 100% (10,000) | 0% |
+| `unit_price` unrelated to the product's price | 58.4% (23,368) | 0% |
+| products priced at or below cost | 50.0% (9,992) | 0% |
+| category names using the `_N` fallback | ~370 / 400 | 0 / 400 |
+| distinct product names | 30 / 20,000 | 20,000 / 20,000 |
+
+Four of these were previously recorded here. Three were not: line totals were
+*also* 100% wrong, `unit_price` bore no relationship to the product being bought
+(which makes any total arithmetic over noise), and half of all products were
+priced at or below cost.
+
+The `30 / 20,000` figure is measured against the unmodified generator at the
+branch point (`runs/headline/realism-original-code.json`), so the later
+vocabulary fix does not contaminate it.
+
+### Testing
+
+**28. The four `test_*.py` files were not tests.** No assertions, all required a
+live database, one required a server already listening on port 8000.
+`final_integration_test.py` asserted row counts of 1,575 against a model
+generating 100,400, so its final phase failed unconditionally.
+`test_api_server.py` was named so pytest collected it and it "passed" green by
+printing a connection-error message — worse than failing. There was no CI and no
+`pytest` dependency.
+
+Replaced by 165 real tests (149 offline, 16 db-marked). The most important is
+`test_every_foreign_key_resolves_to_a_real_parent`, which converts the project's
+central claim from prose into a checked invariant, and its integration
+counterpart that resolves foreign keys taken from a CSV file against rows in
+PostgreSQL.
+
+---
+
+## Still open
+
+**A. The API server only serves `orders`.** Response models are hand-written, so
+declaring a second `api` table loads it into PostgreSQL but exposes no endpoint.
+The status enum is now model-driven, but the response shape is not.
+
+**B. Parallel loading is implemented but unproven.** `--parallel-loads N` exists
+and defaults to 1. The hypothesis is that it is roughly flat, because once rows
+are batched the work is bandwidth-bound and splitting one uplink N ways does not
+create bandwidth. Measuring it is pending; a flat result is the expected finding,
+not a failure.
+
+**C. The vectorized and GPU generation engines are not built.** The engine
+abstraction was planned for a scalability curve to 10M rows and a measured
+CPU/GPU crossover. Current status: generation is a single row-at-a-time engine.
+The honest expectation, recorded before building it, is that a GPU path is
+*slower* at this project's scale — the first CuPy call initialises the CUDA
+context in 0.5–2s, which exceeds the entire CPU cost of every numeric column in
+the model, and the real remaining cost is string work that CuPy cannot touch.
+
+**D. There is still no CI.** The suite is real and runs locally; nothing runs it
+automatically.
+
+**E. `max_length` can still be exceeded by the uniqueness fallback,** which
+appends `_<counter>` *after* truncation. Now unreachable for the shipped model,
+because the taxonomy vocabulary is large enough that the fallback never
+triggers, but the ordering is still wrong in principle.
+
+**F. Repository history carries ~57 MB of generated data** in pre-2026-11-01
+commits. See the declined section below.
+
+---
+
+## Deliberately declined
+
+**Purging the large blobs from git history.** `exports/database_dump.sql` (34 MB),
+`exports/json/products.json` (14 MB) and `exports/csv/reviews.csv` (7 MB) sit in
+old commits and account for essentially all of the packed `.git`. A purge was
+considered and declined: `master`, `origin/vatsal` and `origin/loan_mgmt` each
+carry the same blobs, so rewriting `master` alone shrinks nothing, and an
+effective purge means a three-branch rewrite plus three force-pushes that would
+renumber every commit on the unmerged `loan_mgmt` work. **Do not propose this
+again as a new idea.**
+
+**A SQLite fallback for offline mode.** No `COPY`, no `execute_values`, and
+`SERIAL` / `JSONB` / `DECIMAL(p,s)` / `ALTER TABLE ADD CONSTRAINT` are
+unsupported or no-ops, so it would require a second schema generator and a
+second load path to test a path that is never shipped. Worse, foreign-key
+enforcement is off by default, so it could not validate the one claim the
+project rests on, while measuring local disk instead of a real network. Offline
+mode renders DDL and COPY payloads to files instead.
+
+**`UNLOGGED` tables during load.** `SET LOGGED` rewrites the table and writes
+back all the WAL the load avoided, so the net saving is small and server-side
+rather than network-side. It also conflicts with Supabase replication.
+
+**Streaming the JSON sink.** `products.json` is ~14 MB and takes a couple of
+seconds — not a bottleneck — and streaming would change the `indent=2`
+formatting of an artefact that gets submitted.
+
+**Migrating to psycopg3.** Nicer `COPY` support, but it touches every connection
+path and buys nothing measurable here.
+
+**Merging the `loan_mgmt` branch.** It rewrites `api_server.py` around a
+different schema, so a naive merge produces a server querying tables the
+ecommerce model does not define. It also contains three contract violations this
+project's `validate` would now reject. See [branches.md](branches.md).
