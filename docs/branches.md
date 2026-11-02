@@ -4,7 +4,7 @@
 branch with a different domain model. Read this before assuming the repo you see is
 the repo there is.
 
-Only `master` exists locally; the others are remote-only on
+`master` and a stale `vatsal` exist locally; `loan_mgmt` is remote-only. Active work is on the `synthforge` branch. All are on
 `https://github.com/Vatsal-Patel-09/data-pipeline-automation`.
 
 ## `master` — current
@@ -101,6 +101,25 @@ Note `git show origin/master:...` no longer works — the file is gone from mast
 
 It is a superseded draft built against an incompatible model shape. Recover it for
 reference only — do not reintroduce its conventions. See `CLAUDE.md`.
+
+## `synthforge` -- active
+
+The overhaul branch. Performance, correctness, data realism, a real test suite
+and the rewritten documentation. Branched from `master` at `381a9a2`.
+
+It is where everything described in `docs/performance.md` and the fixed section
+of `docs/known-issues.md` actually lives. `master` is untouched and remains a
+working fallback until this is merged.
+
+## Correction
+
+An earlier version of this document claimed only `master` existed locally. A
+local `vatsal` branch tracking `origin/vatsal` was also present, and it also
+claimed `origin/vatsal` was "a strict subset of `master`". It is not a subset in
+either direction: `vatsal` uniquely carries the committed `exports/` artefacts,
+`log.txt` and `src/initial_db_manager.py`, and lacks all of `.claude/`,
+`CLAUDE.md` and `docs/`. The conclusion stands -- it is a dead branch and needs
+no merging -- but the reasoning was wrong.
 
 ## Removed material
 
