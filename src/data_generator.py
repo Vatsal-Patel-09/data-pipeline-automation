@@ -10,6 +10,7 @@ from faker import Faker
 try:
     from src.metrics import NullMetrics
     from src.model_graph import (
+        ModelError,
         ModelGraph,
         normalize_output_format,
         parse_foreign_key as _parse_foreign_key,
@@ -18,6 +19,7 @@ try:
 except ImportError:  # pragma: no cover - supports direct module execution
     from metrics import NullMetrics
     from model_graph import (
+        ModelError,
         ModelGraph,
         normalize_output_format,
         parse_foreign_key as _parse_foreign_key,
@@ -210,8 +212,26 @@ class DataGenerator:
             return self.generate_json_value(field_name)
         elif field_type == 'enum':
             return random.choice(field_config['values'])
+        elif field_type in ('bigint', 'smallint'):
+            return self.generate_integer_value(field_config)
+        elif field_type in ('numeric',):
+            return self.generate_decimal_value(field_config)
+        elif field_type in ('float', 'double', 'real'):
+            return float(self.generate_decimal_value(field_config))
+        elif field_type in ('jsonb',):
+            return self.generate_json_value(field_name)
+        elif field_type == 'uuid':
+            return self.fake.uuid4()
         else:
-            return f"sample_{field_type}"
+            # Previously this returned the literal string f"sample_{field_type}",
+            # so a typo or an unsupported type produced a plausible-looking
+            # column full of junk with no warning anywhere.
+            raise ModelError(
+                f"Unknown field type {field_type!r} for field "
+                f"'{table_name}.{field_name}'. Supported types: boolean, date, "
+                "decimal, enum, float, integer, bigint, json, numeric, "
+                "smallint, string, text, timestamp, uuid."
+            )
     
     # A two-part vocabulary for taxonomy names.
     #

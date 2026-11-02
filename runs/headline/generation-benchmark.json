@@ -1,0 +1,171 @@
+{
+  "benchmark": "generation throughput, full scale (100,400 records)",
+  "model": "ecommerce_model.json",
+  "method": "Each configuration generated in its own subprocess, strictly sequentially, with nothing else running. Two independent repeats. This matters: an earlier figure of 207.5s for configuration A was contaminated by other work executing concurrently and has been discarded.",
+  "hardware": "Intel i5-13420H, 8 cores / 12 threads, 16 GB RAM, Windows 11, Python 3.13.7",
+  "configurations": [
+    {
+      "label": "A. pre-overhaul (quadratic FK lookup)",
+      "rows": 100400,
+      "total_s_run1": 101.24,
+      "total_s_run2": 101.328,
+      "rows_per_s_run1": 991.7,
+      "rows_per_s_run2": 990.8,
+      "spread_pct": 0.09,
+      "per_table": {
+        "categories": {
+          "rows": 400,
+          "seconds_run1": 0.068,
+          "seconds_run2": 0.069
+        },
+        "users": {
+          "rows": 10000,
+          "seconds_run1": 2.617,
+          "seconds_run2": 2.561
+        },
+        "orders": {
+          "rows": 15000,
+          "seconds_run1": 8.298,
+          "seconds_run2": 7.942
+        },
+        "products": {
+          "rows": 20000,
+          "seconds_run1": 3.08,
+          "seconds_run2": 3.13
+        },
+        "order_items": {
+          "rows": 40000,
+          "seconds_run1": 62.932,
+          "seconds_run2": 63.207
+        },
+        "reviews": {
+          "rows": 15000,
+          "seconds_run1": 24.243,
+          "seconds_run2": 24.419
+        }
+      }
+    },
+    {
+      "label": "B. current, semantic pass OFF",
+      "rows": 100400,
+      "total_s_run1": 9.346,
+      "total_s_run2": 9.235,
+      "rows_per_s_run1": 10742.6,
+      "rows_per_s_run2": 10871.7,
+      "spread_pct": 1.2,
+      "per_table": {
+        "categories": {
+          "rows": 400,
+          "seconds_run1": 0.063,
+          "seconds_run2": 0.048
+        },
+        "users": {
+          "rows": 10000,
+          "seconds_run1": 2.482,
+          "seconds_run2": 2.531
+        },
+        "orders": {
+          "rows": 15000,
+          "seconds_run1": 1.969,
+          "seconds_run2": 1.961
+        },
+        "products": {
+          "rows": 20000,
+          "seconds_run1": 2.716,
+          "seconds_run2": 2.599
+        },
+        "order_items": {
+          "rows": 40000,
+          "seconds_run1": 0.403,
+          "seconds_run2": 0.387
+        },
+        "reviews": {
+          "rows": 15000,
+          "seconds_run1": 1.713,
+          "seconds_run2": 1.708
+        }
+      },
+      "speedup_vs_baseline": 10.83
+    },
+    {
+      "label": "C. current, semantic pass ON (default)",
+      "rows": 100400,
+      "total_s_run1": 10.06,
+      "total_s_run2": 9.716,
+      "rows_per_s_run1": 9980.1,
+      "rows_per_s_run2": 10333.5,
+      "spread_pct": 3.54,
+      "per_table": {
+        "categories": {
+          "rows": 400,
+          "seconds_run1": 0.05,
+          "seconds_run2": 0.051
+        },
+        "users": {
+          "rows": 10000,
+          "seconds_run1": 2.604,
+          "seconds_run2": 2.561
+        },
+        "orders": {
+          "rows": 15000,
+          "seconds_run1": 2.086,
+          "seconds_run2": 1.939
+        },
+        "products": {
+          "rows": 20000,
+          "seconds_run1": 2.654,
+          "seconds_run2": 2.569
+        },
+        "order_items": {
+          "rows": 40000,
+          "seconds_run1": 0.415,
+          "seconds_run2": 0.389
+        },
+        "reviews": {
+          "rows": 15000,
+          "seconds_run1": 1.738,
+          "seconds_run2": 1.714
+        }
+      },
+      "speedup_vs_baseline": 10.06
+    }
+  ],
+  "per_table_speedup": {
+    "categories": {
+      "rows": 400,
+      "before_s": 0.068,
+      "after_s": 0.05,
+      "speedup": 1.4
+    },
+    "users": {
+      "rows": 10000,
+      "before_s": 2.617,
+      "after_s": 2.604,
+      "speedup": 1.0
+    },
+    "orders": {
+      "rows": 15000,
+      "before_s": 8.298,
+      "after_s": 2.086,
+      "speedup": 4.0
+    },
+    "products": {
+      "rows": 20000,
+      "before_s": 3.08,
+      "after_s": 2.654,
+      "speedup": 1.2
+    },
+    "order_items": {
+      "rows": 40000,
+      "before_s": 62.932,
+      "after_s": 0.415,
+      "speedup": 151.6
+    },
+    "reviews": {
+      "rows": 15000,
+      "before_s": 24.243,
+      "after_s": 1.738,
+      "speedup": 13.9
+    }
+  }
+}
