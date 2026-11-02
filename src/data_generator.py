@@ -502,6 +502,8 @@ class DataGenerator:
         table_metric.declared_format = self.get_output_format(table_config)
         table_metric.generate_s = round(elapsed, 6)
         table_metric.engine = self.engine_name
+        self.metrics.emit("table", table=table_name, phase="generate",
+                          rows=len(records), duration_s=round(elapsed, 6))
 
         self.logger.info(
             f"Generated {len(records)} records for {table_name} "

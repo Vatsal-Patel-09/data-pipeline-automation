@@ -114,6 +114,9 @@ class NullMetrics:
     def span(self, name: str, **attrs):
         yield None
 
+    def emit(self, kind: str, **payload) -> None:
+        pass
+
     def table(self, name: str) -> TableMetric:
         return TableMetric(table=name)
 
@@ -163,8 +166,11 @@ class MetricsCollector:
 
     enabled = True
 
-    def __init__(self, run_id: Optional[str] = None):
+    def __init__(self, run_id: Optional[str] = None, on_event=None):
         self._lock = threading.Lock()
+        # Optional sink for live progress. Set by the demo server so a browser
+        # can watch a real run; None everywhere else, so this costs nothing.
+        self.on_event = on_event
         self.run_id = run_id or self._make_run_id()
         self.started_at = _utc_now_iso()
         self._t0 = time.perf_counter()
@@ -217,23 +223,43 @@ class MetricsCollector:
             pass
         return env
 
+    def emit(self, kind: str, **payload) -> None:
+        """
+        Publish a live progress event, if anyone is listening.
+
+        Never allowed to break a run: a failing listener is swallowed, because
+        a UI watching the pipeline must not be able to kill it.
+        """
+        if self.on_event is None:
+            return
+        try:
+            event = {"type": kind, "t": round(time.perf_counter() - self._t0, 3)}
+            event.update(payload)
+            self.on_event(event)
+        except Exception:
+            pass
+
     @contextmanager
     def span(self, name: str, **attrs):
         """Time a named step. Records status 'failed' and re-raises on error."""
         sp = Span(name=name, start_wall=_utc_now_iso(), attrs=dict(attrs))
         started = time.perf_counter()
+        self.emit("stage", stage=name, state="start")
         try:
             yield sp
-        except BaseException:
+        except BaseException as exc:
             sp.duration_s = round(time.perf_counter() - started, 6)
             sp.status = "failed"
             with self._lock:
                 self.spans.append(sp)
+            self.emit("stage", stage=name, state="failed",
+                      duration_s=sp.duration_s, error=str(exc)[:200])
             raise
         else:
             sp.duration_s = round(time.perf_counter() - started, 6)
             with self._lock:
                 self.spans.append(sp)
+            self.emit("stage", stage=name, state="end", duration_s=sp.duration_s)
 
     def table(self, name: str) -> TableMetric:
         """Get or create the metric record for a table."""

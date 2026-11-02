@@ -252,6 +252,50 @@ ul.lim li:last-child { border-bottom:1px solid var(--line); }
 footer { padding:40px 0 70px; font-family:var(--mono); font-size:11.5px; line-height:1.7; color:var(--ink-3); }
 footer p { max-width:74ch; }
 
+/* ---- live mode ---- */
+#live-bar { border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.livedot { width:8px; height:8px; border-radius:50%; background:var(--cool); flex:none;
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--cool) 22%, transparent); }
+.livetxt { font-family:var(--mono); font-size:11px; color:var(--ink-2); }
+.cbar .fld { display:flex; align-items:center; gap:7px; }
+.cbar .fld label { margin:0; }
+.cbar .fld select, .cbar .fld input { width:auto; min-width:86px; }
+.hintbar { font-family:var(--mono); font-size:11px; color:var(--ink-3);
+  border:1px dashed var(--line-2); padding:10px 13px; margin-top:14px; }
+.hintbar code { color:var(--ink-2); }
+
+/* ---- in-browser generator ---- */
+.gen { border:1px solid var(--line); background:var(--bg-2); margin-top:34px; }
+.gen-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:12px 14px;
+  border-bottom:1px solid var(--line); background:var(--bg-3); }
+.gen-bar label { margin:0; display:inline; }
+.gen-bar .fld { display:flex; align-items:center; gap:7px; }
+.gen-bar select, .gen-bar input { width:auto; min-width:92px; }
+.gen-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; }
+@media (max-width:980px){ .gen-grid { grid-template-columns:1fr; }
+  .gen-log-col { border-left:none; border-top:1px solid var(--line); } }
+.gen-main { padding:16px; min-width:0; }
+.gen-log-col { border-left:1px solid var(--line); background:var(--bg-3); }
+.gstats { display:grid; grid-template-columns:repeat(auto-fit,minmax(104px,1fr)); gap:8px; margin-bottom:16px; }
+.gstat { border:1px solid var(--line); padding:8px 10px; font-family:var(--mono); }
+.gstat .k { font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-3); }
+.gstat .v { font-size:17px; margin-top:3px; }
+.checks { margin-top:16px; font-family:var(--mono); font-size:11.5px; }
+.checks div { display:flex; gap:9px; padding:3px 0; color:var(--ink-3); }
+.checks div.pass { color:var(--ink); }
+.checks div.pass .m { color:var(--cool); }
+.checks div.fail { color:var(--warm); }
+.checks .m { width:11px; flex:none; }
+.preview { margin-top:18px; }
+.preview-head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:9px; }
+.preview-head select { width:auto; min-width:120px; }
+.ptable { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:10.5px; }
+.ptable th, .ptable td { padding:4px 8px 4px 0; text-align:left; border-bottom:1px solid var(--line);
+  white-space:nowrap; max-width:190px; overflow:hidden; text-overflow:ellipsis; }
+.ptable thead th { font-size:9px; letter-spacing:0.07em; text-transform:uppercase; color:var(--ink-3);
+  border-bottom:1px solid var(--line-2); }
+.ptable td.nul { color:var(--ink-3); font-style:italic; }
+
 @media (prefers-reduced-motion: reduce){ html { scroll-behavior:auto; } }
 
 @media print {
@@ -335,6 +379,40 @@ footer p { max-width:74ch; }
           <button data-strat="rowwise">rowwise</button>
         </div>
         <div class="clock"><b id="clk">0.00</b> / <span id="clk-tot">69.60</span> s</div>
+      </div>
+      <div class="cbar" id="live-bar" hidden>
+        <span class="livedot"></span>
+        <span class="livetxt" id="live-txt">Server connected &mdash; this can run the real pipeline</span>
+        <button id="btn-live" class="solid">Run it for real</button>
+        <button id="btn-live-stop" disabled>Stop</button>
+        <div class="fld">
+          <label for="live-scale">volume</label>
+          <select id="live-scale">
+            <option value="0.01">1% &middot; ~1,000 rows</option>
+            <option value="0.05" selected>5% &middot; ~5,000 rows</option>
+            <option value="0.25">25% &middot; ~25,000 rows</option>
+            <option value="1">100% &middot; 100,400 rows</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="live-strat">strategy</label>
+          <select id="live-strat">
+            <option value="copy" selected>copy</option>
+            <option value="execute_values">execute_values</option>
+            <option value="rowwise">rowwise</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="live-seed">seed</label>
+          <input id="live-seed" type="number" value="42" min="0" style="width:78px">
+        </div>
+        <div class="fld">
+          <label for="live-offline">mode</label>
+          <select id="live-offline">
+            <option value="0" selected>database</option>
+            <option value="1">offline</option>
+          </select>
+        </div>
       </div>
       <div class="cgrid">
         <div class="stagecol" id="stages"></div>
@@ -558,9 +636,71 @@ footer p { max-width:74ch; }
         <dl class="plan" id="plan"></dl>
         <h3 style="margin-top:24px">model.json</h3>
         <pre class="code json" id="json-out"></pre>
-        <div class="acts"><button id="copy-json">Copy</button></div>
+        <div class="acts">
+          <button id="copy-json">Copy</button>
+          <button id="dl-json">Download</button>
+        </div>
       </div>
     </div>
+
+    <div class="gen">
+      <div class="gen-bar">
+        <button id="gen-run" class="solid">Generate data</button>
+        <button id="gen-stop" disabled>Stop</button>
+        <div class="fld">
+          <label for="gen-scale">volume</label>
+          <select id="gen-scale">
+            <option value="0.01">1% · ~1,000 rows</option>
+            <option value="0.05" selected>5% · ~5,000 rows</option>
+            <option value="0.25">25% · ~25,000 rows</option>
+            <option value="1">100% · 100,400 rows</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="gen-seed">seed</label>
+          <input id="gen-seed" type="number" value="42" min="0" style="width:84px">
+        </div>
+        <div class="fld">
+          <label for="gen-realism">repair</label>
+          <select id="gen-realism"><option value="1" selected>on</option><option value="0">off</option></select>
+        </div>
+        <div class="clock grow"><b id="gen-clk">0.00</b> s</div>
+      </div>
+
+      <div class="gen-grid">
+        <div class="gen-main">
+          <div class="gstats" id="gstats"></div>
+          <div class="wtitle" id="gen-title">Idle — press Generate data</div>
+          <div id="gen-bars"></div>
+          <div class="checks" id="gen-checks"></div>
+          <div class="preview" id="gen-preview" hidden>
+            <div class="preview-head">
+              <h3 style="margin:0">Generated rows</h3>
+              <select id="prev-table"></select>
+              <span class="cap" style="margin:0" id="prev-note"></span>
+            </div>
+            <div class="scroll"><table class="ptable" id="prev-tb"><thead></thead><tbody></tbody></table></div>
+            <div class="acts">
+              <button id="dl-data" class="solid">Download JSON</button>
+              <button id="dl-csv">Download CSV</button>
+              <button id="copy-data">Copy JSON</button>
+            </div>
+          </div>
+        </div>
+        <div class="gen-log-col">
+          <div class="lh">generation log</div>
+          <div class="log" id="gen-log" role="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="cap" style="margin-top:14px">
+      This runs the generator in your browser, not a recording. Field values are
+      inferred from field names, foreign keys are drawn from parent ids already
+      generated, and the semantic repair pass runs afterwards. The checks are the
+      same invariants the Python test suite asserts, re-run here against the rows
+      you just produced. Turn repair off to watch them fail.
+    </p>
   </div>
 </section>
 
@@ -1082,6 +1222,12 @@ function buildLog(tl) {
     else if (raf) { cancelAnimationFrame(raf); raf = null; render(); }
   });
   $("#btn-reset").addEventListener("click", reset);
+  // Live mode takes over the same console, so it needs to halt the replay.
+  window.__replay = { stop: function () {
+    running = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    $("#btn-run").textContent = "Run pipeline";
+  } };
   $$("[data-speed]").forEach(function (b) {
     b.addEventListener("click", function () {
       $$("[data-speed]").forEach(function (x) { x.classList.remove("on"); });
@@ -1350,21 +1496,22 @@ var ENDPOINTS = [
 })();
 
 /* ============ model builder: the real algorithms ============ */
-var SHIPPED = [
-  { name: "categories",  rows: 400,   fmt: "postgres", fks: [{ field: "parent_id", ref: "categories" }] },
-  { name: "users",       rows: 10000, fmt: "csv",      fks: [] },
-  { name: "products",    rows: 20000, fmt: "json",     fks: [{ field: "category_id", ref: "categories" }] },
-  { name: "orders",      rows: 15000, fmt: "api",      fks: [{ field: "user_id", ref: "users" }] },
-  { name: "order_items", rows: 40000, fmt: "postgres", fks: [{ field: "order_id", ref: "orders" }, { field: "product_id", ref: "products" }] },
-  { name: "reviews",     rows: 15000, fmt: "csv",      fks: [{ field: "product_id", ref: "products" }, { field: "user_id", ref: "users" }] }
-];
+/* The shipped model, with its real field definitions, so the in-browser
+   generator produces the same shape the Python pipeline does. */
+var SHIPPED = [{"name":"categories","rows":400,"fmt":"postgres","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"name","t":"string","uq":1,"len":100},{"n":"description","t":"text","null":1},{"n":"parent_id","t":"integer","fk":"categories.id","null":1},{"n":"is_active","t":"boolean"},{"n":"created_at","t":"timestamp"}]},{"name":"users","rows":10000,"fmt":"csv","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"username","t":"string","uq":1,"len":50},{"n":"email","t":"string","uq":1,"len":255},{"n":"full_name","t":"string","len":200},{"n":"phone","t":"string","null":1,"len":20},{"n":"birth_date","t":"date","null":1},{"n":"registration_date","t":"timestamp"},{"n":"status","t":"enum","v":["active","inactive","suspended"]},{"n":"total_spent","t":"decimal","p":12,"s":2}]},{"name":"products","rows":20000,"fmt":"json","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"sku","t":"string","uq":1,"len":50},{"n":"name","t":"string","len":255},{"n":"description","t":"text","null":1},{"n":"category_id","t":"integer","fk":"categories.id"},{"n":"price","t":"decimal","p":10,"s":2},{"n":"cost","t":"decimal","p":10,"s":2},{"n":"stock_quantity","t":"integer"},{"n":"weight","t":"decimal","null":1,"p":8,"s":3},{"n":"is_active","t":"boolean"},{"n":"created_at","t":"timestamp"}]},{"name":"orders","rows":15000,"fmt":"api","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"order_number","t":"string","uq":1,"len":20},{"n":"user_id","t":"integer","fk":"users.id"},{"n":"order_date","t":"timestamp"},{"n":"total_amount","t":"decimal","p":12,"s":2},{"n":"tax_amount","t":"decimal","p":10,"s":2},{"n":"shipping_cost","t":"decimal","p":8,"s":2},{"n":"status","t":"enum","v":["pending","processing","shipped","delivered","cancelled"]},{"n":"shipping_address","t":"json"},{"n":"payment_method","t":"string","len":50}]},{"name":"order_items","rows":40000,"fmt":"postgres","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"order_id","t":"integer","fk":"orders.id"},{"n":"product_id","t":"integer","fk":"products.id"},{"n":"quantity","t":"integer"},{"n":"unit_price","t":"decimal","p":10,"s":2},{"n":"total_price","t":"decimal","p":12,"s":2},{"n":"discount_amount","t":"decimal","p":8,"s":2}]},{"name":"reviews","rows":15000,"fmt":"csv","fields":[{"n":"id","t":"integer","pk":1,"ai":1},{"n":"product_id","t":"integer","fk":"products.id"},{"n":"user_id","t":"integer","fk":"users.id"},{"n":"rating","t":"integer"},{"n":"review_text","t":"text","null":1},{"n":"created_at","t":"timestamp"}]}];
 var MODEL = JSON.parse(JSON.stringify(SHIPPED));
 var PG_BACKED = ["postgres", "postgresql", "api"];
 
+function fksOf(t) {
+  return (t.fields || []).filter(function (f) { return !!f.fk; }).map(function (f) {
+    var parts = String(f.fk).split(".");
+    return { field: f.n, ref: parts[0], refField: parts[1] || "id", nullable: !!f["null"] };
+  });
+}
 function deps(t, model) {
   var names = {}, out = {};
   model.forEach(function (x) { names[x.name] = 1; });
-  (t.fks || []).forEach(function (fk) {
+  fksOf(t).forEach(function (fk) {
     if (fk.ref !== t.name && names[fk.ref]) out[fk.ref] = 1;
   });
   return Object.keys(out).sort();
@@ -1438,29 +1585,50 @@ function toModelJson(model) {
   return {
     database: { name: "custom_domain", version: "1.0" },
     tables: model.map(function (t) {
-      var fields = [{ name: "id", type: "integer", primary_key: true, auto_increment: true }];
-      (t.fks || []).forEach(function (fk) {
-        var f = { name: fk.field, type: "integer", foreign_key: fk.ref + ".id" };
-        if (fk.ref === t.name) f.nullable = true;
-        fields.push(f);
-      });
-      fields.push({ name: "name", type: "string", max_length: 200 });
-      fields.push({ name: "created_at", type: "timestamp" });
-      return { name: t.name, sample_size: t.rows, output_format: t.fmt, fields: fields };
+      return {
+        name: t.name, sample_size: t.rows, output_format: t.fmt,
+        fields: t.fields.map(function (f) {
+          var o = { name: f.n, type: f.t };
+          if (f.pk) o.primary_key = true;
+          if (f.ai) o.auto_increment = true;
+          if (f.fk) o.foreign_key = f.fk;
+          if (f.uq) o.unique = true;
+          if (f["null"]) o.nullable = true;
+          if (f.len) o.max_length = f.len;
+          if (f.p) o.precision = f.p;
+          if (f.s) o.scale = f.s;
+          if (f.v) o.values = f.v;
+          return o;
+        })
+      };
     })
   };
 }
+
+/* Fields for a table the visitor adds. Named so the generator's own
+   inference has something to work with. */
+function defaultFields(name, ref) {
+  var f = [{ n: "id", t: "integer", pk: 1, ai: 1 }];
+  if (ref) f.push({ n: ref.replace(/s$/, "") + "_id", t: "integer", fk: ref + ".id" });
+  f.push({ n: "name", t: "string", len: 200 });
+  f.push({ n: "status", t: "enum", v: ["pending", "active", "closed"] });
+  f.push({ n: "total_amount", t: "decimal", p: 12, s: 2 });
+  f.push({ n: "created_at", t: "timestamp" });
+  return f;
+}
+
 function renderBuilder() {
   var host = $("#tbl-list"); host.innerHTML = "";
   var closure = pgClosure(MODEL);
   MODEL.forEach(function (t, i) {
     var card = el("div", "card"), top = el("div", "ct");
     top.appendChild(el("span", "cn2", t.name));
-    top.appendChild(el("span", "cs", t.rows.toLocaleString("en-US") + " rows · " + t.fmt));
+    top.appendChild(el("span", "cs", t.rows.toLocaleString("en-US") + " rows · " + t.fmt
+      + " · " + t.fields.length + " fields"));
     card.appendChild(top);
     var tags = el("div", "tags");
     tags.appendChild(el("span", "tag", "id PK"));
-    (t.fks || []).forEach(function (fk) {
+    fksOf(t).forEach(function (fk) {
       tags.appendChild(el("span", "tag fk", fk.field + " → " + fk.ref));
     });
     if (closure[t.name] && PG_BACKED.indexOf(t.fmt) < 0) {
@@ -1474,7 +1642,9 @@ function renderBuilder() {
         var gone = MODEL[i].name;
         MODEL.splice(i, 1);
         MODEL.forEach(function (x) {
-          x.fks = (x.fks || []).filter(function (f) { return f.ref !== gone; });
+          x.fields = x.fields.filter(function (f) {
+            return !f.fk || String(f.fk).split(".")[0] !== gone;
+          });
         });
         renderBuilder();
       });
@@ -1514,7 +1684,7 @@ $("#add-tbl").addEventListener("click", function () {
     name: raw,
     rows: Math.max(1, parseInt($("#nt-rows").value, 10) || 100),
     fmt: $("#nt-fmt").value,
-    fks: ref ? [{ field: ref.replace(/s$/, "") + "_id", ref: ref }] : []
+    fields: defaultFields(raw, ref)
   });
   $("#nt-name").value = "";
   renderBuilder();
@@ -1535,6 +1705,302 @@ $("#copy-json").addEventListener("click", function () {
   }
 });
 renderBuilder();
+
+
+/* ============ live mode ============
+   When this page is served by serve_demo.py it can trigger the real Python
+   pipeline. Stage transitions, per-table completions and every log line arrive
+   over Server-Sent Events and drive the same console the replay uses. Opened
+   straight from disk there is no server, so the page stays in replay mode. */
+(function () {
+  var LIVE_STAGES = [
+    { id: "schema",   nm: "schema",   note: "DDL, foreign keys deferred" },
+    { id: "generate", nm: "generate", note: "topological order, then repair" },
+    { id: "output",   nm: "write",    note: "postgres, then file sinks" },
+    { id: "finalize", nm: "finalize", note: "constraints · sequences · verify" },
+    { id: "report",   nm: "report",   note: "run_report.json" }
+  ];
+  var stagesHost = document.getElementById("stages");
+  var workHost = document.getElementById("work");
+  var sinkHost = document.getElementById("sinks");
+  var verifHost = document.getElementById("verif");
+  var logHost = document.getElementById("log");
+  var titleEl = document.getElementById("work-title");
+  var clkEl = document.getElementById("clk");
+  var clkTot = document.getElementById("clk-tot");
+  if (!stagesHost) return;
+
+  var es = null, t0 = 0, ticker = null;
+  var stageEls = {}, tableRows = {}, sinkRows = {}, plan = null;
+
+  function mk(t, c, x) {
+    var n = document.createElement(t);
+    if (c) n.className = c;
+    if (x !== undefined) n.textContent = x;
+    return n;
+  }
+  function num(n) { return Math.round(n).toLocaleString("en-US"); }
+
+  function paintStages() {
+    stagesHost.innerHTML = "";
+    stageEls = {};
+    LIVE_STAGES.forEach(function (sd) {
+      var d = mk("div", "stage"), row = mk("div", "srow");
+      row.appendChild(mk("span", "dot"));
+      row.appendChild(mk("span", "nm", sd.nm));
+      row.appendChild(mk("span", "dur", "—"));
+      d.appendChild(row);
+      d.appendChild(mk("div", "note", sd.note));
+      var pb = mk("div", "pbar"); pb.appendChild(mk("i")); d.appendChild(pb);
+      stagesHost.appendChild(d);
+      stageEls[sd.id] = d;
+    });
+    var tot = mk("div", "tot");
+    var b = mk("b", null, "0.00 s"); b.id = "live-tot";
+    var sp = mk("span", null, "waiting"); sp.id = "live-tot-x";
+    tot.appendChild(b);
+    tot.appendChild(document.createElement("br"));
+    tot.appendChild(sp);
+    stagesHost.appendChild(tot);
+  }
+
+  function paintSinks() {
+    sinkHost.innerHTML = "";
+    sinkRows = {};
+    ["postgres", "csv", "json", "parquet", "api"].forEach(function (s) {
+      var d = mk("div", "sink");
+      d.appendChild(mk("div", "sn", s));
+      var v = mk("div", "sv", "0");
+      var x = mk("div", "sx", "waiting");
+      d.appendChild(v); d.appendChild(x);
+      sinkHost.appendChild(d);
+      sinkRows[s] = { node: d, v: v, x: x, rows: 0, bytes: 0 };
+    });
+  }
+
+  function bumpSink(name, rows, bytes, label) {
+    var s = sinkRows[name];
+    if (!s) return;
+    s.rows += rows || 0;
+    s.bytes += bytes || 0;
+    s.v.textContent = num(s.rows);
+    s.x.textContent = label || (s.bytes ? num(s.bytes / 1024) + " KB" : "rows");
+    s.node.classList.add("lit");
+  }
+
+  function planRows(stage) {
+    workHost.innerHTML = "";
+    tableRows = {};
+    if (!plan) return;
+    plan.tables.forEach(function (t) {
+      if (stage === "output" && plan.postgres_closure.indexOf(t.table) < 0) return;
+      var row = mk("div", "trow");
+      row.appendChild(mk("div", "tn", t.table));
+      var tb = mk("div", "tb"), i = mk("i");
+      tb.appendChild(i); row.appendChild(tb);
+      var tv = mk("div", "tv", "queued");
+      row.appendChild(tv);
+      workHost.appendChild(row);
+      tableRows[t.table] = { row: row, bar: i, val: tv, rows: t.rows };
+    });
+  }
+
+  function markTable(name, label, done) {
+    var r = tableRows[name];
+    if (!r) return;
+    r.bar.style.width = done ? "100%" : "60%";
+    r.val.textContent = label;
+    r.row.classList.toggle("d", !!done);
+    r.row.classList.toggle("a", !done);
+  }
+
+  function logLine(level, msg) {
+    var cls = "l";
+    if (level === "ERROR" || level === "CRITICAL" || level === "WARNING") cls += " warn";
+    else if (/verified|validated|passed|SUCCESS|added and/i.test(msg)) cls += " ok";
+    var line = mk("div", cls);
+    var secs = (performance.now() - t0) / 1000;
+    var pad = (secs > 0 ? secs.toFixed(2) : "0.00");
+    while (pad.length < 6) pad = " " + pad;
+    line.appendChild(mk("span", "ts", pad + "  "));
+    line.appendChild(document.createTextNode(msg));
+    logHost.appendChild(line);
+    while (logHost.childNodes.length > 600) logHost.removeChild(logHost.firstChild);
+    logHost.scrollTop = logHost.scrollHeight;
+  }
+
+  function setStage(id, state, duration) {
+    var node = stageEls[id];
+    if (!node) return;
+    if (state === "start") {
+      node.classList.add("active");
+      node.querySelector(".pbar i").style.width = "45%";
+      node.querySelector(".dur").textContent = "running";
+      titleEl.textContent = "Live · " + id;
+      if (id === "generate" || id === "output") planRows(id);
+    } else {
+      node.classList.remove("active");
+      node.classList.add("done");
+      node.querySelector(".pbar i").style.width = "100%";
+      if (duration !== undefined && duration !== null) {
+        node.querySelector(".dur").textContent = duration.toFixed(2) + " s";
+      }
+    }
+  }
+
+  function resetLive() {
+    paintStages();
+    paintSinks();
+    verifHost.innerHTML = "";
+    workHost.innerHTML = "";
+    logHost.innerHTML = "";
+    tableRows = {};
+    plan = null;
+    titleEl.textContent = "Live — waiting for the pipeline";
+    clkTot.textContent = "live";
+  }
+
+  function startTicker() {
+    t0 = performance.now();
+    if (ticker) clearInterval(ticker);
+    ticker = setInterval(function () {
+      var secs = (performance.now() - t0) / 1000;
+      clkEl.textContent = secs.toFixed(2);
+      var tv = document.getElementById("live-tot");
+      if (tv) tv.textContent = secs.toFixed(2) + " s";
+    }, 100);
+  }
+  function stopTicker() { if (ticker) { clearInterval(ticker); ticker = null; } }
+
+  function showVerification(report) {
+    verifHost.innerHTML = "";
+    var v = (report && report.verification) || {};
+    var items = [];
+    if (v.fk_constraints_added !== undefined) {
+      items.push([v.fk_violations === 0, v.fk_constraints_added + " foreign key constraints validated"]);
+    }
+    if (v.fk_violations !== undefined) {
+      items.push([v.fk_violations === 0, v.fk_violations + " referential integrity violations"]);
+    }
+    if (v.sequences_advanced !== undefined) {
+      items.push([true, v.sequences_advanced + " primary key sequences advanced"]);
+    }
+    if (v.row_counts_match !== undefined) {
+      items.push([v.row_counts_match, "row counts " + (v.row_counts_match ? "matched on every table" : "DID NOT match")]);
+    }
+    if (v.write_probe !== undefined) {
+      items.push([v.write_probe === "passed", "application write probe " + v.write_probe]);
+    }
+    items.forEach(function (it) {
+      var d = mk("div", it[0] ? "on" : "fail");
+      d.appendChild(mk("span", "tick", it[0] ? "✓" : "✗"));
+      d.appendChild(mk("span", null, it[1]));
+      verifHost.appendChild(d);
+    });
+  }
+
+  function setBusy(b) {
+    var run = document.getElementById("btn-live");
+    var stop = document.getElementById("btn-live-stop");
+    if (!run) return;
+    run.disabled = b;
+    stop.disabled = !b;
+    run.textContent = b ? "Running…" : "Run it for real";
+  }
+
+  function handle(ev) {
+    if (ev.type === "run" && ev.state === "start") {
+      resetLive();
+      startTicker();
+      logLine("INFO", "Run started · scale " + ev.options.scale
+        + " · " + ev.options.strategy
+        + (ev.options.offline ? " · offline" : ""));
+    } else if (ev.type === "plan") {
+      plan = ev;
+      logLine("INFO", "Plan: " + ev.tables.length + " tables · "
+        + ev.order.join(" → "));
+      planRows("generate");
+    } else if (ev.type === "stage") {
+      setStage(ev.stage, ev.state, ev.duration_s);
+    } else if (ev.type === "table") {
+      if (ev.phase === "generate") {
+        markTable(ev.table, num(ev.rows) + " rows · " + ev.duration_s.toFixed(2) + "s", true);
+      } else if (ev.phase === "load") {
+        markTable(ev.table, num(ev.rows) + " rows · " + ev.duration_s.toFixed(2) + "s", true);
+        bumpSink("postgres", ev.rows, ev.bytes_sent, num(ev.roundtrips) + " trips");
+      }
+    } else if (ev.type === "file") {
+      bumpSink(ev.sink, ev.rows, ev.bytes, num(ev.bytes / 1024) + " KB");
+    } else if (ev.type === "log") {
+      logLine(ev.level, ev.msg);
+    } else if (ev.type === "run") {
+      stopTicker();
+      if (ev.duration_s !== undefined) clkEl.textContent = ev.duration_s.toFixed(2);
+      var tx = document.getElementById("live-tot-x");
+      if (tx) tx.textContent = ev.state === "done" ? "complete" : "failed";
+      titleEl.textContent = ev.state === "done" ? "Live · complete" : "Live · failed";
+      if (ev.report) showVerification(ev.report);
+      if (ev.error) logLine("ERROR", ev.error);
+      setBusy(false);
+    }
+  }
+
+  function connect() {
+    if (es) return;
+    es = new EventSource("/api/events");
+    es.onmessage = function (m) {
+      try { handle(JSON.parse(m.data)); } catch (e) { /* ignore a bad frame */ }
+    };
+  }
+
+  fetch("/api/status", { cache: "no-store" }).then(function (r) {
+    if (!r.ok) throw new Error("no server");
+    return r.json();
+  }).then(function (s) {
+    if (!s.live) return;
+    var bar = document.getElementById("live-bar");
+    bar.hidden = false;
+    document.getElementById("live-txt").textContent = s.database_configured
+      ? "Server connected · database " + s.database_kind + " · this runs the real pipeline"
+      : "Server connected · no database configured · use offline mode";
+    if (!s.database_configured) document.getElementById("live-offline").value = "1";
+    connect();
+
+    document.getElementById("btn-live").addEventListener("click", function () {
+      if (window.__replay && window.__replay.stop) window.__replay.stop();
+      setBusy(true);
+      resetLive();
+      fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scale: parseFloat(document.getElementById("live-scale").value),
+          seed: parseInt(document.getElementById("live-seed").value, 10) || 42,
+          strategy: document.getElementById("live-strat").value,
+          offline: document.getElementById("live-offline").value === "1",
+          realism: true,
+          verify_writes: true
+        })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (j.error) { logLine("ERROR", j.error); setBusy(false); }
+      }).catch(function (e) { logLine("ERROR", String(e)); setBusy(false); });
+    });
+
+    document.getElementById("btn-live-stop").addEventListener("click", function () {
+      fetch("/api/stop", { method: "POST" });
+    });
+  }).catch(function () {
+    var host = document.querySelector("#run .wrap");
+    if (!host || document.getElementById("live-hint")) return;
+    var hint = document.createElement("div");
+    hint.className = "hintbar";
+    hint.id = "live-hint";
+    hint.innerHTML = "Replay mode. To trigger the real Python pipeline from this "
+      + "page and stream its stages and logs back here, run "
+      + "<code>python serve_demo.py</code> and open the address it prints.";
+    host.appendChild(hint);
+  });
+})();
 
 /* nav highlight */
 (function () {

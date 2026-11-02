@@ -256,6 +256,11 @@ class OutputHandler:
             table_metric.load = LoadMetric(**stats)
             if "postgresql" not in table_metric.destinations:
                 table_metric.destinations.append("postgresql")
+            self.metrics.emit("table", table=table_name, phase="load",
+                              rows=stats["rows"], duration_s=stats["duration_s"],
+                              roundtrips=stats["roundtrips"],
+                              bytes_sent=stats["bytes_sent"],
+                              strategy=stats["strategy"])
 
             self.logger.info(
                 "Loaded %s records into %s via %s in %.2fs "
@@ -378,6 +383,8 @@ class OutputHandler:
         table_metric = self.metrics.table(table_name)
         if sink not in table_metric.destinations:
             table_metric.destinations.append(sink)
+        self.metrics.emit("file", table=table_name, sink=sink, path=path,
+                          bytes=size, rows=len(data))
         self.logger.info(
             f"Exported {len(data)} records to {path} ({size:,} bytes)"
         )
