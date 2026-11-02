@@ -6,788 +6,904 @@
 <title>Synthetic Data at Scale</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* Layout idea: an engineering measurement readout - document spine, instrument
-   panels for the numbers, one animated schematic as the centrepiece. */
+/* An engineering test report: narrow metadata rail beside a measure column,
+   rules and whitespace instead of boxes, numbered figures and tables. */
 :root {
   color-scheme: light;
 
-  --ink:        #13161c;
-  --ink-2:      #4a5260;
-  --ink-3:      #7b8494;
-  --surface:    #f7f8f9;
-  --panel:      #ffffff;
-  --rule:       #dde1e7;
-  --rule-firm:  #c3cad4;
+  --ink:      #15171c;   /* near-black, slight blue bias */
+  --ink-2:    #474d59;
+  --ink-3:    #818895;
+  --paper:    #fbfbfc;
+  --paper-2:  #f2f3f5;
+  --rule:     #d9dbe0;
+  --rule-2:   #b4b8c0;
 
-  --accent:     #2a78d6;   /* validated categorical slot 1 */
-  --warm:       #eb6834;   /* validated categorical slot 2 */
-  --cool:       #1baf7a;   /* validated categorical slot 3 */
+  --accent:   #2a78d6;   /* validated categorical slot 1 */
+  --warm:     #eb6834;   /* validated categorical slot 2 */
+  --cool:     #1baf7a;   /* validated categorical slot 3 */
 
-  /* Webfonts are a progressive enhancement. This file is meant to open from
-     disk with no network, so every stack below degrades to something that is
-     already installed on Windows, macOS and most Linux desktops. */
-  --font-display: "Archivo", "Segoe UI", -apple-system, BlinkMacSystemFont,
-                  "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-body:    "Archivo", "Segoe UI", -apple-system, BlinkMacSystemFont,
-                  "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono:    "IBM Plex Mono", "Cascadia Mono", Consolas,
-                  "SFMono-Regular", "SF Mono", Menlo, "DejaVu Sans Mono",
-                  monospace;
+  --serif:    "Instrument Serif", "Iowan Old Style", "Palatino Linotype",
+              Palatino, Georgia, serif;
+  --body:     "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --mono:     "IBM Plex Mono", "Cascadia Mono", Consolas, "SFMono-Regular",
+              Menlo, "DejaVu Sans Mono", monospace;
+
+  --rail: 150px;
+  --gap: 34px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --ink:       #eceef1;
-    --ink-2:     #a7b0bd;
-    --ink-3:     #6f7886;
-    --surface:   #121419;
-    --panel:     #191c23;
-    --rule:      #2a2f39;
-    --rule-firm: #3c4350;
-    --accent:    #3987e5;
-    --warm:      #d95926;
-    --cool:      #199e70;
+    --ink:     #e9eaee;
+    --ink-2:   #a8aeba;
+    --ink-3:   #6e7583;
+    --paper:   #101217;
+    --paper-2: #181b21;
+    --rule:    #282c34;
+    --rule-2:  #3a3f49;
+    --accent:  #3987e5;
+    --warm:    #d95926;
+    --cool:    #199e70;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ink:       #eceef1;
-  --ink-2:     #a7b0bd;
-  --ink-3:     #6f7886;
-  --surface:   #121419;
-  --panel:     #191c23;
-  --rule:      #2a2f39;
-  --rule-firm: #3c4350;
-  --accent:    #3987e5;
-  --warm:      #d95926;
-  --cool:      #199e70;
+  --ink:     #e9eaee;
+  --ink-2:   #a8aeba;
+  --ink-3:   #6e7583;
+  --paper:   #101217;
+  --paper-2: #181b21;
+  --rule:    #282c34;
+  --rule-2:  #3a3f49;
+  --accent:  #3987e5;
+  --warm:    #d95926;
+  --cool:    #199e70;
 }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--surface);
+  background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.6;
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.62;
   font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 96px; }
-section { padding: 52px 0 0; }
-h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(30px, 5.2vw, 50px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.08; }
-h2 { font-size: clamp(21px, 2.9vw, 27px); font-weight: 600; letter-spacing: -0.01em; }
-h3 { font-size: 16px; font-weight: 600; }
-p { margin: 0 0 14px; max-width: 68ch; }
-a { color: var(--accent); }
-code, .mono { font-family: var(--font-mono); font-size: 0.9em; }
+.sheet { max-width: 1060px; margin: 0 auto; padding: 0 24px 110px; }
 
-.eyebrow {
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
-  margin: 0 0 10px;
-}
-.lede { font-size: 18px; color: var(--ink-2); max-width: 62ch; }
-.note { font-size: 13.5px; color: var(--ink-3); max-width: 70ch; }
-
-/* ---- masthead ---- */
-header.masthead { padding: 56px 0 8px; border-bottom: 1px solid var(--rule); }
-.thesis {
-  margin: 22px 0 0; padding: 18px 20px;
-  border-left: 3px solid var(--accent); background: var(--panel);
-  font-size: 17px; max-width: 72ch;
+/* ---------- the two-column spine ---------- */
+.row { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: var(--gap); }
+.rail { grid-column: 1; }
+.measure { grid-column: 2; min-width: 0; }
+@media (max-width: 880px) {
+  :root { --rail: 1fr; --gap: 0px; }
+  .row { grid-template-columns: 1fr; }
+  .rail, .measure { grid-column: 1; }
+  .rail { margin-bottom: 10px; }
 }
 
-/* ---- stat tiles ---- */
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 12px; margin: 26px 0 30px; }
-.tile { background: var(--panel); border: 1px solid var(--rule); padding: 15px 16px; }
-.tile .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
-.tile .v { font-family: var(--font-display); font-size: 29px; font-weight: 700; line-height: 1.12; margin: 5px 0 1px; letter-spacing: -0.02em; }
-.tile .u { font-size: 12.5px; color: var(--ink-2); }
-.tile.lead .v { color: var(--accent); }
+h1, h2 { font-family: var(--serif); font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(38px, 6.6vw, 68px); line-height: 1.02; letter-spacing: -0.012em; }
+h2 { font-size: clamp(25px, 3.4vw, 34px); line-height: 1.12; letter-spacing: -0.008em; }
+h3 {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+  margin: 0 0 9px;
+}
+p { margin: 0 0 15px; }
+.measure p { max-width: 64ch; }
+a { color: var(--accent); text-underline-offset: 2px; }
+code { font-family: var(--mono); font-size: 0.87em; }
+em { font-style: italic; }
 
-/* ---- pipeline schematic ---- */
-.schematic { background: var(--panel); border: 1px solid var(--rule); padding: 8px 8px 4px; margin: 20px 0 0; overflow-x: auto; }
-.schematic svg { display: block; width: 100%; min-width: 660px; height: auto; }
+/* rail contents */
+.sec-no {
+  font-family: var(--serif); font-size: 36px; line-height: 1;
+  color: var(--rule-2); display: block;
+}
+.sec-name {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3);
+  margin-top: 6px; display: block;
+}
+.marginal {
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.55;
+  color: var(--ink-3); margin-top: 18px;
+  border-top: 1px solid var(--rule); padding-top: 9px;
+}
+.marginal strong { color: var(--ink-2); font-weight: 500; }
+@media (max-width: 880px) {
+  .sec-no { display: inline; font-size: 22px; margin-right: 8px; }
+  .sec-name { display: inline; }
+  .marginal { border-top: none; border-left: 2px solid var(--rule); padding: 0 0 0 12px; margin: 14px 0 18px; }
+}
+
+section { padding-top: 58px; }
+section > .row + .row { margin-top: 0; }
+
+/* ---------- masthead ---------- */
+.masthead { padding-top: 60px; }
+.slug {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-3);
+  padding-bottom: 14px; border-bottom: 1px solid var(--ink);
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.deck { font-size: 20px; line-height: 1.5; color: var(--ink-2); max-width: 56ch; margin: 22px 0 0; }
+.deck b { color: var(--ink); font-weight: 500; }
+
+/* report header: the specimen block */
+/* Four fixed columns, so eight entries make two complete rows. auto-fit left a
+   ragged half-row with no bottom rule, which read as unfinished. */
+.specimen {
+  margin: 30px 0 0; border-top: 1px solid var(--rule);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+}
+.specimen div {
+  padding: 11px 14px 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 620px) { .specimen { grid-template-columns: repeat(2, 1fr); } }
+.specimen dt {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 3px;
+}
+.specimen dd { font-family: var(--mono); font-size: 13px; margin: 0; color: var(--ink); }
+
+/* hero figure */
+.hero { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin: 34px 0 0; }
+.hero .big {
+  font-family: var(--serif); font-size: clamp(62px, 11vw, 112px);
+  line-height: 0.88; letter-spacing: -0.03em; color: var(--accent);
+}
+.hero .say { font-size: 17px; color: var(--ink-2); max-width: 34ch; }
+
+/* ---------- figures & tables ---------- */
+figure { margin: 0; }
+.cap {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  color: var(--ink-3); margin: 10px 0 0; line-height: 1.5;
+}
+.cap b { color: var(--ink-2); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+
+table { width: 100%; border-collapse: collapse; }
+.tb { font-family: var(--mono); font-size: 13px; }
+.tb caption {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  color: var(--ink-3); text-align: left; padding-bottom: 9px;
+}
+.tb caption b { color: var(--ink-2); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.tb th, .tb td { padding: 8px 12px 8px 0; text-align: right; border-bottom: 1px solid var(--rule); }
+.tb th:first-child, .tb td:first-child { text-align: left; }
+.tb thead th {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--ink-3);
+  border-bottom: 1px solid var(--ink-2);
+}
+.tb tfoot td { border-bottom: none; border-top: 1px solid var(--ink-2); font-weight: 600; }
+.tb tbody tr.hi td { background: var(--paper-2); }
+.tb .num { font-variant-numeric: tabular-nums; }
+.tb .gain { color: var(--accent); font-weight: 600; }
+.tb .was  { color: var(--warm); }
+.tb .is   { color: var(--cool); font-weight: 500; }
+.scroll { overflow-x: auto; }
+
+/* dumbbell chart inside a table cell */
+.track { position: relative; height: 18px; min-width: 150px; }
+.track .axisline { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--rule); }
+.track .conn { position: absolute; top: 50%; height: 1px; background: var(--rule-2); }
+.track .pt { position: absolute; top: 50%; width: 9px; height: 9px; margin: -5px 0 0 -4.5px; border-radius: 50%; }
+.track .pt.b { background: var(--warm); }
+.track .pt.a { background: var(--accent); box-shadow: 0 0 0 2px var(--paper); }
+.axisrow td { border-bottom: none !important; padding-top: 2px !important; }
+.ticks { position: relative; height: 16px; min-width: 150px; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+.ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.ticks span::before {
+  content: ""; position: absolute; left: 50%; top: -4px; width: 1px; height: 4px;
+  background: var(--rule-2);
+}
+
+/* ---------- schematic (earns a frame) ---------- */
+.frame { border: 1px solid var(--rule); background: var(--paper-2); }
+.schematic { padding: 6px; overflow-x: auto; }
+.schematic svg { display: block; width: 100%; min-width: 640px; height: auto; }
 .stage-node { cursor: pointer; }
-.stage-node rect, .stage-node circle { transition: stroke 120ms, fill 120ms; }
+.stage-node rect { transition: stroke 120ms, stroke-width 120ms; }
 .stage-node:focus { outline: none; }
-.stage-node:focus-visible rect, .stage-node:focus-visible circle { stroke: var(--accent); stroke-width: 2.5; }
-.stage-node.on rect, .stage-node.on circle { stroke: var(--accent); stroke-width: 2.2; }
-.detail { background: var(--panel); border: 1px solid var(--rule); border-top: none; padding: 18px 20px; }
-.detail h3 { margin-bottom: 4px; }
-.detail .meta { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); margin-bottom: 10px; }
-.detail p { font-size: 14.5px; margin-bottom: 8px; }
-.detail dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 10px 0 0; font-size: 13.5px; }
-.detail dt { font-family: var(--font-mono); color: var(--ink-3); }
-.detail dd { margin: 0; }
-.ctrl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 0 0; }
-button {
-  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
-  color: var(--ink); background: var(--panel);
-  border: 1px solid var(--rule-firm); padding: 7px 13px; cursor: pointer;
+.stage-node:focus-visible rect { stroke: var(--accent); stroke-width: 2.4; }
+.stage-node.on rect { stroke: var(--accent); stroke-width: 2.2; }
+.readout { border-top: 1px solid var(--rule); padding: 16px 16px 18px; }
+.readout .t { font-family: var(--serif); font-size: 23px; line-height: 1.15; }
+.readout .m { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin: 3px 0 10px; letter-spacing: 0.04em; }
+.readout p { font-size: 15.5px; margin: 0 0 12px; max-width: 62ch; }
+/* Each label/value pair is wrapped in a div. A bare dt and dd are separate grid
+   items, so they flowed independently and a value could land under a different
+   label than its own. */
+.readout dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: 12px 16px; margin: 0; }
+.readout dt { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); }
+.readout dd { font-family: var(--mono); font-size: 13.5px; margin: 2px 0 0; }
+
+/* ---------- regime proportions ---------- */
+.reg { margin-top: 4px; }
+.reg-row { margin-bottom: 17px; }
+.reg-top { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+.reg-top .l { color: var(--ink); }
+.reg-top .r { color: var(--ink-3); }
+.reg-bar { display: flex; height: 24px; }
+.reg-bar span {
+  display: flex; align-items: center; padding: 0 7px; overflow: hidden;
+  font-family: var(--mono); font-size: 10.5px; color: #fff; white-space: nowrap;
 }
-button:hover { border-color: var(--accent); color: var(--accent); }
-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.primary:hover { color: #fff; opacity: 0.9; }
+.reg-bar .wait { background: var(--warm); }
+.reg-bar .send { background: var(--accent); }
+.key { display: flex; gap: 18px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.key i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; }
 
-/* ---- bar comparisons ---- */
-table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
-table.data th, table.data td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--rule); }
-table.data th:first-child, table.data td:first-child { text-align: left; font-family: var(--font-mono); font-size: 13px; }
-table.data thead th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; border-bottom: 1px solid var(--rule-firm); }
-table.data tbody tr:last-child td { border-bottom: none; }
-table.data tr.total td { font-weight: 700; border-top: 1px solid var(--rule-firm); }
-.bar-cell { width: 34%; }
-.barwrap { display: flex; align-items: center; gap: 8px; }
-.bar { height: 11px; border-radius: 0 3px 3px 0; min-width: 2px; }
-.bar.before { background: var(--warm); }
-.bar.after  { background: var(--accent); }
-.barlabel { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); white-space: nowrap; }
-.scroller { overflow-x: auto; }
+/* ---------- storage ---------- */
+.fmt { margin-top: 2px; }
+.fmt-row { margin-bottom: 13px; }
+.fmt-top { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; margin-bottom: 5px; }
+.fmt-bar { height: 15px; background: var(--warm); }
+.fmt-bar.win { background: var(--accent); }
 
-.panel { background: var(--panel); border: 1px solid var(--rule); padding: 18px 20px; }
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-
-/* regime bars */
-.regime { margin: 16px 0 0; }
-.regime-row { margin-bottom: 15px; }
-.regime-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; margin-bottom: 5px; }
-.regime-head .nm { font-family: var(--font-mono); font-weight: 500; }
-.regime-head .tot { color: var(--ink-2); font-family: var(--font-mono); }
-.stack { display: flex; height: 22px; gap: 2px; }
-.stack span { display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10.5px; color: #fff; overflow: hidden; white-space: nowrap; }
-.seg-wait { background: var(--warm); }
-.seg-send { background: var(--accent); }
-.legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
-.legend i { display: inline-block; width: 11px; height: 11px; margin-right: 6px; vertical-align: -1px; }
-
-/* realism */
-.rl { width: 100%; border-collapse: collapse; font-size: 14px; }
-.rl th, .rl td { padding: 7px 10px; border-bottom: 1px solid var(--rule); }
-.rl thead th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; text-align: left; border-bottom: 1px solid var(--rule-firm); }
-.rl td.b { font-family: var(--font-mono); font-size: 13px; color: var(--warm); text-align: right; white-space: nowrap; }
-.rl td.a { font-family: var(--font-mono); font-size: 13px; color: var(--cool); text-align: right; font-weight: 600; white-space: nowrap; }
-.rl tbody tr:last-child td { border-bottom: none; }
-
-/* model builder */
-.builder { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; }
-@media (max-width: 760px) { .builder { grid-template-columns: 1fr; } }
-.tbl-card { border: 1px solid var(--rule); padding: 11px 12px; margin-bottom: 9px; background: var(--surface); }
-.tbl-card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.tbl-card .nm { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
-.tbl-card .sub { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
-.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-.chip { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border: 1px solid var(--rule-firm); color: var(--ink-2); }
-.chip.fk { border-color: var(--accent); color: var(--accent); }
-.chip.pk { border-color: var(--rule-firm); background: var(--rule); color: var(--ink); }
-label { display: block; font-size: 12px; color: var(--ink-3); margin: 9px 0 3px; font-family: var(--font-mono); letter-spacing: 0.04em; }
+/* ---------- builder ---------- */
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(286px, 1fr)); gap: 30px; }
+.card { border-top: 1px solid var(--ink-2); padding-top: 12px; margin-bottom: 11px; }
+.card .ct { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-family: var(--mono); }
+.card .cn { font-size: 14px; font-weight: 600; }
+.card .cs { font-size: 11px; color: var(--ink-3); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.tag { font-family: var(--mono); font-size: 10.5px; padding: 2px 6px; border: 1px solid var(--rule-2); color: var(--ink-3); }
+.tag.fk { border-color: var(--accent); color: var(--accent); }
+.tag.dual { border-color: var(--cool); color: var(--cool); }
+label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); margin: 11px 0 4px; }
 input, select {
-  font-family: var(--font-mono); font-size: 13px; width: 100%;
-  padding: 6px 8px; color: var(--ink); background: var(--surface);
-  border: 1px solid var(--rule-firm);
+  font-family: var(--mono); font-size: 13px; width: 100%; padding: 7px 9px;
+  color: var(--ink); background: var(--paper); border: 1px solid var(--rule-2);
+  border-radius: 0;
 }
 input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.inline { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-pre.out {
-  font-family: var(--font-mono); font-size: 11.5px; line-height: 1.5;
-  background: var(--surface); border: 1px solid var(--rule);
-  padding: 12px; overflow: auto; max-height: 320px; margin: 10px 0 0;
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+button {
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--ink); background: transparent;
+  border: 1px solid var(--ink-2); padding: 8px 14px; cursor: pointer;
 }
-.derived { font-size: 13.5px; }
-.derived dt { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin-top: 9px; }
-.derived dd { margin: 2px 0 0; font-family: var(--font-mono); font-size: 13px; }
-.bad { color: var(--warm); }
-.good { color: var(--cool); }
-
-figure { margin: 18px 0 0; }
-figcaption { font-size: 13px; color: var(--ink-3); margin-top: 9px; max-width: 70ch; }
-.fkgraph { background: var(--panel); border: 1px solid var(--rule); padding: 10px; overflow-x: auto; }
-.fkgraph svg { display: block; width: 100%; min-width: 560px; height: auto; }
-
-ul.plain { margin: 0 0 14px; padding-left: 20px; max-width: 70ch; font-size: 15px; }
-ul.plain li { margin-bottom: 7px; }
-
-footer { border-top: 1px solid var(--rule); margin-top: 56px; padding-top: 22px; font-size: 13.5px; color: var(--ink-3); }
-
-@media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+button:hover { background: var(--ink); color: var(--paper); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.solid { background: var(--ink); color: var(--paper); }
+button.solid:hover { opacity: 0.84; }
+button.mini { padding: 3px 8px; font-size: 10px; border-color: var(--rule-2); color: var(--ink-3); margin-top: 8px; }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+.plan dt { font-family: var(--mono); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); margin-top: 12px; }
+.plan dd { font-family: var(--mono); font-size: 13px; margin: 3px 0 0; line-height: 1.5; }
+.plan .ok { color: var(--cool); }
+.plan .no { color: var(--warm); }
+pre.json {
+  font-family: var(--mono); font-size: 11px; line-height: 1.5;
+  background: var(--paper-2); border: 1px solid var(--rule);
+  padding: 13px; overflow: auto; max-height: 300px; margin: 12px 0 0;
 }
 
-/* ---- print / save-as-PDF ----
-   This file is a submission document as well as a web page, so printing has to
-   produce something readable. Browsers drop background fills by default, which
-   would erase every bar and stacked proportion, so the data marks are given
-   print-colour-adjust and everything else is re-expressed with borders. */
+/* ---------- fk graph ---------- */
+.graph { padding: 8px; overflow-x: auto; }
+.graph svg { display: block; width: 100%; min-width: 560px; height: auto; }
+
+ul.lim { margin: 0; padding: 0; list-style: none; }
+ul.lim li { border-top: 1px solid var(--rule); padding: 13px 0; max-width: 64ch; }
+ul.lim li:last-child { border-bottom: 1px solid var(--rule); }
+ul.lim b { font-weight: 600; }
+
+.colophon {
+  margin-top: 70px; border-top: 1px solid var(--ink); padding-top: 16px;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.65; color: var(--ink-3);
+}
+.colophon p { max-width: 70ch; margin: 0 0 10px; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- print / save-as-PDF ---------- */
 @media print {
   :root {
     color-scheme: light;
-    --ink: #000; --ink-2: #333; --ink-3: #555;
-    --surface: #fff; --panel: #fff;
-    --rule: #bbb; --rule-firm: #777;
-    --accent: #1a4f91; --warm: #a8431d; --cool: #0f7050;
+    --ink: #000; --ink-2: #2b2b2b; --ink-3: #555;
+    --paper: #fff; --paper-2: #fff; --rule: #bbb; --rule-2: #777;
+    --accent: #14477f; --warm: #a0401b; --cool: #0d6548;
+    --rail: 120px; --gap: 22px;
   }
-  body { background: #fff; font-size: 10.5pt; line-height: 1.45; }
-  .wrap { max-width: none; padding: 0; }
-  section { padding: 18pt 0 0; break-inside: avoid-page; }
-  header.masthead { padding: 0 0 6pt; }
-  h1 { font-size: 22pt; }
-  h2 { font-size: 14pt; break-after: avoid; }
-  h3 { break-after: avoid; }
-  .lede { font-size: 11.5pt; }
-
-  /* Keep the data marks visible on paper. */
-  .bar, .stack span, .legend i, .tile.lead .v {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  body { background: #fff; font-size: 10pt; line-height: 1.42; }
+  .sheet { max-width: none; padding: 0; }
+  section { padding-top: 20pt; break-inside: avoid-page; }
+  h1 { font-size: 27pt; } h2 { font-size: 15pt; break-after: avoid; }
+  .deck { font-size: 11pt; }
+  .hero .big { font-size: 44pt; }
+  .sec-no { font-size: 20pt; }
+  /* keep data marks visible: browsers drop backgrounds by default */
+  .reg-bar span, .fmt-bar, .track .pt, .key i, .hero .big {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-
-  .panel, .tile, .schematic, .detail, .fkgraph, .tbl-card {
-    border: 1px solid var(--rule) !important;
-    background: #fff !important;
-    break-inside: avoid;
-  }
-  .tiles { grid-template-columns: repeat(5, 1fr); gap: 6pt; }
-  .tile .v { font-size: 16pt; }
-  table.data, table.rl { break-inside: avoid; font-size: 9pt; }
-  figure, .regime-row, .grid2 > * { break-inside: avoid; }
-  .scroller, .schematic, .fkgraph { overflow: visible; }
-  .schematic svg, .fkgraph svg { min-width: 0; }
-
-  /* Controls cannot be operated on paper. */
-  .ctrl-row, #copy-json, #add-tbl, #reset-tbl, .tbl-card button,
-  label, input, select { display: none !important; }
-  .builder { grid-template-columns: 1fr 1fr; }
-  pre.out { max-height: none; font-size: 8pt; }
-
-  a { color: var(--ink); text-decoration: none; }
-  footer { break-inside: avoid; }
+  .frame, pre.json { background: #fff !important; }
+  figure, .reg-row, .fmt-row, .card, table { break-inside: avoid; }
+  .scroll, .schematic, .graph { overflow: visible; }
+  .schematic svg, .graph svg { min-width: 0; }
+  .acts, button, label, input, select { display: none !important; }
+  pre.json { max-height: none; font-size: 7.5pt; }
+  a { color: #000; text-decoration: none; }
 }
 @page { margin: 14mm; }
 </style>
 </head>
 <body data-palette="#2a78d6,#eb6834,#1baf7a">
-<div class="wrap">
+<div class="sheet">
 
-<header class="masthead">
-  <p class="eyebrow">Big Data Analytics &middot; semester 7</p>
-  <h1>Synthetic data at scale,<br>for everyone outside the companies that own it</h1>
-  <p class="lede" style="margin-top:16px">
-    A declarative pipeline: describe a domain once as JSON, get a complete
-    referentially-consistent dataset materialised into PostgreSQL, CSV, JSON,
-    Parquet and a live REST API at the same time.
-  </p>
-  <div class="thesis">
-    The engineering that matters only becomes visible at scale. The data that
-    exhibits scale is held by organisations that will not release it. So the
-    ability to <em>practise</em> at scale is gated by employment. Making volume a
-    parameter rather than a property of a handed-over dataset removes that gate.
-  </div>
-</header>
-
-<section>
-  <div class="tiles">
-    <div class="tile lead">
-      <div class="k">end to end</div>
-      <div class="v">69.6s</div>
-      <div class="u">100,400 records, 5 destinations, verified</div>
-    </div>
-    <div class="tile">
-      <div class="k">records</div>
-      <div class="v">100,400</div>
-      <div class="u">6 tables, 49 fields, 7 foreign keys</div>
-    </div>
-    <div class="tile">
-      <div class="k">generation</div>
-      <div class="v">10.1&times;</div>
-      <div class="u">101.24s &rarr; 10.06s</div>
-    </div>
-    <div class="tile">
-      <div class="k">load path</div>
-      <div class="v">1,395&times;</div>
-      <div class="u">7.21h projected &rarr; 18.61s measured</div>
-    </div>
-    <div class="tile">
-      <div class="k">db round trip</div>
-      <div class="v">287ms</div>
-      <div class="u">client in India, database in Ireland</div>
-    </div>
-  </div>
-  <p class="note">
-    Every figure on this page was measured by a committed harness, run with
-    nothing else on the machine, and repeated. One figure is projected rather
-    than measured and says so wherever it appears.
-  </p>
-</section>
-
-<section>
-  <p class="eyebrow">the mechanism</p>
-  <h2>One dataset, five destinations, one set of ids</h2>
-  <p>
-    Foreign keys stay valid across destinations because every sink is
-    materialised from a single in-memory dataset, not generated per sink. The id
-    a CSV row carries is the same object the PostgreSQL parent row carries.
-    Select a stage to see what it does and what it cost in the run measured
-    above.
-  </p>
-
-  <div class="schematic">
-    <svg viewBox="0 0 980 300" role="img" aria-label="Pipeline schematic: the model file feeds a generator, then a semantic repair pass, then fans out to PostgreSQL, CSV, JSON, Parquet and a REST API served from PostgreSQL.">
-      <defs>
-        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
-        </marker>
-      </defs>
-
-      <!-- wires -->
-      <g stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.4" marker-end="url(#ah)">
-        <path id="w1" d="M 136 150 L 214 150"></path>
-        <path id="w2" d="M 320 150 L 398 150"></path>
-        <path d="M 506 150 L 556 150"></path>
-      </g>
-      <g stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.4" marker-end="url(#ah)">
-        <path id="f1" d="M 556 150 C 610 150 620 44 700 44"></path>
-        <path id="f2" d="M 556 150 C 610 150 620 97 700 97"></path>
-        <path id="f3" d="M 556 150 L 700 150"></path>
-        <path id="f4" d="M 556 150 C 610 150 620 203 700 203"></path>
-        <path id="f5" d="M 556 150 C 610 150 620 256 700 256"></path>
-      </g>
-      <path d="M 790 44 C 850 44 856 230 856 246 L 856 256 L 802 256" stroke="var(--accent)" stroke-width="1.4" fill="none" opacity="0.75" marker-end="url(#ah)"></path>
-      <text x="868" y="150" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.65">served from</text>
-      <text x="868" y="164" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity="0.65">postgres</text>
-
-      <!-- stage: model -->
-      <g class="stage-node" data-stage="model" tabindex="0" role="button" aria-label="Model file stage">
-        <rect x="16" y="120" width="120" height="60" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="76" y="145" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="currentColor">model.json</text>
-        <text x="76" y="162" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">6 tables</text>
-      </g>
-
-      <!-- stage: generate -->
-      <g class="stage-node" data-stage="generate" tabindex="0" role="button" aria-label="Generate stage">
-        <rect x="214" y="110" width="106" height="80" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="267" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="currentColor">generate</text>
-        <text x="267" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">topological</text>
-        <text x="267" y="169" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">9.98s</text>
-      </g>
-
-      <!-- stage: repair -->
-      <g class="stage-node" data-stage="repair" tabindex="0" role="button" aria-label="Semantic repair stage">
-        <rect x="398" y="110" width="108" height="80" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="452" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="currentColor">repair</text>
-        <text x="452" y="156" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">causality,</text>
-        <text x="452" y="169" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">money</text>
-      </g>
-
-      <!-- fan-out hub -->
-      <circle cx="556" cy="150" r="5" fill="currentColor"></circle>
-
-      <!-- sinks -->
-      <g class="stage-node" data-stage="postgres" tabindex="0" role="button" aria-label="PostgreSQL destination">
-        <rect x="700" y="24" width="90" height="40" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="745" y="42" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">postgres</text>
-        <text x="745" y="55" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">85,400 rows</text>
-      </g>
-      <g class="stage-node" data-stage="csv" tabindex="0" role="button" aria-label="CSV destination">
-        <rect x="700" y="77" width="90" height="40" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="745" y="95" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">csv</text>
-        <text x="745" y="108" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">25,000 rows</text>
-      </g>
-      <g class="stage-node" data-stage="json" tabindex="0" role="button" aria-label="JSON destination">
-        <rect x="700" y="130" width="90" height="40" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="745" y="148" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">json</text>
-        <text x="745" y="161" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">20,000 rows</text>
-      </g>
-      <g class="stage-node" data-stage="parquet" tabindex="0" role="button" aria-label="Parquet destination">
-        <rect x="700" y="183" width="90" height="40" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"></rect>
-        <text x="745" y="201" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">parquet</text>
-        <text x="745" y="214" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">columnar</text>
-      </g>
-      <g class="stage-node" data-stage="api" tabindex="0" role="button" aria-label="REST API destination">
-        <rect x="700" y="236" width="102" height="40" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.4"></rect>
-        <text x="751" y="254" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="var(--accent)">rest api</text>
-        <text x="751" y="267" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">GET /orders</text>
-      </g>
-
-      <!-- animated records -->
-      <g id="flow"></g>
-    </svg>
+<!-- ============ masthead ============ -->
+<div class="masthead">
+  <div class="slug">
+    <span>Big Data Analytics &middot; semester 7 &middot; measurement report</span>
+    <span>rev. 2026&#8209;11&#8209;02</span>
   </div>
 
-  <div class="detail" id="detail">
-    <h3 id="d-title">Select a stage</h3>
-    <div class="meta" id="d-meta">five stages &middot; click or tab to any box above</div>
-    <p id="d-body">
-      The schematic is the real routing for the shipped model. Two tables land in
-      two places each, which is where the integrity claim is actually tested.
-    </p>
-    <dl id="d-dl"></dl>
-  </div>
-  <div class="ctrl-row">
-    <button id="toggle-flow" class="primary">Pause the flow</button>
-    <span class="note" style="margin:0">Each dot is a batch of records moving to its destination.</span>
-  </div>
-</section>
-
-<section>
-  <p class="eyebrow">the finding that matters most</p>
-  <h2>Three load strategies, three different regimes</h2>
-  <p>
-    The original pipeline sent one <code>INSERT</code> per row: about 85,400
-    sequential network round trips. The problem was never bandwidth. 85,400 rows
-    is 16.5&nbsp;MB. The problem was 85,400 sequential <em>waits</em>, at roughly
-    0.3 seconds each.
-  </p>
-  <p>
-    Splitting each strategy's time into waiting for the network and actually
-    sending data shows these are not three points on one curve:
-  </p>
-
-  <div class="panel regime" id="regime">
-    <div class="regime-row">
-      <div class="regime-head"><span class="nm">rowwise &mdash; 85,400 round trips</span><span class="tot">25,961s &middot; projected</span></div>
-      <div class="stack"><span class="seg-wait" style="flex:94">waiting 94%</span><span class="seg-send" style="flex:6"></span></div>
-    </div>
-    <div class="regime-row">
-      <div class="regime-head"><span class="nm">execute_values &mdash; 86 round trips</span><span class="tot">40.67s &middot; measured</span></div>
-      <div class="stack"><span class="seg-wait" style="flex:61">waiting 61%</span><span class="seg-send" style="flex:39">sending 39%</span></div>
-    </div>
-    <div class="regime-row" style="margin-bottom:4px">
-      <div class="regime-head"><span class="nm">copy &mdash; 5 round trips</span><span class="tot">18.61s &middot; measured</span></div>
-      <div class="stack"><span class="seg-wait" style="flex:8">8%</span><span class="seg-send" style="flex:92">sending 92%</span></div>
-    </div>
-    <div class="legend">
-      <span><i style="background:var(--warm)"></i>waiting on the network</span>
-      <span><i style="background:var(--accent)"></i>sending data</span>
-    </div>
-  </div>
-
-  <div class="grid2" style="margin-top:16px">
-    <div class="panel">
-      <h3>Two consequences follow</h3>
-      <p style="font-size:14.5px">
-        The large multiple is <code>rowwise</code> &rarr;
-        <code>execute_values</code>, which removes the waiting. COPY then buys a
-        further <strong>2.19&times;</strong>, which is real but an order of
-        magnitude smaller.
-      </p>
-      <p style="font-size:14.5px;margin-bottom:0">
-        And parallel loading should be roughly <strong>flat</strong>: COPY is
-        already 92% bandwidth-bound, so splitting one uplink across N connections
-        cannot create bandwidth. That prediction is recorded as open work rather
-        than quietly skipped.
+  <div class="row" style="margin-top:36px">
+    <div class="rail"></div>
+    <div class="measure">
+      <h1>Synthetic data at scale, for everyone outside the companies that own it</h1>
+      <p class="deck">
+        Describe a domain once as JSON. Get a complete, referentially-consistent
+        dataset materialised into PostgreSQL, CSV, JSON, Parquet and a live REST
+        API at the same time &ndash; at <b>whatever volume you ask for</b>.
       </p>
     </div>
-    <div class="panel">
-      <h3>A measured crossover</h3>
-      <div class="scroller">
-        <table class="data" style="margin-top:8px">
-          <thead><tr><th>rows</th><th>execute_values</th><th>copy</th><th>winner</th></tr></thead>
-          <tbody>
-            <tr><td>854</td><td>2.78s</td><td>4.16s</td><td>execute_values</td></tr>
-            <tr><td>85,400</td><td>40.67s</td><td>18.61s</td><td>copy</td></tr>
-          </tbody>
-        </table>
+  </div>
+
+  <div class="row" style="margin-top:30px">
+    <div class="rail">
+      <div class="marginal" style="border-top:none;margin-top:0;padding-top:0">
+        <strong>Why it matters.</strong> The engineering that matters only shows
+        up at scale. The data that has scale belongs to companies that will not
+        release it. So practising at scale is gated by employment. Making volume
+        a parameter removes the gate.
       </div>
-      <p class="note" style="margin-top:10px;margin-bottom:0">
-        At 854 rows both collapse to 5 round trips, so COPY's stream setup has
-        nothing to amortise and it loses. A benchmark run at one scale would get
-        this backwards.
-      </p>
     </div>
-  </div>
-  <p class="note" style="margin-top:14px">
-    The 7.21-hour row-at-a-time figure is <strong>projected</strong>: 854 round
-    trips were measured at 259.61s, giving 0.304s each, and 85,400 round trips
-    follow from the row count. A full-scale run would take most of a working day
-    to produce a number already fixed by two measured quantities.
-  </p>
-</section>
-
-<section>
-  <p class="eyebrow">generation</p>
-  <h2>An accidentally quadratic foreign-key lookup</h2>
-  <p>
-    Resolving a foreign key rebuilt the entire list of candidate parent ids on
-    every single field call, for a result that never changes within a table.
-    About two billion dictionary probes per run. Memoizing it produces
-    byte-identical output, verified across all six tables and all 49 fields.
-  </p>
-  <div class="panel scroller">
-    <table class="data" id="gen-table">
-      <thead>
-        <tr><th>table</th><th>rows</th><th>before</th><th>after</th><th class="bar-cell">relative</th><th>speedup</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <p class="note" style="margin-top:12px">
-    The headline multiple is not the interesting part. The speedup tracks
-    rows&nbsp;&times;&nbsp;parent-rows, and the three tables with no meaningful
-    foreign-key load are flat. That pattern is what separates the right fix from
-    a lucky one.
-  </p>
-</section>
-
-<section>
-  <p class="eyebrow">veracity</p>
-  <h2>Structurally valid is not the same as believable</h2>
-  <p>
-    Every foreign key resolved, every type matched, every unique column was
-    unique &mdash; and every user was an infant, half the orders predated the
-    accounts that placed them, and no order total matched its line items. A query
-    planner never sees data shaped like that, so it teaches you nothing.
-  </p>
-  <div class="panel scroller">
-    <table class="rl" id="realism-table">
-      <thead><tr><th>measured at full scale</th><th style="text-align:right">before</th><th style="text-align:right">after</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <p class="note" style="margin-top:12px">
-    Four of these were already in the project's defect register. Three were not,
-    and the worst is <code>unit_price</code>: reconciling order totals while line
-    prices bear no relation to the product being bought is arithmetic over noise.
-    It yields a dataset that is internally consistent and still describes
-    impossible orders. Every rule is driven by field names and the foreign-key
-    graph, never hardcoded table names, which is what keeps the pipeline
-    declarative.
-  </p>
-</section>
-
-<section>
-  <p class="eyebrow">storage</p>
-  <h2>Why columnar is the format analytical tools use</h2>
-  <p>
-    The same table &mdash; <code>products</code>, 20,000 rows across 11 fields
-    &mdash; written to all three file destinations. Read timings are best-of-five
-    after a warm-up, so they measure I/O rather than library import cost.
-  </p>
-  <div class="grid2">
-    <div class="panel">
-      <h3>On disk</h3>
-      <div id="fmt-bars" style="margin-top:12px"></div>
-    </div>
-    <div class="panel">
-      <h3>Reading it back</h3>
-      <div class="scroller">
-        <table class="data" style="margin-top:8px">
-          <thead><tr><th>operation</th><th>CSV</th><th>Parquet</th><th>gain</th></tr></thead>
-          <tbody>
-            <tr><td>all 11 columns</td><td>0.081s</td><td>0.022s</td><td>3.7&times;</td></tr>
-            <tr><td>2 of 11 columns</td><td>0.030s</td><td>0.002s</td><td>15.6&times;</td></tr>
-            <tr><td>aggregate 1 column</td><td>0.029s</td><td>0.001s</td><td>19.6&times;</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="note" style="margin-top:10px;margin-bottom:0">
-        A row-oriented file reads every byte to reach one column. A columnar file
-        reads only the chunks it needs. That is the whole argument.
-      </p>
-    </div>
-  </div>
-  <p class="note" style="margin-top:14px">
-    The first run of this benchmark reported Parquet reads as <em>slower</em>
-    than CSV, 0.52s against 0.12s. That was pyarrow's first-import cost, not I/O.
-    Warming the libraries reversed the result by a factor of 24. It is recorded
-    as a correction, because the method matters as much as the numbers.
-  </p>
-</section>
-
-<section>
-  <p class="eyebrow">the claim, proven</p>
-  <h2>Foreign keys that survive leaving the database</h2>
-  <figure>
-    <div class="fkgraph">
-      <svg viewBox="0 0 860 260" role="img" aria-label="Foreign key graph of the shipped model: categories references itself, products references categories, orders references users, order_items references orders and products, reviews references products and users. Each table is annotated with its destination.">
-        <defs>
-          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
-          </marker>
-        </defs>
-        <g stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.45" marker-end="url(#ah2)">
-          <path d="M 196 60 L 126 60"></path>
-          <path d="M 61 44 C 61 20 20 20 20 44 L 20 52"></path>
-          <path d="M 266 78 L 266 108"></path>
-          <path d="M 196 190 L 126 190"></path>
-          <path d="M 336 190 L 406 190"></path>
-          <path d="M 466 172 L 466 130 L 336 130 L 336 142"></path>
-          <path d="M 466 208 C 466 240 600 240 600 208"></path>
-          <path d="M 636 190 L 706 190"></path>
-        </g>
-
-        <g font-family="IBM Plex Mono, monospace" font-size="11.5">
-          <g><rect x="196" y="42" width="140" height="36" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
-            <text x="266" y="58" text-anchor="middle" font-weight="600" fill="currentColor">categories</text>
-            <text x="266" y="71" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.6">400 &middot; postgres</text></g>
-          <g><rect x="196" y="108" width="140" height="36" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
-            <text x="266" y="124" text-anchor="middle" font-weight="600" fill="currentColor">products</text>
-            <text x="266" y="137" text-anchor="middle" font-size="9.5" fill="var(--accent)">20,000 &middot; json + pg</text></g>
-          <g><rect x="196" y="172" width="140" height="36" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
-            <text x="266" y="188" text-anchor="middle" font-weight="600" fill="currentColor">users</text>
-            <text x="266" y="201" text-anchor="middle" font-size="9.5" fill="var(--accent)">10,000 &middot; csv + pg</text></g>
-          <g><rect x="406" y="172" width="120" height="36" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
-            <text x="466" y="188" text-anchor="middle" font-weight="600" fill="currentColor">orders</text>
-            <text x="466" y="201" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.6">15,000 &middot; api</text></g>
-          <g><rect x="540" y="172" width="96" height="36" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
-            <text x="588" y="188" text-anchor="middle" font-weight="600" fill="currentColor">order_items</text>
-            <text x="588" y="201" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.6">40,000 &middot; pg</text></g>
-          <g><rect x="706" y="172" width="120" height="36" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"></rect>
-            <text x="766" y="188" text-anchor="middle" font-weight="600" fill="currentColor">reviews</text>
-            <text x="766" y="201" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.6">15,000 &middot; csv</text></g>
-        </g>
-        <text x="20" y="34" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">self-ref</text>
-      </svg>
-    </div>
-    <figcaption>
-      <strong>users</strong> and <strong>products</strong> land in two places
-      each: their declared file sink <em>and</em> PostgreSQL, because
-      <code>orders</code> and <code>order_items</code> reference them. That dual
-      destination is where the claim is actually tested.
-    </figcaption>
-  </figure>
-
-  <div class="grid2" style="margin-top:18px">
-    <div class="panel">
-      <h3>Verified by the server, not by its author</h3>
-      <p style="font-size:14.5px">
-        Foreign keys are created <em>after</em> the bulk load, so PostgreSQL
-        validates every generated reference in one sequential pass. If generation
-        were wrong, the constraint is refused and the offending row is named.
-      </p>
-      <dl class="detail" style="border:none;padding:0;background:none;margin:0">
-        <dt>constraints added</dt><dd>7 of 7</dd>
-        <dt>violations</dt><dd class="good">0</dd>
-        <dt>row counts</dt><dd class="good">matched on every table</dd>
-        <dt>sequences advanced</dt><dd>6</dd>
-        <dt>write probe</dt><dd class="good">passed</dd>
+    <div class="measure">
+      <dl class="specimen">
+        <div><dt>model</dt><dd>6 tables, 49 fields</dd></div>
+        <div><dt>records</dt><dd>100,400</dd></div>
+        <div><dt>destinations</dt><dd>5</dd></div>
+        <div><dt>foreign keys</dt><dd>7, all validated</dd></div>
+        <div><dt>client</dt><dd>i5-13420H, India</dd></div>
+        <div><dt>database</dt><dd>PostgreSQL 17.11, eu-west-1</dd></div>
+        <div><dt>round trip</dt><dd>287 ms median</dd></div>
+        <div><dt>tests</dt><dd>165 passing</dd></div>
       </dl>
+
+      <div class="hero">
+        <div class="big">69.6<span style="font-size:0.32em;letter-spacing:0">s</span></div>
+        <p class="say" style="margin:0">
+          End to end: schema, 100,400 records, five destinations, constraint
+          validation and verification. Against a database 7,000&nbsp;km away.
+          Before this work, the same run took <b>roughly seven hours</b>.
+        </p>
+      </div>
     </div>
-    <div class="panel">
-      <h3>And checked from the other direction</h3>
-      <p style="font-size:14.5px;margin-bottom:0">
-        An integration test reads foreign keys out of
-        <code>exports/csv/reviews.csv</code> and resolves them against rows in
-        PostgreSQL. A <code>user_id</code> sitting in a flat file has to name a
-        real database row. 165 tests cover this and the rest; the before-state of
-        each defect above is pinned too, so the comparison tables stay checked
-        rather than remembered.
+  </div>
+</div>
+
+<!-- ============ 01 mechanism ============ -->
+<section id="mechanism">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">01</span>
+      <span class="sec-name">Mechanism</span>
+      <div class="marginal">
+        <strong>Fig. 1.</strong> Select any stage for what it does and what it
+        cost in the measured run. Two tables land in two places each, which is
+        where the integrity claim is actually tested.
+      </div>
+    </div>
+    <div class="measure">
+      <h2>One dataset, five destinations, one set of ids</h2>
+      <p>
+        Foreign keys stay valid across destinations because every sink is
+        materialised from a single in-memory dataset rather than generated per
+        sink. The id a CSV row carries is the same object the PostgreSQL parent
+        row carries.
       </p>
+
+      <figure class="frame" style="margin-top:22px">
+        <div class="schematic">
+          <svg viewBox="0 0 960 296" role="img" aria-label="Pipeline schematic: the model file feeds generation, then a semantic repair pass, then fans out to PostgreSQL, CSV, JSON, Parquet and a REST API served from PostgreSQL.">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+              </marker>
+            </defs>
+            <g stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.38" marker-end="url(#ah)">
+              <path id="w1" d="M 132 148 L 206 148"></path>
+              <path id="w2" d="M 312 148 L 386 148"></path>
+              <path d="M 494 148 L 540 148"></path>
+              <path id="f1" d="M 540 148 C 594 148 602 42 684 42"></path>
+              <path id="f2" d="M 540 148 C 594 148 602 95 684 95"></path>
+              <path id="f3" d="M 540 148 L 684 148"></path>
+              <path id="f4" d="M 540 148 C 594 148 602 201 684 201"></path>
+              <path id="f5" d="M 540 148 C 594 148 602 254 684 254"></path>
+            </g>
+            <path d="M 778 42 C 842 42 848 228 848 244 L 848 254 L 790 254" stroke="var(--accent)" stroke-width="1.3" fill="none" opacity="0.8" marker-end="url(#ah)"></path>
+            <text x="862" y="145" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">served</text>
+            <text x="862" y="158" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity="0.6">from pg</text>
+
+            <g class="stage-node" data-stage="model" tabindex="0" role="button" aria-label="Model file stage">
+              <rect x="14" y="120" width="118" height="56" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="73" y="144" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor">model.json</text>
+              <text x="73" y="159" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">6 tables</text>
+            </g>
+            <g class="stage-node" data-stage="generate" tabindex="0" role="button" aria-label="Generation stage">
+              <rect x="206" y="112" width="106" height="72" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="259" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor">generate</text>
+              <text x="259" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">topological</text>
+              <text x="259" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--accent)">9.98 s</text>
+            </g>
+            <g class="stage-node" data-stage="repair" tabindex="0" role="button" aria-label="Semantic repair stage">
+              <rect x="386" y="112" width="108" height="72" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="440" y="140" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="currentColor">repair</text>
+              <text x="440" y="155" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">causality,</text>
+              <text x="440" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity="0.6">money</text>
+            </g>
+            <circle cx="540" cy="148" r="4.5" fill="currentColor"></circle>
+
+            <g class="stage-node" data-stage="postgres" tabindex="0" role="button" aria-label="PostgreSQL destination">
+              <rect x="684" y="24" width="94" height="37" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="731" y="41" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">postgres</text>
+              <text x="731" y="53" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">85,400 rows</text>
+            </g>
+            <g class="stage-node" data-stage="csv" tabindex="0" role="button" aria-label="CSV destination">
+              <rect x="684" y="77" width="94" height="37" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="731" y="94" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">csv</text>
+              <text x="731" y="106" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">25,000 rows</text>
+            </g>
+            <g class="stage-node" data-stage="json" tabindex="0" role="button" aria-label="JSON destination">
+              <rect x="684" y="130" width="94" height="37" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="731" y="147" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">json</text>
+              <text x="731" y="159" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">20,000 rows</text>
+            </g>
+            <g class="stage-node" data-stage="parquet" tabindex="0" role="button" aria-label="Parquet destination">
+              <rect x="684" y="183" width="94" height="37" fill="var(--paper)" stroke="currentColor" stroke-width="1.3"></rect>
+              <text x="731" y="200" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="currentColor">parquet</text>
+              <text x="731" y="212" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">columnar</text>
+            </g>
+            <g class="stage-node" data-stage="api" tabindex="0" role="button" aria-label="REST API destination">
+              <rect x="684" y="236" width="106" height="37" fill="var(--paper)" stroke="var(--accent)" stroke-width="1.3"></rect>
+              <text x="737" y="253" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="var(--accent)">rest api</text>
+              <text x="737" y="265" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">GET /orders</text>
+            </g>
+            <g id="flow"></g>
+          </svg>
+        </div>
+        <div class="readout">
+          <div class="t" id="d-title">PostgreSQL</div>
+          <div class="m" id="d-meta"></div>
+          <p id="d-body"></p>
+          <dl id="d-dl"></dl>
+        </div>
+      </figure>
+      <div class="acts">
+        <button id="toggle-flow" class="solid">Pause flow</button>
+        <span class="cap" style="margin:0">Each dot is a batch moving to its destination.</span>
+      </div>
     </div>
   </div>
 </section>
 
-<section>
-  <p class="eyebrow">try the interface</p>
-  <h2>Build a model, get the execution plan</h2>
-  <p>
-    This is the actual contract. Add tables and relationships and the panel
-    derives the creation order, the set of tables that must reach PostgreSQL, and
-    the parallel load waves &mdash; the same algorithms the pipeline runs, in
-    JavaScript. Export the JSON and the CLI accepts it.
-  </p>
-
-  <div class="builder">
-    <div>
-      <div class="panel">
-        <h3 style="margin-bottom:10px">Tables</h3>
-        <div id="tbl-list"></div>
-        <div style="border-top:1px solid var(--rule);margin-top:12px;padding-top:4px">
-          <div class="inline">
-            <div><label for="nt-name">table name</label>
-              <input id="nt-name" value="shipments" spellcheck="false"></div>
-            <div><label for="nt-rows">sample_size</label>
-              <input id="nt-rows" type="number" value="5000" min="1"></div>
-          </div>
-          <div class="inline">
-            <div><label for="nt-fmt">output_format</label>
-              <select id="nt-fmt">
-                <option>postgres</option><option>csv</option>
-                <option>json</option><option>parquet</option><option>api</option>
-              </select></div>
-            <div><label for="nt-fk">references</label>
-              <select id="nt-fk"></select></div>
-          </div>
-          <div class="ctrl-row">
-            <button id="add-tbl" class="primary">Add table</button>
-            <button id="reset-tbl">Reset to shipped model</button>
-          </div>
-        </div>
+<!-- ============ 02 load path ============ -->
+<section id="load">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">02</span>
+      <span class="sec-name">Load path</span>
+      <div class="marginal">
+        <strong>Projection method.</strong> 854 round trips were measured at
+        259.61&nbsp;s, giving 0.304&nbsp;s each. 85,400 round trips follow from
+        the row count. A full-scale row-at-a-time run would take most of a
+        working day to produce a number already fixed by two measured
+        quantities, so it was not performed.
       </div>
     </div>
+    <div class="measure">
+      <h2>Three strategies, three different regimes</h2>
+      <p>
+        The original pipeline sent one <code>INSERT</code> per row: about 85,400
+        sequential round trips. Bandwidth was never the problem. 85,400 rows is
+        16.5&nbsp;MB. The problem was 85,400 sequential <em>waits</em>, at
+        roughly three tenths of a second each.
+      </p>
 
-    <div>
-      <div class="panel">
-        <h3 style="margin-bottom:4px">Derived plan</h3>
-        <dl class="derived" id="derived"></dl>
-      </div>
-      <div class="panel" style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <h3>model.json</h3>
-          <button id="copy-json">Copy</button>
+      <figure style="margin-top:26px">
+        <div class="scroll">
+          <table class="tb">
+            <caption><b>Table 1</b> &nbsp; PostgreSQL load strategies</caption>
+            <thead>
+              <tr><th>strategy</th><th>scale</th><th class="num">rows</th><th class="num">trips</th><th class="num">load</th><th class="num">rows/s</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>rowwise</td><td>0.01</td><td class="num">854</td><td class="num">854</td><td class="num was">259.61 s</td><td class="num">3</td></tr>
+              <tr><td>execute_values</td><td>0.01</td><td class="num">854</td><td class="num">5</td><td class="num">2.78 s</td><td class="num">307</td></tr>
+              <tr><td>copy</td><td>0.01</td><td class="num">854</td><td class="num">5</td><td class="num">4.16 s</td><td class="num">205</td></tr>
+              <tr><td>execute_values</td><td>1.00</td><td class="num">85,400</td><td class="num">86</td><td class="num">40.67 s</td><td class="num">2,100</td></tr>
+              <tr class="hi"><td>copy</td><td>1.00</td><td class="num">85,400</td><td class="num">5</td><td class="num is">18.61 s</td><td class="num">4,590</td></tr>
+            </tbody>
+            <tfoot>
+              <tr><td colspan="4">rowwise at full scale, projected</td><td class="num was">7.21 h</td><td class="num">3</td></tr>
+            </tfoot>
+          </table>
         </div>
-        <pre class="out" id="json-out"></pre>
+        <p class="cap">
+          COPY is <em>slower</em> than execute_values at
+          854 rows and 2.19&times; faster at 85,400. At small volume both
+          collapse to five round trips, so COPY's stream setup has nothing to
+          amortise. A benchmark at one scale gets this backwards.
+        </p>
+      </figure>
+
+      <figure style="margin-top:34px">
+        <h3>Where the time goes</h3>
+        <div class="reg" id="reg"></div>
+        <div class="key">
+          <span><i style="background:var(--warm)"></i>waiting on the network</span>
+          <span><i style="background:var(--accent)"></i>sending data</span>
+        </div>
+        <p class="cap">
+          <b>Fig. 2</b> &nbsp; Row-at-a-time is waiting, not working. COPY is
+          bandwidth-bound at an effective 0.89&nbsp;MB/s. Two things follow: the
+          large multiple comes from batching rather than from COPY, which adds a
+          further 2.19&times;; and parallel loading should be close to flat,
+          because splitting one uplink across N connections cannot create
+          bandwidth. That second prediction is recorded as open work rather than
+          quietly dropped.
+        </p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 generation ============ -->
+<section id="generation">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">03</span>
+      <span class="sec-name">Generation</span>
+      <div class="marginal">
+        <strong>Why log scale.</strong> The per-table times span 0.05&nbsp;s to
+        62.93&nbsp;s. On a linear axis every row but one would be invisible.
+      </div>
+      <div class="marginal">
+        <strong>Byte-identical.</strong> Memoizing is safe because tables
+        generate in topological order, so the cached list is the same list in
+        the same order and the RNG draw is unchanged. Verified across all six
+        tables and all 49 fields.
+      </div>
+    </div>
+    <div class="measure">
+      <h2>An accidentally quadratic foreign-key lookup</h2>
+      <p>
+        Resolving a foreign key rebuilt the entire list of candidate parent ids
+        on every single field call, for a result that never changes within a
+        table. About two billion dictionary probes per run.
+      </p>
+      <figure style="margin-top:26px">
+        <div class="scroll">
+          <table class="tb" id="gen-tb">
+            <caption><b>Table 2 &middot; Fig. 3</b> &nbsp; Generation time per table, full scale</caption>
+            <thead>
+              <tr>
+                <th>table</th><th class="num">rows</th>
+                <th class="num">before</th><th class="num">after</th>
+                <th style="text-align:left;width:34%">seconds (log scale)</th>
+                <th class="num">gain</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+        <p class="cap">
+          <b>Fig. 3</b> &nbsp; <span style="color:var(--warm)">&#9679;</span> before
+          &nbsp;<span style="color:var(--accent)">&#9679;</span> after.
+          The gain tracks rows&nbsp;&times;&nbsp;parent-rows, and the three
+          tables with no real foreign-key load sit still. That pattern is what
+          separates the right fix from a lucky one.
+        </p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 veracity ============ -->
+<section id="veracity">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">04</span>
+      <span class="sec-name">Veracity</span>
+      <div class="marginal">
+        <strong>Declarative, still.</strong> Every repair rule is driven by
+        field names and the foreign-key graph, never by hardcoded table names. A
+        column called <code>cost</code> is kept below one called
+        <code>price</code> without any ecommerce-specific code.
+      </div>
+    </div>
+    <div class="measure">
+      <h2>Structurally valid is not the same as believable</h2>
+      <p>
+        Every foreign key resolved, every type matched, every unique column was
+        unique. And every user was an infant, half the orders predated the
+        accounts that placed them, and no order total matched its line items. A
+        query planner never sees data shaped like that.
+      </p>
+      <figure style="margin-top:26px">
+        <div class="scroll">
+          <table class="tb" id="rl-tb">
+            <caption><b>Table 3</b> &nbsp; Semantic defects, measured at full scale</caption>
+            <thead><tr><th>property</th><th class="num">before</th><th class="num">after</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="cap">
+          Four of these were already in the defect
+          register. Three were not, and <code>unit_price</code> is the worst:
+          reconciling order totals while line prices bear no relation to the
+          product being bought is arithmetic over noise. It gives you a dataset
+          that is internally consistent and still describes impossible orders.
+        </p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 storage ============ -->
+<section id="storage">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">05</span>
+      <span class="sec-name">Storage</span>
+      <div class="marginal">
+        <strong>A correction.</strong> The first run of this benchmark reported
+        Parquet reads as <em>slower</em> than CSV, 0.52&nbsp;s against
+        0.12&nbsp;s. That was pyarrow's first-import cost, not I/O. Warming the
+        libraries reversed it by a factor of 24.
+      </div>
+    </div>
+    <div class="measure">
+      <h2>What columnar storage actually buys</h2>
+      <p>
+        The same table, <code>products</code> at 20,000 rows across 11 fields,
+        written to all three file destinations. Read timings are best-of-five
+        after a warm-up, so they measure I/O rather than library startup.
+      </p>
+      <div class="two" style="margin-top:26px">
+        <figure>
+          <h3>On disk</h3>
+          <div class="fmt" id="fmt"></div>
+          <p class="cap"><b>Fig. 4</b> &nbsp; Parquet is 40% smaller than CSV and 56% smaller than JSON.</p>
+        </figure>
+        <figure>
+          <h3>Reading it back</h3>
+          <table class="tb" style="margin-top:2px">
+            <caption><b>Table 4</b> &nbsp; Read time, best of five, warmed</caption>
+            <thead><tr><th>operation</th><th class="num">CSV</th><th class="num">Parquet</th><th class="num">gain</th></tr></thead>
+            <tbody>
+              <tr><td>all 11 columns</td><td class="num">0.081 s</td><td class="num">0.022 s</td><td class="num gain">3.7&times;</td></tr>
+              <tr><td>2 of 11 columns</td><td class="num">0.030 s</td><td class="num">0.002 s</td><td class="num gain">15.6&times;</td></tr>
+              <tr><td>aggregate 1 column</td><td class="num">0.029 s</td><td class="num">0.001 s</td><td class="num gain">19.6&times;</td></tr>
+            </tbody>
+          </table>
+          <p class="cap">
+            A row-oriented file reads every byte to reach
+            one column. A columnar file reads only the chunks it needs.
+          </p>
+        </figure>
       </div>
     </div>
   </div>
 </section>
 
-<section>
-  <p class="eyebrow">limits</p>
-  <h2>What this does not do</h2>
-  <ul class="plain">
-    <li>
-      <strong>It is not a privacy tool.</strong> It does not learn a distribution
-      from real data and emit a private imitation. There is no real data anywhere
-      in the process.
-    </li>
-    <li>
-      <strong>No GPU path, deliberately.</strong> An RTX 4050 is available and
-      unused. Faker is pure Python over CPython's RNG with no CUDA path; a first
-      CuPy call initialises the CUDA context in 0.5&ndash;2 seconds, more than the
-      entire CPU cost of every numeric column combined; and cuDF has no native
-      Windows build. The run is bandwidth-bound anyway. The honest prediction,
-      recorded before building it, is that a GPU path would be <em>slower</em> at
-      this scale.
-    </li>
-    <li>
-      <strong>Parallel loading is implemented but unmeasured</strong>, and
-      predicted to be flat.
-    </li>
-    <li>
-      <strong>The API serves only <code>orders</code>.</strong> Response models
-      are hand-written, so a second <code>api</code> table is loaded but not
-      exposed.
-    </li>
-    <li><strong>There is no CI.</strong></li>
-    <li>
-      A coursework demonstrator, not production ELT. Correctness, measurement and
-      clarity were the goals; multi-node horizontal scale was not.
-    </li>
-  </ul>
+<!-- ============ 06 integrity ============ -->
+<section id="integrity">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">06</span>
+      <span class="sec-name">Integrity</span>
+      <div class="marginal">
+        <strong>Checked both ways.</strong> An integration test reads foreign
+        keys out of <code>exports/csv/reviews.csv</code> and resolves them
+        against rows in PostgreSQL. A <code>user_id</code> sitting in a flat
+        file has to name a real database row.
+      </div>
+    </div>
+    <div class="measure">
+      <h2>Foreign keys that survive leaving the database</h2>
+      <p>
+        Constraints are created <em>after</em> the bulk load, so PostgreSQL
+        validates every generated reference in one sequential pass. If
+        generation were wrong, the constraint is refused and the offending row
+        named. The claim is proven by the server, not asserted by its author.
+      </p>
+
+      <figure class="frame graph" style="margin-top:22px">
+        <svg viewBox="0 0 850 250" role="img" aria-label="Foreign key graph: categories references itself, products references categories, orders references users, order_items references orders and products, reviews references products and users. Tables are annotated with their destinations.">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <g stroke="currentColor" stroke-width="1.1" fill="none" opacity="0.42" marker-end="url(#ah2)">
+            <path d="M 192 58 L 124 58"></path>
+            <path d="M 59 42 C 59 19 20 19 20 42 L 20 50"></path>
+            <path d="M 262 76 L 262 104"></path>
+            <path d="M 192 186 L 124 186"></path>
+            <path d="M 332 186 L 400 186"></path>
+            <path d="M 460 168 L 460 126 L 332 126 L 332 138"></path>
+            <path d="M 460 204 C 460 234 592 234 592 204"></path>
+            <path d="M 628 186 L 696 186"></path>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <g><rect x="192" y="40" width="140" height="36" fill="var(--paper)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="262" y="56" text-anchor="middle" font-weight="600" fill="currentColor">categories</text>
+              <text x="262" y="69" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">400 &middot; postgres</text></g>
+            <g><rect x="192" y="104" width="140" height="36" fill="var(--paper)" stroke="var(--cool)" stroke-width="1.4"></rect>
+              <text x="262" y="120" text-anchor="middle" font-weight="600" fill="currentColor">products</text>
+              <text x="262" y="133" text-anchor="middle" font-size="9" fill="var(--cool)">20,000 &middot; json + pg</text></g>
+            <g><rect x="192" y="168" width="140" height="36" fill="var(--paper)" stroke="var(--cool)" stroke-width="1.4"></rect>
+              <text x="262" y="184" text-anchor="middle" font-weight="600" fill="currentColor">users</text>
+              <text x="262" y="197" text-anchor="middle" font-size="9" fill="var(--cool)">10,000 &middot; csv + pg</text></g>
+            <g><rect x="400" y="168" width="120" height="36" fill="var(--paper)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="460" y="184" text-anchor="middle" font-weight="600" fill="currentColor">orders</text>
+              <text x="460" y="197" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">15,000 &middot; api</text></g>
+            <g><rect x="532" y="168" width="96" height="36" fill="var(--paper)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="580" y="184" text-anchor="middle" font-weight="600" fill="currentColor">order_items</text>
+              <text x="580" y="197" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">40,000 &middot; pg</text></g>
+            <g><rect x="696" y="168" width="120" height="36" fill="var(--paper)" stroke="currentColor" stroke-width="1.2"></rect>
+              <text x="756" y="184" text-anchor="middle" font-weight="600" fill="currentColor">reviews</text>
+              <text x="756" y="197" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.6">15,000 &middot; csv</text></g>
+          </g>
+          <text x="20" y="32" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.6">self-ref</text>
+        </svg>
+      </figure>
+      <p class="cap">
+        <b>Fig. 5</b> &nbsp; <span style="color:var(--cool)">Green</span> marks
+        the two tables that land in two places at once: their declared file sink
+        and PostgreSQL, because <code>orders</code> and <code>order_items</code>
+        reference them.
+      </p>
+
+      <table class="tb" style="margin-top:28px;max-width:430px">
+        <caption><b>Table 5</b> &nbsp; Verification, from the measured run</caption>
+        <tbody>
+          <tr><td>foreign key constraints added</td><td class="num">7 of 7</td></tr>
+          <tr><td>violations</td><td class="num is">0</td></tr>
+          <tr><td>row counts</td><td class="num is">all matched</td></tr>
+          <tr><td>sequences advanced</td><td class="num">6</td></tr>
+          <tr><td>application write probe</td><td class="num is">passed</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
-<footer>
-  <p style="margin:0 0 10px">
-    Python 3.13 &middot; PostgreSQL 17 &middot; psycopg2 &middot; Faker &middot;
-    pandas &middot; PyArrow &middot; FastAPI &middot; pytest. Measured on an
-    i5-13420H against Supabase in eu-west-1. Harnesses and raw results are
-    committed under <code>runs/headline/</code>.
-  </p>
-  <p style="margin:0">
-    This is a single self-contained file. Open
-    <code>overview.html</code> in any browser, with or without a network
-    connection &mdash; there is no build step, no server and no external data.
-    Webfonts are the only thing it fetches, and it falls back to system faces
-    without them. Print or save to PDF for a paper copy; the layout and the data
-    marks are styled for it.
-  </p>
-</footer>
+<!-- ============ 07 builder ============ -->
+<section id="builder">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">07</span>
+      <span class="sec-name">Try it</span>
+      <div class="marginal">
+        <strong>Same algorithms.</strong> The ordering, the transitive closure
+        and the wave scheduler here are the pipeline's own, reimplemented in
+        JavaScript and checked against the Python: identical order and closure
+        on the shipped model, a dependency-of-a-dependency resolves, a real
+        cycle is reported instead of hanging, and a self-reference is correctly
+        not a cycle.
+      </div>
+    </div>
+    <div class="measure">
+      <h2>Build a model, get the execution plan</h2>
+      <p>
+        This is the actual contract. Add tables and relationships; the plan
+        derives the creation order, which tables must reach PostgreSQL, and the
+        parallel load waves. Export the JSON and the CLI accepts it.
+      </p>
+
+      <div class="two" style="margin-top:26px">
+        <div>
+          <h3>Tables</h3>
+          <div id="tbl-list"></div>
+          <div style="border-top:1px solid var(--rule);margin-top:16px">
+            <div class="pair">
+              <div><label for="nt-name">table name</label><input id="nt-name" value="shipments" spellcheck="false"></div>
+              <div><label for="nt-rows">sample_size</label><input id="nt-rows" type="number" value="5000" min="1"></div>
+            </div>
+            <div class="pair">
+              <div><label for="nt-fmt">output_format</label>
+                <select id="nt-fmt"><option>postgres</option><option>csv</option><option>json</option><option>parquet</option><option>api</option></select></div>
+              <div><label for="nt-fk">references</label><select id="nt-fk"></select></div>
+            </div>
+            <div class="acts">
+              <button id="add-tbl" class="solid">Add table</button>
+              <button id="reset-tbl">Reset</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3>Derived plan</h3>
+          <dl class="plan" id="plan"></dl>
+          <h3 style="margin-top:26px">model.json</h3>
+          <pre class="json" id="json-out"></pre>
+          <div class="acts"><button id="copy-json">Copy</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 limits ============ -->
+<section id="limits">
+  <div class="row">
+    <div class="rail">
+      <span class="sec-no">08</span>
+      <span class="sec-name">Limits</span>
+    </div>
+    <div class="measure">
+      <h2>What this does not do</h2>
+      <ul class="lim">
+        <li>
+          <b>It is not a privacy tool.</b> It does not learn a distribution from
+          real data and emit a private imitation. There is no real data anywhere
+          in the process.
+        </li>
+        <li>
+          <b>No GPU path, on purpose.</b> An RTX 4050 sits unused. Faker is pure
+          Python over CPython's RNG with no CUDA path; a first CuPy call
+          initialises the CUDA context in 0.5&ndash;2 seconds, more than the
+          entire CPU cost of every numeric column combined; cuDF has no native
+          Windows build. The run is bandwidth-bound anyway. The prediction,
+          recorded before building it, is that a GPU path would be
+          <em>slower</em> at this scale.
+        </li>
+        <li><b>Parallel loading is implemented but unmeasured</b>, and predicted to be flat.</li>
+        <li>
+          <b>The API serves only <code>orders</code>.</b> Response models are
+          hand-written, so a second <code>api</code> table is loaded but not
+          exposed.
+        </li>
+        <li><b>There is no CI.</b></li>
+        <li>
+          <b>A coursework demonstrator, not production ELT.</b> Correctness,
+          measurement and clarity were the goals. Multi-node horizontal scale
+          was not.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="row colophon">
+  <div class="rail"></div>
+  <div class="measure">
+    <p>
+      Python 3.13 &middot; PostgreSQL 17 &middot; psycopg2 &middot; Faker
+      &middot; pandas &middot; PyArrow &middot; FastAPI &middot; pytest.
+      Measured on an i5-13420H against Supabase in eu-west-1. Every harness and
+      raw result is committed under <code>runs/headline/</code>.
+    </p>
+    <p>
+      One self-contained file. Open it in any browser, with or without a
+      network. Webfonts are the only thing it fetches and it falls back to
+      system faces without them. Print or save to PDF for a paper copy.
+    </p>
+  </div>
+</div>
 
 </div>
 
@@ -806,160 +922,198 @@ const GEN = [
 const GEN_TOTAL = { rows: 100400, before: 101.24, after: 10.06 };
 
 const REALISM = [
-  ["users.birth_date implied age", "0.0-2.0 years", "18.0-79.99 years"],
+  ["users.birth_date implied age", "0.0 - 2.0 yrs", "18.0 - 79.99 yrs"],
   ["users under 18", "10,000 / 10,000", "0 / 10,000"],
-  ["orders placed before the user registered", "49.8%  (7,467)", "0%"],
-  ["reviews written before the product existed", "49.9%  (7,479)", "0%"],
+  ["orders before the user registered", "49.8%  (7,467)", "0%"],
+  ["reviews before the product existed", "49.9%  (7,479)", "0%"],
   ["line totals wrong", "100%  (40,000)", "0%"],
   ["order totals wrong", "100%  (13,969)", "0%"],
   ["users.total_spent wrong", "100%  (10,000)", "0%"],
-  ["unit_price unrelated to the product", "58.4%  (23,368)", "0%"],
+  ["unit_price unrelated to product", "58.4%  (23,368)", "0%"],
   ["products priced at or below cost", "50.0%  (9,992)", "0%"],
-  ["category names using the _N fallback", "~370 / 400", "0 / 400"],
+  ["category names using _N fallback", "~370 / 400", "0 / 400"],
   ["distinct product names", "30 / 20,000", "20,000 / 20,000"]
 ];
 
+const REGIMES = [
+  { n: "rowwise",        trips: "85,400 trips", tot: "25,961 s  projected", wait: 94 },
+  { n: "execute_values", trips: "86 trips",     tot: "40.67 s  measured",   wait: 61 },
+  { n: "copy",           trips: "5 trips",      tot: "18.61 s  measured",   wait: 8  }
+];
+
 const FORMATS = [
-  { n: "JSON",    mb: 14.51, rel: "1.38x CSV" },
-  { n: "CSV",     mb: 10.55, rel: "baseline"  },
-  { n: "Parquet", mb:  6.32, rel: "0.60x CSV" }
+  { n: "JSON",    mb: 14.51, rel: "1.38x CSV", win: false },
+  { n: "CSV",     mb: 10.55, rel: "baseline",  win: false },
+  { n: "Parquet", mb:  6.32, rel: "0.60x CSV", win: true  }
 ];
 
 const STAGES = {
   model: {
     title: "The model file",
-    meta: "src/model_graph.py  .  validated before anything runs",
-    body: "Tables, fields, types, relationships and volumes. This is the whole interface: a new domain is a new file, not a code change. Field names drive both the generated values and the inferred relationships, so a column named cost is kept below one named price without anyone writing ecommerce-specific code.",
-    dl: [["tables", "6"], ["fields", "49"], ["foreign keys", "7"], ["validation", "order, closure, cycles, contract"]]
+    meta: "src/model_graph.py",
+    body: "Tables, fields, types, relationships and volumes. This is the whole interface: a new domain is a new file, not a code change. Field names drive both the generated values and the inferred relationships.",
+    dl: [["tables", "6"], ["fields", "49"], ["foreign keys", "7"], ["validated", "before anything runs"]]
   },
   generate: {
     title: "Generation",
-    meta: "src/data_generator.py  .  9.98s for 100,400 records",
-    body: "Records are built table by table in topological order, so a foreign key can draw from parent ids that already exist. Parent id lists are memoized per table and field, which is the fix worth 10.1x. Identical seed and model reproduce identical output.",
-    dl: [["throughput", "9,980 rows/s"], ["before the fix", "101.24s"], ["probes removed", "about 2.0 billion"], ["reproducible", "across 6 hash seeds"]]
+    meta: "src/data_generator.py  .  9.98 s",
+    body: "Records are built table by table in topological order, so a foreign key can draw from parent ids that already exist. Parent id lists are memoized, which is the fix worth 10.1x. Identical seed and model reproduce identical output.",
+    dl: [["throughput", "9,980 rows/s"], ["before the fix", "101.24 s"], ["probes removed", "~2.0 billion"], ["reproducible", "across 6 hash seeds"]]
   },
   repair: {
     title: "Semantic repair",
-    meta: "src/realism.py  .  about 0.8s, on by default",
-    body: "Runs after every table exists, because almost every rule is cross-table. Birth dates become adult, child entities stop predating their parents, line totals become arithmetic, parent totals reconcile with their children, and cost sits below price. All of it driven by field names and the foreign-key graph.",
-    dl: [["dates reordered", "29,781"], ["line totals fixed", "40,000"], ["parent totals", "15,000"], ["names composed", "20,000"]]
+    meta: "src/realism.py  .  ~0.8 s",
+    body: "Runs once every table exists, because almost every rule is cross-table. Birth dates become adult, child entities stop predating their parents, totals become arithmetic, cost sits below price.",
+    dl: [["dates reordered", "29,781"], ["line totals", "40,000"], ["parent totals", "15,000"], ["names composed", "20,000"]]
   },
   postgres: {
     title: "PostgreSQL",
-    meta: "src/load_strategies.py  .  18.61s via COPY, 5 round trips",
-    body: "The dominant cost of a run, and the reason the load strategy is pluggable. Foreign keys are added after the load, which both avoids 85,400 per-row index probes and makes the server prove cross-destination referential integrity in one pass. Sequences are then advanced, or the delivered database would reject its first application insert.",
-    dl: [["rows", "85,400"], ["bytes sent", "16.5 MB"], ["round trips", "5"], ["projected rowwise", "7.21 hours"]]
+    meta: "src/load_strategies.py  .  18.61 s via COPY",
+    body: "The dominant cost of a run, and the reason the load strategy is pluggable. Constraints are added after the load, which avoids 85,400 per-row index probes and makes the server prove referential integrity in one pass. Sequences are then advanced, or the delivered database rejects its first application insert.",
+    dl: [["rows", "85,400"], ["bytes sent", "16.5 MB"], ["round trips", "5"], ["rowwise, projected", "7.21 h"]]
   },
   csv: {
     title: "CSV",
-    meta: "exports/csv/  .  users and reviews",
-    body: "Row-oriented and universally readable. Nullable integers are written through pandas' nullable Int64 type, because a single null used to promote the whole column to float and a foreign key came out as 1.0 instead of 1.",
-    dl: [["users", "10,000 rows"], ["reviews", "15,000 rows"], ["products size", "10.55 MB"], ["also in postgres", "users only"]]
+    meta: "exports/csv/  .  users, reviews",
+    body: "Row-oriented and universally readable. Nullable integers go through pandas' nullable Int64 type, because one null used to promote the whole column to float and a foreign key came out as 1.0 instead of 1.",
+    dl: [["users", "10,000 rows"], ["reviews", "15,000 rows"], ["products size", "10.55 MB"], ["also in pg", "users"]]
   },
   json: {
     title: "JSON",
     meta: "exports/json/  .  products",
-    body: "Document-oriented, and the one sink deliberately left unoptimised: it is a few tens of megabytes and a couple of seconds, not a bottleneck, and streaming it would change the indentation of a submitted artefact.",
-    dl: [["products", "20,000 rows"], ["size", "14.51 MB"], ["vs CSV", "1.38x larger"], ["also in postgres", "yes"]]
+    body: "Document-oriented, and the one sink deliberately left unoptimised: a few tens of megabytes and a couple of seconds is not a bottleneck, and streaming it would change the indentation of a submitted artefact.",
+    dl: [["products", "20,000 rows"], ["size", "14.51 MB"], ["vs CSV", "1.38x larger"], ["also in pg", "yes"]]
   },
   parquet: {
     title: "Parquet",
-    meta: "exports/parquet/  .  the columnar destination",
-    body: "Typed, compressed and the format analytical tooling actually consumes. Smallest on disk and fastest to read, and the gap widens enormously when you want a subset of columns rather than all of them.",
-    dl: [["size", "6.32 MB"], ["vs CSV", "40% smaller"], ["2 of 11 columns", "15.6x faster"], ["aggregate 1 column", "19.6x faster"]]
+    meta: "exports/parquet/  .  columnar",
+    body: "Typed, compressed, and the format analytical tooling actually consumes. Smallest on disk and fastest to read, and the gap widens sharply when you want a subset of columns rather than all of them.",
+    dl: [["size", "6.32 MB"], ["vs CSV", "40% smaller"], ["2 of 11 columns", "15.6x faster"], ["aggregate 1", "19.6x faster"]]
   },
   api: {
     title: "REST API",
-    meta: "api_server.py  .  FastAPI over the orders table",
-    body: "Served from PostgreSQL through a connection pool, so a request no longer pays a TLS handshake. A missing order now returns 404 rather than 500, an invalid status returns 422 rather than an empty 200, and a file-backed repository lets the whole thing run with no database at all.",
-    dl: [["endpoints", "6"], ["pagination", "offset or keyset"], ["status filter", "validated from the model"], ["offline mode", "serves a JSON file"]]
+    meta: "api_server.py  .  FastAPI over orders",
+    body: "Served from PostgreSQL through a connection pool, so a request no longer pays a TLS handshake. A missing order returns 404 rather than 500, an invalid status 422 rather than an empty 200, and a file-backed repository lets the whole thing run with no database at all.",
+    dl: [["endpoints", "6"], ["pagination", "offset or keyset"], ["status filter", "from the model"], ["offline", "serves a JSON file"]]
   }
 };
 
-/* ---------- helpers ---------- */
 const $ = (s, r) => (r || document).querySelector(s);
 const el = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c; if (x !== undefined) n.textContent = x; return n; };
-const fmt = (n) => n.toLocaleString("en-US");
+const fmt = n => n.toLocaleString("en-US");
 
-/* ---------- generation table ---------- */
-(function buildGen() {
-  const body = $("#gen-table tbody");
-  const max = Math.max.apply(null, GEN.map(g => g.before));
+/* ---------- Table 2 / Fig 3: dumbbell on a log axis ---------- */
+(function generation() {
+  const LO = 0.01, HI = 100;
+  const pos = v => (Math.log10(Math.max(v, LO)) - Math.log10(LO)) / (Math.log10(HI) - Math.log10(LO)) * 100;
+
+  const body = $("#gen-tb tbody");
   GEN.forEach(g => {
     const tr = el("tr");
     tr.appendChild(el("td", null, g.t));
-    tr.appendChild(el("td", null, fmt(g.rows)));
-    tr.appendChild(el("td", null, g.before.toFixed(2) + "s"));
-    tr.appendChild(el("td", null, g.after.toFixed(2) + "s"));
+    tr.appendChild(el("td", "num", fmt(g.rows)));
+    tr.appendChild(el("td", "num was", g.before.toFixed(2)));
+    tr.appendChild(el("td", "num", g.after.toFixed(2)));
 
-    const bc = el("td");
-    const wrap = el("div", "barwrap");
-    const bars = el("div");
-    bars.style.flex = "1";
-    const b1 = el("div", "bar before");
-    b1.style.width = Math.max(1.2, (g.before / max) * 100) + "%";
-    const b2 = el("div", "bar after");
-    b2.style.width = Math.max(1.2, (g.after / max) * 100) + "%";
-    b2.style.marginTop = "3px";
-    bars.appendChild(b1); bars.appendChild(b2);
-    wrap.appendChild(bars);
-    bc.appendChild(wrap);
-    tr.appendChild(bc);
+    const cell = el("td");
+    const track = el("div", "track");
+    track.appendChild(el("div", "axisline"));
+    const a = pos(g.after), b = pos(g.before);
+    const conn = el("div", "conn");
+    conn.style.left = Math.min(a, b) + "%";
+    conn.style.width = Math.abs(b - a) + "%";
+    track.appendChild(conn);
+    const pb = el("div", "pt b");
+    pb.style.left = b + "%";
+    pb.title = g.t + " before: " + g.before.toFixed(2) + " s";
+    const pa = el("div", "pt a");
+    pa.style.left = a + "%";
+    pa.title = g.t + " after: " + g.after.toFixed(2) + " s";
+    track.appendChild(pb); track.appendChild(pa);
+    cell.appendChild(track);
+    tr.appendChild(cell);
 
-    const sp = el("td", null, (g.before / g.after).toFixed(1) + "x");
-    if (g.before / g.after > 10) sp.style.fontWeight = "700";
-    tr.appendChild(sp);
+    const gain = g.before / g.after;
+    tr.appendChild(el("td", "num gain", gain.toFixed(1) + "x"));
+    if (gain > 10) tr.classList.add("hi");
     body.appendChild(tr);
   });
 
-  const tr = el("tr", "total");
+  const foot = $("#gen-tb tfoot");
+  const tr = el("tr");
   tr.appendChild(el("td", null, "total"));
-  tr.appendChild(el("td", null, fmt(GEN_TOTAL.rows)));
-  tr.appendChild(el("td", null, GEN_TOTAL.before.toFixed(2) + "s"));
-  tr.appendChild(el("td", null, GEN_TOTAL.after.toFixed(2) + "s"));
-  const legend = el("td");
-  const lw = el("div", "legend");
-  lw.style.fontSize = "11.5px";
-  lw.innerHTML = '<span><i style="background:var(--warm)"></i>before</span><span><i style="background:var(--accent)"></i>after</span>';
-  legend.appendChild(lw);
-  tr.appendChild(legend);
-  tr.appendChild(el("td", null, (GEN_TOTAL.before / GEN_TOTAL.after).toFixed(1) + "x"));
-  body.appendChild(tr);
+  tr.appendChild(el("td", "num", fmt(GEN_TOTAL.rows)));
+  tr.appendChild(el("td", "num was", GEN_TOTAL.before.toFixed(2)));
+  tr.appendChild(el("td", "num", GEN_TOTAL.after.toFixed(2)));
+  const axc = el("td");
+  const ticks = el("div", "ticks");
+  const marks = [[0.01, "0.01"], [0.1, "0.1"], [1, "1"], [10, "10"], [100, "100 s"]];
+  marks.forEach((t, i) => {
+    const s = el("span", null, t[1]);
+    const p = pos(t[0]);
+    s.style.left = p + "%";
+    // Pull the end labels inside the plot; a centred label at 0% or 100%
+    // would hang half outside the column.
+    if (i === 0) s.style.transform = "translateX(0)";
+    else if (i === marks.length - 1) s.style.transform = "translateX(-100%)";
+    ticks.appendChild(s);
+  });
+  axc.appendChild(ticks);
+  tr.appendChild(axc);
+  tr.appendChild(el("td", "num gain", (GEN_TOTAL.before / GEN_TOTAL.after).toFixed(1) + "x"));
+  foot.appendChild(tr);
 })();
 
-/* ---------- realism table ---------- */
-(function buildRealism() {
-  const body = $("#realism-table tbody");
+/* ---------- Table 3: realism ---------- */
+(function realism() {
+  const body = $("#rl-tb tbody");
   REALISM.forEach(r => {
     const tr = el("tr");
     tr.appendChild(el("td", null, r[0]));
-    tr.appendChild(el("td", "b", r[1]));
-    tr.appendChild(el("td", "a", r[2]));
+    tr.appendChild(el("td", "num was", r[1]));
+    tr.appendChild(el("td", "num is", r[2]));
     body.appendChild(tr);
   });
 })();
 
-/* ---------- format bars ---------- */
-(function buildFormats() {
-  const host = $("#fmt-bars");
-  const max = Math.max.apply(null, FORMATS.map(f => f.mb));
-  FORMATS.forEach(f => {
-    const row = el("div");
-    row.style.marginBottom = "12px";
-    const head = el("div", "regime-head");
-    head.appendChild(el("span", "nm", f.n));
-    head.appendChild(el("span", "tot", f.mb.toFixed(2) + " MB  .  " + f.rel));
-    row.appendChild(head);
-    const bar = el("div", "bar");
-    bar.style.width = (f.mb / max * 100) + "%";
-    bar.style.height = "16px";
-    bar.style.background = f.n === "Parquet" ? "var(--accent)" : "var(--warm)";
+/* ---------- Fig 2: regimes ---------- */
+(function regimes() {
+  const host = $("#reg");
+  REGIMES.forEach(r => {
+    const row = el("div", "reg-row");
+    const top = el("div", "reg-top");
+    top.appendChild(el("span", "l", r.n + "  ·  " + r.trips));
+    top.appendChild(el("span", "r", r.tot));
+    row.appendChild(top);
+    const bar = el("div", "reg-bar");
+    const w = el("span", "wait", r.wait >= 20 ? "waiting " + r.wait + "%" : r.wait + "%");
+    w.style.flex = r.wait;
+    const s = el("span", "send", (100 - r.wait) >= 20 ? "sending " + (100 - r.wait) + "%" : "");
+    s.style.flex = 100 - r.wait;
+    bar.appendChild(w); bar.appendChild(s);
     row.appendChild(bar);
     host.appendChild(row);
   });
 })();
 
-/* ---------- stage detail ---------- */
+/* ---------- Fig 4: formats ---------- */
+(function formats() {
+  const host = $("#fmt");
+  const max = Math.max.apply(null, FORMATS.map(f => f.mb));
+  FORMATS.forEach(f => {
+    const row = el("div", "fmt-row");
+    const top = el("div", "fmt-top");
+    top.appendChild(el("span", null, f.n));
+    top.appendChild(el("span", null, f.mb.toFixed(2) + " MB  ·  " + f.rel));
+    row.appendChild(top);
+    const bar = el("div", "fmt-bar" + (f.win ? " win" : ""));
+    bar.style.width = (f.mb / max * 100) + "%";
+    row.appendChild(bar);
+    host.appendChild(row);
+  });
+})();
+
+/* ---------- Fig 1: stage readout ---------- */
 (function stages() {
   const nodes = Array.prototype.slice.call(document.querySelectorAll(".stage-node"));
   function show(key) {
@@ -971,9 +1125,12 @@ const fmt = (n) => n.toLocaleString("en-US");
     $("#d-body").textContent = s.body;
     const dl = $("#d-dl");
     dl.innerHTML = "";
-    s.dl.forEach(pair => {
-      dl.appendChild(el("dt", null, pair[0]));
-      dl.appendChild(el("dd", null, pair[1]));
+    s.dl.forEach(p => {
+      // Keep each label with its own value: see the note on .readout dl.
+      const pair = el("div");
+      pair.appendChild(el("dt", null, p[0]));
+      pair.appendChild(el("dd", null, p[1]));
+      dl.appendChild(pair);
     });
   }
   nodes.forEach(n => {
@@ -985,12 +1142,12 @@ const fmt = (n) => n.toLocaleString("en-US");
   show("postgres");
 })();
 
-/* ---------- animated flow ---------- */
+/* ---------- Fig 1: flow animation ---------- */
 (function flow() {
   const host = document.getElementById("flow");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wires = ["w1", "w2", "f1", "f2", "f3", "f4", "f5"].map(id => document.getElementById(id)).filter(Boolean);
-  if (!wires.length) return;
+  if (!wires.length || !host) return;
 
   const dots = [];
   wires.forEach((w, wi) => {
@@ -998,38 +1155,34 @@ const fmt = (n) => n.toLocaleString("en-US");
     const count = wi < 2 ? 3 : 2;
     for (let i = 0; i < count; i++) {
       const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      c.setAttribute("r", wi < 2 ? "3.4" : "2.8");
+      c.setAttribute("r", wi < 2 ? "3.2" : "2.6");
       c.setAttribute("fill", wi < 2 ? "currentColor" : "var(--accent)");
-      c.setAttribute("opacity", "0.85");
+      c.setAttribute("opacity", "0.8");
       host.appendChild(c);
-      dots.push({ node: c, wire: w, len: len, t: i / count, speed: 0.00022 + wi * 0.00002 });
+      dots.push({ node: c, wire: w, len: len, t: i / count, speed: 0.00021 + wi * 0.00002 });
     }
   });
-
   function place(d) {
     const p = d.wire.getPointAtLength(d.t * d.len);
-    d.node.setAttribute("cx", p.x);
-    d.node.setAttribute("cy", p.y);
+    d.node.setAttribute("cx", p.x); d.node.setAttribute("cy", p.y);
   }
   dots.forEach(place);
 
   let running = !reduce, last = 0, raf = null;
   function frame(ts) {
     if (!last) last = ts;
-    const dt = Math.min(ts - last, 60);
-    last = ts;
+    const dt = Math.min(ts - last, 60); last = ts;
     dots.forEach(d => { d.t += d.speed * dt; if (d.t > 1) d.t -= 1; place(d); });
     if (running) raf = requestAnimationFrame(frame);
   }
   const btn = document.getElementById("toggle-flow");
-  function setBtn() { btn.textContent = running ? "Pause the flow" : "Resume the flow"; }
+  function label() { btn.textContent = running ? "Pause flow" : "Resume flow"; }
   btn.addEventListener("click", () => {
-    running = !running;
-    setBtn();
+    running = !running; label();
     if (running) { last = 0; raf = requestAnimationFrame(frame); }
     else if (raf) cancelAnimationFrame(raf);
   });
-  setBtn();
+  label();
   if (running) raf = requestAnimationFrame(frame);
 })();
 
@@ -1045,14 +1198,11 @@ const SHIPPED = [
 let MODEL = JSON.parse(JSON.stringify(SHIPPED));
 
 const PG_BACKED = ["postgres", "postgresql", "api"];
-const norm = f => (f === "postgres" ? "postgresql" : f);
 
 function deps(t, model) {
   const names = new Set(model.map(x => x.name));
   const out = new Set();
-  (t.fks || []).forEach(fk => {
-    if (fk.ref !== t.name && names.has(fk.ref)) out.add(fk.ref);
-  });
+  (t.fks || []).forEach(fk => { if (fk.ref !== t.name && names.has(fk.ref)) out.add(fk.ref); });
   return Array.from(out).sort();
 }
 
@@ -1060,13 +1210,10 @@ function deps(t, model) {
    iteration order. Mirrors ModelGraph.topological_order. */
 function topoOrder(model) {
   const remaining = new Set(model.map(t => t.name));
-  const byName = {};
-  model.forEach(t => { byName[t.name] = t; });
+  const byName = {}; model.forEach(t => { byName[t.name] = t; });
   const order = [];
   while (remaining.size) {
-    let ready = Array.from(remaining)
-      .filter(n => deps(byName[n], model).every(d => !remaining.has(d)))
-      .sort();
+    let ready = Array.from(remaining).filter(n => deps(byName[n], model).every(d => !remaining.has(d))).sort();
     if (!ready.length) ready = [Array.from(remaining).sort()[0]];
     ready.forEach(n => { order.push(n); remaining.delete(n); });
   }
@@ -1076,13 +1223,11 @@ function topoOrder(model) {
 function waves(model, scope) {
   const inScope = new Set(scope);
   const remaining = new Set(scope);
-  const byName = {};
-  model.forEach(t => { byName[t.name] = t; });
+  const byName = {}; model.forEach(t => { byName[t.name] = t; });
   const levels = [];
   while (remaining.size) {
     let ready = Array.from(remaining)
-      .filter(n => deps(byName[n], model).filter(d => inScope.has(d)).every(d => !remaining.has(d)))
-      .sort();
+      .filter(n => deps(byName[n], model).filter(d => inScope.has(d)).every(d => !remaining.has(d))).sort();
     if (!ready.length) ready = [Array.from(remaining).sort()[0]];
     levels.push(ready);
     ready.forEach(n => remaining.delete(n));
@@ -1093,8 +1238,7 @@ function waves(model, scope) {
 /* Transitive closure to a fixpoint. The original expanded only one level,
    which silently dropped a dependency of a dependency. */
 function pgClosure(model) {
-  const byName = {};
-  model.forEach(t => { byName[t.name] = t; });
+  const byName = {}; model.forEach(t => { byName[t.name] = t; });
   const seeds = model.filter(t => PG_BACKED.indexOf(t.fmt) >= 0).map(t => t.name);
   const result = new Set();
   const pending = seeds.slice();
@@ -1108,25 +1252,18 @@ function pgClosure(model) {
 }
 
 function cycles(model) {
-  // Report any strongly connected group bigger than one table.
-  const byName = {};
-  model.forEach(t => { byName[t.name] = t; });
+  const byName = {}; model.forEach(t => { byName[t.name] = t; });
   const found = [];
-  const names = model.map(t => t.name).sort();
-  names.forEach(start => {
+  model.map(t => t.name).sort().forEach(start => {
     const seen = new Set();
     const stack = [[start, [start]]];
     while (stack.length) {
-      const item = stack.pop();
-      const node = item[0], path = item[1];
+      const item = stack.pop(), node = item[0], path = item[1];
       deps(byName[node], model).forEach(d => {
         if (d === start && path.length > 1) {
           const key = path.slice().sort().join(",");
           if (!found.some(f => f.join(",") === key)) found.push(path.slice().sort());
-        } else if (!seen.has(d)) {
-          seen.add(d);
-          stack.push([d, path.concat([d])]);
-        }
+        } else if (!seen.has(d)) { seen.add(d); stack.push([d, path.concat([d])]); }
       });
     }
   });
@@ -1137,26 +1274,19 @@ function toModelJson(model) {
   return {
     database: { name: "custom_domain", version: "1.0" },
     tables: model.map(t => {
-      const fields = [
-        { name: "id", type: "integer", primary_key: true, auto_increment: true }
-      ];
+      const fields = [{ name: "id", type: "integer", primary_key: true, auto_increment: true }];
       (t.fks || []).forEach(fk => {
         fields.push({
-          name: fk.field, type: "integer",
-          foreign_key: fk.ref + ".id",
+          name: fk.field, type: "integer", foreign_key: fk.ref + ".id",
           nullable: fk.ref === t.name ? true : undefined
         });
       });
       fields.push({ name: "name", type: "string", max_length: 200 });
       fields.push({ name: "created_at", type: "timestamp" });
       return {
-        name: t.name,
-        sample_size: t.rows,
-        output_format: t.fmt,
+        name: t.name, sample_size: t.rows, output_format: t.fmt,
         fields: fields.map(f => {
-          const c = {};
-          Object.keys(f).forEach(k => { if (f[k] !== undefined) c[k] = f[k]; });
-          return c;
+          const c = {}; Object.keys(f).forEach(k => { if (f[k] !== undefined) c[k] = f[k]; }); return c;
         })
       };
     })
@@ -1164,33 +1294,27 @@ function toModelJson(model) {
 }
 
 function render() {
-  // table cards
   const host = $("#tbl-list");
   host.innerHTML = "";
   const closure = pgClosure(MODEL);
+
   MODEL.forEach((t, i) => {
-    const card = el("div", "tbl-card");
-    const top = el("div", "top");
-    top.appendChild(el("span", "nm", t.name));
-    const sub = el("span", "sub", fmt(t.rows) + " rows . " + t.fmt);
-    top.appendChild(sub);
+    const card = el("div", "card");
+    const top = el("div", "ct");
+    top.appendChild(el("span", "cn", t.name));
+    top.appendChild(el("span", "cs", fmt(t.rows) + " rows · " + t.fmt));
     card.appendChild(top);
 
-    const chips = el("div", "chips");
-    chips.appendChild(el("span", "chip pk", "id PK"));
-    (t.fks || []).forEach(fk => {
-      chips.appendChild(el("span", "chip fk", fk.field + " -> " + fk.ref + ".id"));
-    });
+    const tags = el("div", "tags");
+    tags.appendChild(el("span", "tag", "id PK"));
+    (t.fks || []).forEach(fk => tags.appendChild(el("span", "tag fk", fk.field + " → " + fk.ref)));
     if (closure.has(t.name) && PG_BACKED.indexOf(t.fmt) < 0) {
-      chips.appendChild(el("span", "chip", "+ postgres for FK integrity"));
+      tags.appendChild(el("span", "tag dual", "+ postgres"));
     }
-    card.appendChild(chips);
+    card.appendChild(tags);
 
     if (MODEL.length > 1) {
-      const rm = el("button", null, "Remove");
-      rm.style.marginTop = "8px";
-      rm.style.fontSize = "12px";
-      rm.style.padding = "4px 9px";
+      const rm = el("button", "mini", "Remove");
       rm.addEventListener("click", () => {
         const gone = MODEL[i].name;
         MODEL.splice(i, 1);
@@ -1202,56 +1326,43 @@ function render() {
     host.appendChild(card);
   });
 
-  // reference dropdown
   const sel = $("#nt-fk");
   const prev = sel.value;
   sel.innerHTML = "";
-  const none = el("option", null, "(none)");
-  none.value = "";
+  const none = el("option", null, "(none)"); none.value = "";
   sel.appendChild(none);
-  MODEL.forEach(t => {
-    const o = el("option", null, t.name);
-    o.value = t.name;
-    sel.appendChild(o);
-  });
+  MODEL.forEach(t => { const o = el("option", null, t.name); o.value = t.name; sel.appendChild(o); });
   if (prev && MODEL.some(t => t.name === prev)) sel.value = prev;
 
-  // derived plan
   const order = topoOrder(MODEL);
   const cl = Array.from(closure).sort();
   const cyc = cycles(MODEL);
   const totalRows = MODEL.reduce((a, t) => a + t.rows, 0);
   const pgRows = MODEL.filter(t => closure.has(t.name)).reduce((a, t) => a + t.rows, 0);
 
-  const d = $("#derived");
+  const d = $("#plan");
   d.innerHTML = "";
-  function row(k, v, cls) {
-    d.appendChild(el("dt", null, k));
-    const dd = el("dd", cls || null, v);
-    d.appendChild(dd);
-  }
-  row("creation order", order.join("  ->  "));
-  row("must reach postgres", cl.length ? cl.join(", ") : "(none)");
-  row("parallel load waves", waves(MODEL, cl).map((w, i) => "[" + w.join(", ") + "]").join("  then  ") || "(none)");
-  row("records", fmt(totalRows) + "   (" + fmt(pgRows) + " into postgres)");
-  row("at --scale 50", fmt(totalRows * 50) + " records");
-  if (cyc.length) {
-    row("circular dependency", cyc.map(c => c.join(" <-> ")).join("; "), "bad");
-  } else {
-    row("validation", "no cycles, every reference resolves", "good");
-  }
+  function line(k, v, cls) { d.appendChild(el("dt", null, k)); d.appendChild(el("dd", cls || null, v)); }
+  line("creation order", order.join("  →  "));
+  line("must reach postgres", cl.length ? cl.join(", ") : "(none)");
+  line("parallel load waves", waves(MODEL, cl).map(w => "[" + w.join(", ") + "]").join("  then  ") || "(none)");
+  line("records", fmt(totalRows) + "   (" + fmt(pgRows) + " into postgres)");
+  line("at --scale 50", fmt(totalRows * 50) + " records");
+  if (cyc.length) line("circular dependency", cyc.map(c => c.join(" ↔ ")).join("; "), "no");
+  else line("validation", "no cycles, every reference resolves", "ok");
 
   $("#json-out").textContent = JSON.stringify(toModelJson(MODEL), null, 2);
 }
 
 $("#add-tbl").addEventListener("click", () => {
   const raw = $("#nt-name").value.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_");
-  if (!raw) return;
-  if (MODEL.some(t => t.name === raw)) { $("#nt-name").focus(); return; }
+  if (!raw || MODEL.some(t => t.name === raw)) { $("#nt-name").focus(); return; }
   const rows = Math.max(1, parseInt($("#nt-rows").value, 10) || 100);
   const ref = $("#nt-fk").value;
-  const fks = ref ? [{ field: ref.replace(/s$/, "") + "_id", ref: ref }] : [];
-  MODEL.push({ name: raw, rows: rows, fmt: $("#nt-fmt").value, fks: fks });
+  MODEL.push({
+    name: raw, rows: rows, fmt: $("#nt-fmt").value,
+    fks: ref ? [{ field: ref.replace(/s$/, "") + "_id", ref: ref }] : []
+  });
   $("#nt-name").value = "";
   render();
 });
@@ -1263,12 +1374,8 @@ $("#reset-tbl").addEventListener("click", () => {
 
 $("#copy-json").addEventListener("click", async () => {
   const btn = $("#copy-json");
-  try {
-    await navigator.clipboard.writeText($("#json-out").textContent);
-    btn.textContent = "Copied";
-  } catch (e) {
-    btn.textContent = "Select it manually";
-  }
+  try { await navigator.clipboard.writeText($("#json-out").textContent); btn.textContent = "Copied"; }
+  catch (e) { btn.textContent = "Select manually"; }
   setTimeout(() => { btn.textContent = "Copy"; }, 1800);
 });
 
