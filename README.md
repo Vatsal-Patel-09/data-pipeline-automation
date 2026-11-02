@@ -42,6 +42,11 @@ offer.
 
 Full argument: **[docs/why-synthetic-data.md](docs/why-synthetic-data.md)**.
 
+**Interactive overview:**
+[claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro](https://claude.ai/artifact/A5qaitR6DSeKCsjbD9V4ro)
+— animated pipeline schematic, every measurement, and a model builder that
+derives the execution plan live. Source: `docs/artifact/index.html`.
+
 The project's own development is the evidence for the claim. Two defects
 dominated its runtime, and neither is observable at small volume — a
 foreign-key lookup that was accidentally quadratic, and a load path issuing one
