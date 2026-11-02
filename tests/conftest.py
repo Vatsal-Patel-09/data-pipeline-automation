@@ -65,14 +65,55 @@ def field_types(model, table_name):
 
 
 @pytest.fixture(scope="session")
-def db_available():
-    """True when a database target is configured."""
+def db_reachability():
+    """
+    Whether a database is actually reachable, and why not if it is not.
+
+    Deliberately a real connection attempt rather than a check that
+    configuration exists. A configured but unreachable host is the common case
+    here -- Supabase's direct hostnames are IPv6-only, so on a network without
+    an IPv6 route the config is present and complete while nothing can connect.
+    Treating "configured" as "available" would turn every db-marked test into a
+    failure instead of a skip.
+    """
+    from dotenv import load_dotenv
+
+    load_dotenv(os.path.join(REPO_ROOT, ".env"), override=False)
+
     from src.db import resolve_db_config
 
-    return resolve_db_config().available
+    config = resolve_db_config()
+    if not config.available:
+        return False, "no database configured (set DATABASE_URL or the DB_* vars)"
+
+    try:
+        import psycopg2
+
+        kwargs = config.connect_args()
+        if "dsn" in kwargs:
+            conn = psycopg2.connect(kwargs["dsn"], connect_timeout=8)
+        else:
+            conn = psycopg2.connect(connect_timeout=8, **kwargs)
+        conn.close()
+        return True, None
+    except Exception as exc:
+        first_line = str(exc).strip().splitlines()[0]
+        return False, f"database configured but unreachable: {first_line[:160]}"
+
+
+@pytest.fixture(scope="session")
+def db_available(db_reachability):
+    return db_reachability[0]
+
+
+@pytest.fixture(autouse=True)
+def _skip_db_marked_without_database(request, db_reachability):
+    """Skip anything marked `db` when no database can be reached."""
+    if request.node.get_closest_marker("db") and not db_reachability[0]:
+        pytest.skip(db_reachability[1])
 
 
 @pytest.fixture
-def require_db(db_available):
+def require_db(db_available, db_reachability):
     if not db_available:
-        pytest.skip("no database configured (set DATABASE_URL or the DB_* vars)")
+        pytest.skip(db_reachability[1])
