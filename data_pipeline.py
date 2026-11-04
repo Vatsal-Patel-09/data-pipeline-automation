@@ -722,6 +722,77 @@ def export_database_cmd(model, env, output):
         sys.exit(1)
 
 
+@cli.command("clean-db")
+@click.option("--model", default=DEFAULT_MODEL, help="Path to JSON model file")
+@click.option("--env", default=".env", help="Path to environment file")
+@click.option("--yes", is_flag=True, help="Skip the confirmation prompt")
+def clean_db_cmd(model, env, yes):
+    """
+    Drop the tables this model declares, and nothing else.
+
+    Only tables named in the model are touched, so anything else living in the
+    public schema is left alone. On a hosted instance that matters: Supabase
+    keeps its own auth, storage and realtime schemas beside yours.
+    """
+    load_dotenv(env)
+    from src.db import connect, resolve_db_config
+
+    config = resolve_db_config()
+    if not config.available:
+        print("No database configuration found. Nothing to clean.")
+        sys.exit(1)
+
+    graph = ModelGraph.from_file(model)
+    declared = set(graph.table_names)
+
+    conn = connect()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema = 'public' AND table_type = 'BASE TABLE';"
+            )
+            present = {row[0] for row in cursor.fetchall()}
+
+        mine = sorted(present & declared)
+        others = sorted(present - declared)
+
+        print(f"Database : {config.describe()}")
+        print(f"Model    : {model}")
+        print(f"Declared tables present : {', '.join(mine) if mine else '(none)'}")
+        if others:
+            print(f"Other tables in public  : {', '.join(others)}  (left alone)")
+
+        if not mine:
+            print("\nNothing to clean.")
+            return
+
+        with conn.cursor() as cursor:
+            total = 0
+            for table in mine:
+                cursor.execute(f'SELECT COUNT(*) FROM "{table}";')
+                count = cursor.fetchone()[0]
+                total += count
+                print(f"  {table:<16} {count:>10,} rows")
+            print(f"  {'TOTAL':<16} {total:>10,} rows")
+
+        if not yes:
+            answer = input("\nDrop these tables? [y/N] ").strip().lower()
+            if answer not in ("y", "yes"):
+                print("Cancelled.")
+                return
+
+        # Reverse dependency order; CASCADE covers the self-reference.
+        order = [t for t in reversed(graph.topological_order()) if t in mine]
+        quoted = ", ".join(f'"{t}"' for t in order)
+        with conn.cursor() as cursor:
+            cursor.execute(f"DROP TABLE IF EXISTS {quoted} CASCADE;")
+        conn.commit()
+        print(f"\nDropped {len(order)} table(s): {', '.join(order)}")
+    finally:
+        conn.close()
+
+
 @cli.command("validate")
 @click.option("--model", default=DEFAULT_MODEL, help="Path to JSON model file")
 def validate_cmd(model):

@@ -151,6 +151,25 @@ strategy comparison, the round-trip counts and the projection method.
 
 ## Quick start
 
+On Windows, one entry point does everything:
+
+```bat
+run.bat                preflight, pipeline at 5%, API server, website
+run.bat full           the same, at full scale (100,400 records)
+run.bat site           website only
+run.bat api            API server only
+run.bat pipeline 0.01  pipeline only, at any scale
+run.bat offline        everything with no database at all
+run.bat test           the test suite
+run.bat clean          drop the model's tables from the database
+run.bat check          preflight only
+run.bat install        install dependencies
+```
+
+`site`, `offline`, `test` and `check` work without a database.
+
+
+
 ```bash
 git clone https://github.com/Vatsal-Patel-09/data-pipeline-automation.git
 cd data-pipeline-automation
