@@ -145,12 +145,34 @@ class RunBroker:
         try:
             from src.data_generator import DataGenerator
             from src.metrics import MetricsCollector
+            from src.model_graph import ModelGraph
             from data_pipeline import DataPipeline
+
+            model_path = options.get("model") or "ecommerce_model.json"
+            inline = options.get("model_json")
+            if inline:
+                # Validate before writing anything: a bad model should fail here
+                # with a readable reason, not deep inside the pipeline.
+                problems = ModelGraph(inline).validate()
+                if problems:
+                    raise ValueError(
+                        "The model is not valid:\n  - " + "\n  - ".join(problems)
+                    )
+                os.makedirs(os.path.join(REPO, "runs"), exist_ok=True)
+                model_path = os.path.join(REPO, "runs", "_browser_model.json")
+                with open(model_path, "w", encoding="utf-8") as fh:
+                    json.dump(inline, fh, indent=2)
+                self.publish({
+                    "type": "log", "level": "INFO",
+                    "msg": "Using the model built in the browser (%d tables), "
+                           "written to runs/_browser_model.json"
+                           % len(inline.get("tables", [])),
+                })
 
             collector = MetricsCollector(on_event=self.publish)
 
             pipeline = DataPipeline(
-                options.get("model") or "ecommerce_model.json",
+                model_path,
                 options.get("env") or ".env",
                 seed=int(options.get("seed", DataGenerator.DEFAULT_SEED)),
                 scale=float(options.get("scale", 0.05)),
@@ -158,6 +180,7 @@ class RunBroker:
                 load_strategy=options.get("strategy", "copy"),
                 offline=bool(options.get("offline", False)),
                 verify_writes=bool(options.get("verify_writes", True)),
+                load_all=bool(options.get("load_all", True)),
                 export_dir=os.path.join(REPO, "exports"),
                 report_path=os.path.join(REPO, "runs", "demo_run.json"),
             )
@@ -185,6 +208,10 @@ class RunBroker:
             })
 
             ok = pipeline.run_complete_pipeline()
+
+            if ok and not bool(options.get("offline", False)):
+                self._publish_database_contents(pipeline)
+
             report = None
             try:
                 with open(pipeline.report_path, encoding="utf-8") as fh:
@@ -209,6 +236,58 @@ class RunBroker:
         finally:
             root.removeHandler(handler)
             root.setLevel(previous_level)
+
+
+    def _publish_database_contents(self, pipeline) -> None:
+        """
+        Read the tables back out of the database and publish what is there.
+
+        This is the difference between "the pipeline says it sent rows" and
+        "the rows are in your database": the counts below come from a fresh
+        query after the run, not from the pipeline's own bookkeeping.
+        """
+        try:
+            from src.db import connect, resolve_db_config
+
+            config = resolve_db_config()
+            conn = connect()
+            try:
+                tables = []
+                with conn.cursor() as cursor:
+                    for name in pipeline.graph.topological_order():
+                        try:
+                            cursor.execute(f'SELECT COUNT(*) FROM "{name}";')
+                            tables.append({"table": name, "rows": cursor.fetchone()[0]})
+                        except Exception:
+                            conn.rollback()
+                            tables.append({"table": name, "rows": None})
+                    # Scope the count to this model's tables. Counting the
+                    # whole public schema reported foreign keys belonging to
+                    # whatever model ran before, which this run did not create.
+                    names = list(pipeline.graph.table_names)
+                    cursor.execute(
+                        "SELECT count(*) FROM information_schema.table_constraints "
+                        "WHERE table_schema = 'public' "
+                        "AND constraint_type = 'FOREIGN KEY' "
+                        "AND table_name = ANY(%s);",
+                        (names,),
+                    )
+                    constraints = cursor.fetchone()[0]
+            finally:
+                conn.close()
+
+            self.publish({
+                "type": "published",
+                "host_kind": config.host_kind,
+                "tables": tables,
+                "total_rows": sum(t["rows"] or 0 for t in tables),
+                "foreign_keys": constraints,
+            })
+        except Exception as exc:  # noqa: BLE001
+            self.publish({
+                "type": "log", "level": "WARNING",
+                "msg": f"Could not read the database back: {exc}",
+            })
 
 
 class _StreamingLogHandler(logging.Handler):
@@ -245,8 +324,11 @@ class RunRequest(BaseModel):
     realism: bool = True
     offline: bool = False
     verify_writes: bool = True
+    load_all: bool = True
     model: Optional[str] = None
     env: Optional[str] = None
+    #: A model built in the browser, sent whole. Takes precedence over `model`.
+    model_json: Optional[Dict[str, Any]] = None
 
 
 app = FastAPI(title="Pipeline demo server", docs_url=None, redoc_url=None)

@@ -202,4 +202,264 @@ function cycles(model) {
   return found;
 }
 
+/* ================= pipeline board =================
+   Renders a run the way a CI board does: one card per stage, each moving from
+   pending to running to succeeded, with the steps inside it ticking off and a
+   final panel reporting what the database actually holds afterwards.
+
+   It is driven entirely by the event stream serve_demo.py publishes, so what
+   you watch is the real pipeline, not a re-enactment. */
+
+var BOARD_STAGES = [
+  { id: "preflight", nm: "preflight", note: "connect, probe latency" },
+  { id: "schema",    nm: "schema",    note: "drop, create, defer keys" },
+  { id: "generate",  nm: "generate",  note: "rows, then semantic repair" },
+  { id: "output",    nm: "write",     note: "database, then file sinks" },
+  { id: "finalize",  nm: "finalize",  note: "keys, sequences, verify" },
+  { id: "published", nm: "published",  note: "read back from the database" }
+];
+
+function PipelineBoard(opts) {
+  var boardHost = opts.board;
+  var logHost = opts.log;
+  var pubHost = opts.published;
+  var statusHost = opts.status;
+
+  var cards = {};
+  var steps = {};          /* stage id -> { key -> {node, valueNode} } */
+  var t0 = 0, ticker = null, finished = false;
+
+  function mkIcon(state) {
+    if (state === "ok") return "✓";
+    if (state === "bad") return "✗";
+    if (state === "running") return "●";
+    return "";
+  }
+
+  function render() {
+    boardHost.innerHTML = "";
+    cards = {}; steps = {};
+    BOARD_STAGES.forEach(function (sd) {
+      var card = el("div", "bstage pending");
+      var head = el("div", "bhead");
+      var icon = el("span", "bicon", "");
+      var name = el("span", "bname", sd.nm);
+      var dur = el("span", "bdur", "—");
+      head.appendChild(icon); head.appendChild(name); head.appendChild(dur);
+      card.appendChild(head);
+      card.appendChild(el("div", "bnote", sd.note));
+      var sl = el("div", "bsteps");
+      card.appendChild(sl);
+      boardHost.appendChild(card);
+      cards[sd.id] = { card: card, icon: icon, dur: dur, note: $(".bnote", card), steps: sl };
+      steps[sd.id] = {};
+    });
+  }
+
+  function setStage(id, state, duration, note) {
+    var c = cards[id];
+    if (!c) return;
+    c.card.className = "bstage " + state;
+    c.icon.textContent = mkIcon(state);
+    if (duration !== undefined && duration !== null) {
+      c.dur.textContent = Number(duration).toFixed(2) + " s";
+    } else if (state === "running") {
+      c.dur.textContent = "running";
+    }
+    if (note) c.note.textContent = note;
+  }
+
+  function step(stageId, key, label, state, value) {
+    var c = cards[stageId];
+    if (!c) return;
+    var entry = steps[stageId][key];
+    if (!entry) {
+      var node = el("div", "bstep");
+      var m = el("span", "m", "○");
+      var t = el("span", null, label);
+      var v = el("span", "v", "");
+      node.appendChild(m); node.appendChild(t); node.appendChild(v);
+      c.steps.appendChild(node);
+      entry = steps[stageId][key] = { node: node, mark: m, value: v };
+    }
+    entry.node.className = "bstep" + (state ? " " + state : "");
+    entry.mark.textContent = state === "ok" ? "✓" : (state === "run" ? "●" : "○");
+    if (value !== undefined) entry.value.textContent = value;
+  }
+
+  function log(level, msg) {
+    if (!logHost) return;
+    var cls = "l";
+    if (level === "ERROR" || level === "CRITICAL" || level === "WARNING") cls += " warn";
+    else if (/verified|validated|passed|added and|SUCCESS/i.test(msg)) cls += " ok";
+    var line = el("div", cls);
+    var secs = t0 ? (performance.now() - t0) / 1000 : 0;
+    var pad = secs.toFixed(2);
+    while (pad.length < 6) pad = " " + pad;
+    line.appendChild(el("span", "ts", pad + "  "));
+    line.appendChild(document.createTextNode(msg));
+    logHost.appendChild(line);
+    while (logHost.childNodes.length > 700) logHost.removeChild(logHost.firstChild);
+    logHost.scrollTop = logHost.scrollHeight;
+  }
+
+  function setStatus(text, bold) {
+    if (!statusHost) return;
+    statusHost.innerHTML = "";
+    if (bold) {
+      statusHost.appendChild(el("b", null, bold));
+      statusHost.appendChild(document.createTextNode(" " + text));
+    } else {
+      statusHost.appendChild(document.createTextNode(text));
+    }
+  }
+
+  function tick() {
+    if (ticker) clearInterval(ticker);
+    t0 = performance.now();
+    ticker = setInterval(function () {
+      if (finished) return;
+      setStatus("elapsed", ((performance.now() - t0) / 1000).toFixed(1) + " s");
+    }, 200);
+  }
+
+  function publish(ev) {
+    if (!pubHost) return;
+    pubHost.innerHTML = "";
+    var head = el("div", "pub-h");
+    head.appendChild(document.createTextNode("in the database now"));
+    var badge = el("span", "badge", ev.host_kind || "database");
+    head.appendChild(badge);
+    pubHost.appendChild(head);
+
+    var table = el("table"), body = el("tbody");
+    var empty = 0;
+    ev.tables.forEach(function (t) {
+      var tr = el("tr");
+      tr.appendChild(el("td", null, t.table));
+      var v = el("td", t.rows ? "some" : "zero",
+                 t.rows === null ? "missing" : fmt(t.rows) + " rows");
+      if (!t.rows) empty++;
+      tr.appendChild(v);
+      body.appendChild(tr);
+    });
+    var tr = el("tr", "tot");
+    tr.appendChild(el("td", null, "total · " + ev.foreign_keys + " foreign keys"));
+    tr.appendChild(el("td", null, fmt(ev.total_rows) + " rows"));
+    body.appendChild(tr);
+    table.appendChild(body);
+    pubHost.appendChild(table);
+
+    setStage("published", empty ? "bad" : "ok", undefined,
+      empty ? empty + " table(s) empty" : "all tables hold rows");
+    step("published", "readback", "read back from database", "ok",
+         fmt(ev.total_rows) + " rows");
+  }
+
+  return {
+    reset: function () {
+      finished = false;
+      render();
+      if (logHost) logHost.innerHTML = "";
+      if (pubHost) pubHost.innerHTML = "";
+      setStatus("idle");
+      if (ticker) { clearInterval(ticker); ticker = null; }
+    },
+    handle: function (ev) {
+      if (ev.type === "run" && ev.state === "start") {
+        this.reset();
+        tick();
+        setStage("preflight", "running");
+        step("preflight", "connect", "connect and probe latency", "run");
+        log("INFO", "Run started · scale " + ev.options.scale
+          + " · " + ev.options.strategy
+          + (ev.options.offline ? " · offline" : ""));
+      } else if (ev.type === "plan") {
+        setStage("preflight", "ok", undefined, ev.tables.length + " tables planned");
+        step("preflight", "connect", "connect and probe latency", "ok");
+        step("preflight", "model", "validate the model", "ok",
+             ev.tables.length + " tables");
+        ev.tables.forEach(function (t) {
+          step("generate", "g_" + t.table, t.table, null, fmt(t.rows));
+          if (ev.postgres_closure.indexOf(t.table) >= 0) {
+            step("output", "l_" + t.table, t.table, null, "queued");
+          }
+        });
+        log("INFO", "Plan: " + ev.order.join(" → "));
+      } else if (ev.type === "stage") {
+        if (ev.state === "start") {
+          setStage(ev.stage, "running");
+          if (ev.stage === "schema") step("schema", "ddl", "apply DDL", "run");
+          if (ev.stage === "finalize") {
+            step("finalize", "fk", "add foreign keys", "run");
+            step("finalize", "seq", "advance sequences", null);
+            step("finalize", "ver", "verify row counts", null);
+          }
+        } else {
+          setStage(ev.stage, ev.state === "failed" ? "bad" : "ok", ev.duration_s);
+          if (ev.stage === "schema") step("schema", "ddl", "apply DDL", "ok", "1 round trip");
+          if (ev.stage === "finalize") {
+            step("finalize", "fk", "add foreign keys", "ok");
+            step("finalize", "seq", "advance sequences", "ok");
+            step("finalize", "ver", "verify row counts", "ok");
+          }
+        }
+      } else if (ev.type === "table") {
+        if (ev.phase === "generate") {
+          step("generate", "g_" + ev.table, ev.table, "ok",
+               fmt(ev.rows) + " · " + ev.duration_s.toFixed(2) + "s");
+        } else if (ev.phase === "load") {
+          step("output", "l_" + ev.table, ev.table, "ok",
+               fmt(ev.rows) + " · " + ev.duration_s.toFixed(2) + "s");
+        }
+      } else if (ev.type === "file") {
+        step("output", "f_" + ev.table + ev.sink, ev.table + " → " + ev.sink,
+             "ok", fmt(ev.bytes / 1024) + " KB");
+      } else if (ev.type === "published") {
+        publish(ev);
+      } else if (ev.type === "log") {
+        log(ev.level, ev.msg);
+      } else if (ev.type === "run") {
+        finished = true;
+        if (ticker) { clearInterval(ticker); ticker = null; }
+        var good = ev.state === "done";
+        setStatus(good ? "complete" : "failed",
+                  ev.duration_s !== undefined ? ev.duration_s.toFixed(2) + " s" : "");
+        if (!good) {
+          BOARD_STAGES.forEach(function (sd) {
+            if (cards[sd.id] && cards[sd.id].card.classList.contains("running")) {
+              setStage(sd.id, "bad");
+            }
+          });
+          if (ev.error) log("ERROR", ev.error);
+        }
+        if (ev.report && ev.report.verification) {
+          var v = ev.report.verification;
+          if (v.fk_constraints_added !== undefined) {
+            step("finalize", "fk", "add foreign keys", "ok",
+                 v.fk_constraints_added + " added, " + v.fk_violations + " violations");
+          }
+          if (v.sequences_advanced !== undefined) {
+            step("finalize", "seq", "advance sequences", "ok", v.sequences_advanced);
+          }
+          if (v.row_counts_match !== undefined) {
+            step("finalize", "ver", "verify row counts", v.row_counts_match ? "ok" : "run",
+                 v.row_counts_match ? "matched" : "MISMATCH");
+          }
+          if (v.write_probe) {
+            step("finalize", "probe", "application write probe", "ok", v.write_probe);
+          }
+        }
+        if (!cards.published.card.classList.contains("ok")
+            && !cards.published.card.classList.contains("bad")) {
+          setStage("published", good ? "ok" : "bad", undefined,
+                   good ? "offline run, nothing written to a database" : "not reached");
+        }
+      }
+    },
+    log: log,
+    setStatus: setStatus
+  };
+}
+
 document.addEventListener("DOMContentLoaded", buildNav);

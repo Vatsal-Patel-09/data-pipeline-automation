@@ -57,6 +57,68 @@
       </div>
     </div>
 
+
+    <div style="margin-top:46px">
+      <h3>Run this model</h3>
+      <p class="sub" style="font-size:15.5px;max-width:66ch">
+        Not the shipped model &mdash; the one above, whatever you have made of
+        it. The page sends it to the pipeline, which creates the schema,
+        generates the rows, writes every destination and reports what the
+        database holds afterwards. Each stage reports its own state as it goes.
+      </p>
+
+      <div class="runbar" id="run-bar" hidden>
+        <button id="mb-run" class="solid">Run this model</button>
+        <button id="mb-stop" disabled>Stop</button>
+        <div class="fld">
+          <label for="mb-scale">volume</label>
+          <select id="mb-scale">
+            <option value="0.005">0.5%</option>
+            <option value="0.01" selected>1%</option>
+            <option value="0.05">5%</option>
+            <option value="0.25">25%</option>
+            <option value="1">100%</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="mb-strat">strategy</label>
+          <select id="mb-strat">
+            <option value="copy" selected>copy</option>
+            <option value="execute_values">execute_values</option>
+            <option value="rowwise">rowwise</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label for="mb-seed">seed</label>
+          <input id="mb-seed" type="number" value="42" min="0" style="width:74px">
+        </div>
+        <div class="fld">
+          <label for="mb-mode">mode</label>
+          <select id="mb-mode">
+            <option value="0" selected>database</option>
+            <option value="1">offline</option>
+          </select>
+        </div>
+        <div class="status grow" id="mb-status">idle</div>
+      </div>
+
+      <div class="hintbar" id="mb-hint" hidden>
+        No server behind this page, so it cannot run anything. Start one with
+        <code>run.bat site</code> (or <code>python serve_demo.py</code>) and
+        open the address it prints.
+      </div>
+
+      <div class="board" id="mb-board" style="margin-top:14px"></div>
+
+      <div class="cols" style="margin-top:14px">
+        <div class="pub" id="mb-pub"></div>
+        <div class="box" style="background:var(--bg-3)">
+          <div class="lh">run log</div>
+          <div class="log" id="mb-log" role="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
     <p class="cap" style="margin-top:20px">
       Save the exported file beside the pipeline and run
       <code>python data_pipeline.py validate --model your_model.json</code>,
@@ -205,6 +267,78 @@ $("#copy-json").addEventListener("click", function () {
 renderBuilder();
 
 
+
+/* ---- run the model that is on screen ---- */
+(function () {
+  var board = PipelineBoard({
+    board: $("#mb-board"),
+    log: $("#mb-log"),
+    published: $("#mb-pub"),
+    status: $("#mb-status")
+  });
+  board.reset();
+
+  var es = null, busy = false;
+
+  function setBusy(b) {
+    busy = b;
+    $("#mb-run").disabled = b;
+    $("#mb-stop").disabled = !b;
+    $("#mb-run").textContent = b ? "Running…" : "Run this model";
+  }
+
+  function connect() {
+    if (es) return;
+    es = new EventSource("/api/events");
+    es.onmessage = function (m) {
+      var ev;
+      try { ev = JSON.parse(m.data); } catch (e) { return; }
+      board.handle(ev);
+      if (ev.type === "run" && ev.state !== "start") setBusy(false);
+    };
+  }
+
+  fetch("/api/status", { cache: "no-store" }).then(function (r) {
+    if (!r.ok) throw new Error("no server");
+    return r.json();
+  }).then(function (st) {
+    $("#run-bar").hidden = false;
+    if (!st.database_configured) {
+      $("#mb-mode").value = "1";
+      board.log("WARNING", "No database configured; offline mode selected.");
+    }
+    connect();
+
+    $("#mb-run").addEventListener("click", function () {
+      if (busy) return;
+      setBusy(true);
+      board.reset();
+      board.setStatus("sending the model…");
+      fetch("/api/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model_json: toModelJson(MODEL),
+          scale: parseFloat($("#mb-scale").value),
+          seed: parseInt($("#mb-seed").value, 10) || 42,
+          strategy: $("#mb-strat").value,
+          offline: $("#mb-mode").value === "1",
+          realism: true,
+          verify_writes: true,
+          load_all: true
+        })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (j.error) { board.log("ERROR", j.error); setBusy(false); }
+      }).catch(function (e) { board.log("ERROR", String(e)); setBusy(false); });
+    });
+
+    $("#mb-stop").addEventListener("click", function () {
+      fetch("/api/stop", { method: "POST" });
+    });
+  }).catch(function () {
+    $("#mb-hint").hidden = false;
+  });
+})();
 
 </script>
 </body>
