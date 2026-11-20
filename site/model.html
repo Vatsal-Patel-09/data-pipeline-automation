@@ -67,8 +67,8 @@
         database holds afterwards. Each stage reports its own state as it goes.
       </p>
 
-      <div class="runbar" id="run-bar" hidden>
-        <button id="mb-run" class="solid">Run this model</button>
+      <div class="runbar" id="run-bar">
+        <button id="mb-run" class="solid" disabled>Checking for a server…</button>
         <button id="mb-stop" disabled>Stop</button>
         <div class="fld">
           <label for="mb-scale">volume</label>
@@ -102,10 +102,8 @@
         <div class="status grow" id="mb-status">idle</div>
       </div>
 
-      <div class="hintbar" id="mb-hint" hidden>
-        No server behind this page, so it cannot run anything. Start one with
-        <code>run.bat site</code> (or <code>python serve_demo.py</code>) and
-        open the address it prints.
+      <div class="hintbar" id="mb-hint">
+        <span id="mb-hint-text">Looking for a server behind this page…</span>
       </div>
 
       <div class="board" id="mb-board" style="margin-top:14px"></div>
@@ -287,8 +285,12 @@ renderBuilder();
     $("#mb-run").textContent = b ? "Running…" : "Run this model";
   }
 
-  function connect() {
-    if (es) return;
+  /* Opened on demand, and only once. Connecting on page load left an idle
+     stream open for every tab the server had to hold. Waiting for onopen
+     before POSTing also removes the race where the first events are published
+     before the browser is listening. */
+  function connect(then) {
+    if (es) { if (then) then(); return; }
     es = new EventSource("/api/events");
     es.onmessage = function (m) {
       var ev;
@@ -296,24 +298,46 @@ renderBuilder();
       board.handle(ev);
       if (ev.type === "run" && ev.state !== "start") setBusy(false);
     };
+    es.onerror = function () {
+      if (es && es.readyState === EventSource.CLOSED) {
+        board.log("WARNING", "Lost the event stream; the run continues on the server.");
+      }
+    };
+    if (then) {
+      var fired = false;
+      function go() { if (!fired) { fired = true; then(); } }
+      es.onopen = go;
+      setTimeout(go, 1200);   // some proxies are slow to report open
+    }
   }
+
+  function hint(html) { $("#mb-hint-text").innerHTML = html; }
 
   fetch("/api/status", { cache: "no-store" }).then(function (r) {
     if (!r.ok) throw new Error("no server");
     return r.json();
   }).then(function (st) {
-    $("#run-bar").hidden = false;
+    setBusy(false);
+    hint(st.database_configured
+      ? "Connected to a <b>" + st.database_kind + "</b> database. Running this "
+        + "model creates its schema, loads every table and then reads the rows "
+        + "back to confirm they are there."
+      : "Server connected, but no database is configured, so offline mode is "
+        + "selected. Files are written; nothing is sent to a database.");
     if (!st.database_configured) {
       $("#mb-mode").value = "1";
       board.log("WARNING", "No database configured; offline mode selected.");
     }
-    connect();
 
     $("#mb-run").addEventListener("click", function () {
       if (busy) return;
       setBusy(true);
       board.reset();
       board.setStatus("sending the model…");
+      connect(startRun);
+    });
+
+    function startRun() {
       fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -330,13 +354,21 @@ renderBuilder();
       }).then(function (r) { return r.json(); }).then(function (j) {
         if (j.error) { board.log("ERROR", j.error); setBusy(false); }
       }).catch(function (e) { board.log("ERROR", String(e)); setBusy(false); });
-    });
+    }
 
     $("#mb-stop").addEventListener("click", function () {
       fetch("/api/stop", { method: "POST" });
     });
   }).catch(function () {
-    $("#mb-hint").hidden = false;
+    // No server: leave the controls visible but inert, and say how to get one.
+    $("#mb-run").textContent = "Needs the local server";
+    $("#mb-run").disabled = true;
+    $("#mb-stop").disabled = true;
+    board.setStatus("no server");
+    hint("This page is not being served by the pipeline, so it cannot run "
+       + "anything. Start it with <code>run.bat site</code> (or "
+       + "<code>python serve_demo.py</code>) and open the address it prints. "
+       + "Everything else on this page works as it is.");
   });
 })();
 
